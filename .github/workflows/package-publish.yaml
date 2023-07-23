@@ -5,6 +5,8 @@ on:
     branches: [ dev, feat/yc ]
     paths:
       - 'src/**'
+      - '.github/workflows/package-publish.yaml'
+      - '*.props'
 
   workflow_dispatch:
 

@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg
-          key: ${{ runner.os }}-common
+          key: ${{ runner.os }}-yandex-cloud
           restore-keys: ${{ runner.os }}-yandex-cloud
   
   

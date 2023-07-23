@@ -48,6 +48,15 @@ jobs:
           key: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
           restore-keys: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
 
+      - name: Cache nuget packages
+        uses: actions/cache@v3
+        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/*.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: restore
         if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
         run: dotnet restore Itmo.Dev.Platform.sln

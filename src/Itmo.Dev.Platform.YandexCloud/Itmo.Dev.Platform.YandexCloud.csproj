@@ -18,6 +18,7 @@
         <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -27,13 +28,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentChaining"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration"/>
-        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="FluentChaining" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
+        <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj" />
     </ItemGroup>
 
 </Project>

@@ -66,7 +66,9 @@ jobs:
         run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
         
       - name: move packages
+        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
         run: |
+          rm -rf .packages
           mkdir .packages
           mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/

@@ -1,0 +1,73 @@
+name: "publish packages"
+
+on:
+  push:
+    branches: [ dev, feat/yc ]
+    paths:
+      - 'src/**'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 7.0.203
+
+      - name: restore
+        run: dotnet restore Itmo.Dev.Platform
+
+      - name: build
+        run: dotnet build Itmo.Dev.Platform -c Release --no-restore /p:PatchVersion=${{ github.job }}
+
+      - name: cache Itmo.Dev.Platform.Common nupkg
+        uses: actions/cache@v3
+        with:
+          path: src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg
+          key: ${{ runner.os }}-common
+          restore-keys: ${{ runner.os }}-common
+
+      - name: cache Itmo.Dev.Platform.YandexCloud nupkg
+        uses: actions/cache@v3
+        with:
+          path: src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg
+          key: ${{ runner.os }}-common
+          restore-keys: ${{ runner.os }}-yandex-cloud
+  
+  
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: build
+    environment: github-nuget
+    
+    steps:
+      - name: load Itmo.Dev.Platform.Common nupkg
+        uses: actions/cache@v3
+        with:
+          path: .packages
+          key: ${{ runner.os }}-common
+
+      - name: load Itmo.Dev.Platform.YandexCloud nupkg
+        uses: actions/cache@v3
+        with:
+          path: .packages
+          key: ${{ runner.os }}-yandex-cloud
+
+      - name: configure GitHub nuget repository
+        run: |
+          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/itmo-is-dev/index.json"
+
+      - name: publish to GitHub nuget repository
+        run: |
+          for file in .packages/*.nupkg
+          do
+            dotnet nuget push "${file#/}" --source "github"
+          done

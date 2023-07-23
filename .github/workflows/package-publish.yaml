@@ -22,10 +22,10 @@ jobs:
           dotnet-version: 7.0.203
 
       - name: restore
-        run: dotnet restore Itmo.Dev.Platform
+        run: dotnet restore Itmo.Dev.Platform.sln
 
       - name: build
-        run: dotnet build Itmo.Dev.Platform -c Release --no-restore /p:PatchVersion=${{ github.job }}
+        run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.job }}
 
       - name: cache Itmo.Dev.Platform.Common nupkg
         uses: actions/cache@v3

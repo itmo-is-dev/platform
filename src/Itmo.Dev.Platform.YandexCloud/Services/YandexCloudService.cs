@@ -13,7 +13,7 @@ internal class YandexCloudService
 
     public YandexCloudService(IConfiguration configuration)
     {
-        var uri = configuration.GetSection("Platform:YandexCloud:InstanceUri");
+        var uri = configuration.GetSection("Platform:YandexCloud:ServiceUri");
         _baseUri = new Uri(uri.Value ?? string.Empty);
     }
 

@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -18,8 +18,9 @@
         <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
@@ -34,6 +35,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

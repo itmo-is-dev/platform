@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\package-publish.yaml = .github\workflows\package-publish.yaml
+		.github\workflows\dotnet.yaml = .github\workflows\dotnet.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}"

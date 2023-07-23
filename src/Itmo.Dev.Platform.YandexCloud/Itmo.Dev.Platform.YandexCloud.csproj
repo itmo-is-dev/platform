@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -20,7 +20,7 @@
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
@@ -28,13 +28,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentChaining" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" />
-        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="FluentChaining"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration"/>
+        <PackageReference Include="Newtonsoft.Json"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

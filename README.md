@@ -18,15 +18,15 @@
     ```
 4. When prompted for authorization, use your github username as username, and generated PAT as password
 
-Alternatively, you can use CLI to add package source. Code below will add source into your global config. 
+Alternatively, you can use CLI to add package source. Code below will add source into your global config.
 If you want to add it into local config, you should run it with option `--configfile nuget.config`
 
 ```shell
 dotnet nuget add source --username YOUR_USERNAME --password YOUR_GITHUB_PAT --store-password-in-clear-text --name github "https://nuget.pkg.github.com/itmo-is-dev/index.json"
 ```
 
+### <p style="color: red">WARNING! </p>
 
-> WARNING! \
-> Adding source into local config, will result in credentials be written into local file \
-> Be aware that it may lead to credentials leaking into VSC \
-> You can store credentials separately from source definition, in global nuget.config
+Adding source into local config, will result in credentials be written into local file \
+Be aware that it may lead to credentials leaking into VSC \
+You can store credentials separately from source definition, in global nuget.config

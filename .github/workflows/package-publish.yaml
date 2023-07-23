@@ -14,6 +14,9 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    outputs:
+      common-cache-key: ${{ steps.create-cache-keys.outputs.common-key }}
+      yandex-cloud-cache-key: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
     
     steps:
       - uses: actions/checkout@v2
@@ -22,26 +25,36 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 7.0.203
-
-      - name: restore
-        run: dotnet restore Itmo.Dev.Platform.sln
-
-      - name: build
-        run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
+          
+      - name: Create cache keys
+        id: create-cache-keys
+        run: |
+          echo common-key=${{ runner.os }}-${{ hashFiles('src/Itmo.Dev.Platform.Common/**') }}-common >> "$GITHUB_OUTPUT"
+          echo yandex-cloud-key=${{ runner.os }}-${{ hashFiles('src/Itmo.Dev.Platform.YandexCloud/**') }}-yandex-cloud >> "$GITHUB_OUTPUT"
 
       - name: cache Itmo.Dev.Platform.Common nupkg
+        id: cache-common
         uses: actions/cache@v3
         with:
           path: src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg
-          key: ${{ runner.os }}-common
-          restore-keys: ${{ runner.os }}-common
+          key: ${{ steps.create-cache-keys.outputs.common-key }}
+          restore-keys: ${{ steps.create-cache-keys.outputs.common-key }}
 
       - name: cache Itmo.Dev.Platform.YandexCloud nupkg
+        id: cache-yandex-cloud
         uses: actions/cache@v3
         with:
           path: src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg
-          key: ${{ runner.os }}-yandex-cloud
-          restore-keys: ${{ runner.os }}-yandex-cloud
+          key: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
+          restore-keys: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
+
+      - name: restore
+        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        run: dotnet restore Itmo.Dev.Platform.sln
+
+      - name: build
+        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
   
   
   publish:
@@ -53,18 +66,20 @@ jobs:
       - name: load Itmo.Dev.Platform.Common nupkg
         uses: actions/cache@v3
         with:
+          fail-on-cache-miss: true
           path: .packages
-          key: ${{ runner.os }}-common
+          key: ${{ needs.build.outputs.common-cache-key }}
 
       - name: load Itmo.Dev.Platform.YandexCloud nupkg
         uses: actions/cache@v3
         with:
+          fail-on-cache-miss: true
           path: .packages
-          key: ${{ runner.os }}-yandex-cloud
+          key: ${{ needs.build.outputs.yandex-cloud-cache-key }}
 
       - name: configure GitHub nuget repository
         run: |
-          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/itmo-is-dev/index.json"
+          dotnet nuget add source --username ronimizy --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/itmo-is-dev/index.json"
 
       - name: publish to GitHub nuget repository
         run: |

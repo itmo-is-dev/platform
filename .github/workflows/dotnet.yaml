@@ -27,10 +27,10 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Install dependencies
-        run: dotnet restore ITMO.Dev.ASAP.sln
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore
+        run: dotnet build -c Release --no-restore
 
       - name: Test
-        run: dotnet test Itmo.Dev.Platform.sln -c Release --no-restore --no-build
+        run: dotnet test -c Release --no-restore --no-build

@@ -2,7 +2,7 @@ name: "publish packages"
 
 on:
   push:
-    branches: [ master, feat/add-kafka ]
+    branches: [ master ]
     paths:
       - 'src/**'
       - '.github/workflows/package-publish.yaml'

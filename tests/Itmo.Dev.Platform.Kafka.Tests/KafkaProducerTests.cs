@@ -56,11 +56,13 @@ public class KafkaProducerTests : IAsyncLifetime
             GroupId = nameof(KafkaProducerTests),
             BootstrapServers = configuration.Host,
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = true,
         };
 
         // Act
         await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
+
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
 
         using var consumer = new ConsumerBuilder<int, string>(consumerConfig)
             .SetKeyDeserializer(new NewtonsoftJsonValueSerializer<int>())
@@ -71,8 +73,14 @@ public class KafkaProducerTests : IAsyncLifetime
 
         // Assert
         var consumedMessages = messages
-            .Select(_ => consumer.Consume())
-            .OrderBy(x => x.Offset)
+            .Select(_ =>
+            {
+                var result = consumer.Consume(cts.Token);
+                consumer.Commit(result);
+
+                return result;
+            })
+            .OrderBy(x => x.Offset.Value)
             .Select(x => x.Message)
             .ToArray();
 

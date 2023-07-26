@@ -1,13 +1,17 @@
-name: dotnet
+name: platform-kafka
 
 on:
   pull_request:
     branches:
       - master
+    paths:
+      - 'src/Itmo.Dev.Platform.Common/**'
+      - 'src/Itmo.Dev.Platform.Kafka/**'
+      - 'tests/Itmo.Dev.Platform.Kafka.Tests/**'
 
 jobs:
   build:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
     
     steps:
@@ -30,4 +34,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build tests/Itmo.Dev.Platform.Kafka.Tests/Itmo.Dev.Platform.Kafka.Tests.csproj -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/Itmo.Dev.Platform.Kafka.Tests/Itmo.Dev.Platform.Kafka.Tests.csproj -c Release --no-restore --no-build

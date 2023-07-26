@@ -15,9 +15,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\package-publish.yaml = .github\workflows\package-publish.yaml
 		.github\workflows\dotnet.yaml = .github\workflows\dotnet.yaml
+		.github\workflows\build-test-kafka.yaml = .github\workflows\build-test-kafka.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Kafka", "src\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj", "{BC3D9F6A-9511-4978-BE97-C777EF22121E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B24A2836-A847-40AB-85A2-6590ABA8ACB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Kafka.Tests", "tests\Itmo.Dev.Platform.Kafka.Tests\Itmo.Dev.Platform.Kafka.Tests.csproj", "{713610E9-F866-4C7E-96ED-4B486509E3A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +40,20 @@ Global
 		{3485ECDD-43E0-4E86-916E-CC0CBA084FA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3485ECDD-43E0-4E86-916E-CC0CBA084FA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3485ECDD-43E0-4E86-916E-CC0CBA084FA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC3D9F6A-9511-4978-BE97-C777EF22121E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC3D9F6A-9511-4978-BE97-C777EF22121E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC3D9F6A-9511-4978-BE97-C777EF22121E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC3D9F6A-9511-4978-BE97-C777EF22121E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
 		{3485ECDD-43E0-4E86-916E-CC0CBA084FA5} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{360CAAF7-7E52-4537-9BDC-1C6FC24EA437} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
+		{BC3D9F6A-9511-4978-BE97-C777EF22121E} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
+		{713610E9-F866-4C7E-96ED-4B486509E3A3} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 	EndGlobalSection
 EndGlobal

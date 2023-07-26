@@ -8,6 +8,7 @@ on:
       - 'src/Itmo.Dev.Platform.Common/**'
       - 'src/Itmo.Dev.Platform.Kafka/**'
       - 'tests/Itmo.Dev.Platform.Kafka.Tests/**'
+      - '.github/workflows/build-test-kafka.yaml'
 
 jobs:
   build:

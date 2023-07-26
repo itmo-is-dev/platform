@@ -2,6 +2,7 @@
 
 - [Itmo.Dev.Platform.Common](src/Itmo.Dev.Platform.Common/README.md)
 - [Itmo.Dev.Platform.YandexCloud](src/Itmo.Dev.Platform.YandexCloud/README.md)
+- [Itmo.Dev.Platform.Kafka](src/Itmo.Dev.Platform.Kafka/README.md)
 
 ## Package source installation
 

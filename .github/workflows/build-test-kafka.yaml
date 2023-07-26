@@ -39,6 +39,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    needs: build
 
     #    As kafka tests are long running, they should be triggered manually, to avoid unnecessary wait time debounce-like way
     environment: testing

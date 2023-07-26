@@ -2,13 +2,12 @@ name: dotnet
 
 on:
   pull_request:
-    branches:
-      - master
     paths:
       - 'src/**'
-    paths-ignore:
       #     Ignored as there is a separate pipeline for kafka tests
-      - 'src/Itmo.Dev.Platform.Kafka/**'
+      - '!src/Itmo.Dev.Platform.Kafka/**'
+    branches:
+      - master
 
 jobs:
   build:

@@ -15,8 +15,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     outputs:
-      common-cache-key: ${{ steps.create-cache-keys.outputs.common-key }}
-      yandex-cloud-cache-key: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
+      cache-key: ${{ steps.create-cache-keys.outputs.cache-key }}
     
     steps:
       - uses: actions/checkout@v2
@@ -29,28 +28,19 @@ jobs:
       - name: Create cache keys
         id: create-cache-keys
         run: |
-          echo common-key=${{ runner.os }}-${{ hashFiles('src/Itmo.Dev.Platform.Common/**') }}-common >> "$GITHUB_OUTPUT"
-          echo yandex-cloud-key=${{ runner.os }}-${{ hashFiles('src/Itmo.Dev.Platform.YandexCloud/**') }}-yandex-cloud >> "$GITHUB_OUTPUT"
+          echo cache-key=${{ runner.os }}-${{ hashFiles('src/**') }}-packages >> "$GITHUB_OUTPUT"
 
-      - name: cache Itmo.Dev.Platform.Common nupkg
-        id: cache-common
+      - name: cache packages
+        id: cache-packages
         uses: actions/cache@v3
         with:
           path: .packages
-          key: ${{ steps.create-cache-keys.outputs.common-key }}
-          restore-keys: ${{ steps.create-cache-keys.outputs.common-key }}
-
-      - name: cache Itmo.Dev.Platform.YandexCloud nupkg
-        id: cache-yandex-cloud
-        uses: actions/cache@v3
-        with:
-          path: .packages
-          key: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
-          restore-keys: ${{ steps.create-cache-keys.outputs.yandex-cloud-key }}
+          key: ${{ steps.create-cache-keys.outputs.cache-key }}
+          restore-keys: ${{ steps.create-cache-keys.outputs.cache-key }}
 
       - name: Cache nuget packages
         uses: actions/cache@v3
-        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/*.Packages.props', '**/*.csproj') }}
@@ -58,20 +48,21 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: restore
-        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         run: dotnet restore Itmo.Dev.Platform.sln
 
       - name: build
-        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
         
       - name: move packages
-        if: ${{ steps.cache-common.outputs.cache-hit != 'true' || steps.cache-yandex-cloud.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         run: |
           rm -rf .packages
           mkdir .packages
-          mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
+           mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
+           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
+           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
   
   
   publish:
@@ -81,19 +72,12 @@ jobs:
     environment: github-nuget
     
     steps:
-      - name: load Itmo.Dev.Platform.Common nupkg
+      - name: load packages
         uses: actions/cache@v3
         with:
           fail-on-cache-miss: true
           path: .packages
-          key: ${{ needs.build.outputs.common-cache-key }}
-
-      - name: load Itmo.Dev.Platform.YandexCloud nupkg
-        uses: actions/cache@v3
-        with:
-          fail-on-cache-miss: true
-          path: .packages
-          key: ${{ needs.build.outputs.yandex-cloud-cache-key }}
+          key: ${{ needs.build.outputs.cache-key }}
 
       - name: configure GitHub nuget repository
         run: |

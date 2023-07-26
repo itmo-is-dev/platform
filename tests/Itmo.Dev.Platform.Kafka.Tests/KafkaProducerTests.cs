@@ -71,7 +71,9 @@ public class KafkaProducerTests : IAsyncLifetime
 
         // Assert
         var consumedMessages = messages
-            .Select(_ => consumer.Consume().Message)
+            .Select(_ => consumer.Consume())
+            .OrderBy(x => x.Offset)
+            .Select(x => x.Message)
             .ToArray();
 
         consumedMessages.Zip(messages)

@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+#     Ignored as there is a separate pipeline for kafka tests
+      - 'src/Itmo.Dev.Platform.Kafka/**'
 
 jobs:
   build:

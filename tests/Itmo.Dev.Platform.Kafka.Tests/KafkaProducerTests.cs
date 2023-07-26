@@ -58,18 +58,18 @@ public class KafkaProducerTests : IAsyncLifetime
             AutoOffsetReset = AutoOffsetReset.Earliest,
         };
 
-        // Act
-        await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
-
-        using var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
-
         using var consumer = new ConsumerBuilder<int, string>(consumerConfig)
             .SetKeyDeserializer(new NewtonsoftJsonValueSerializer<int>())
             .SetValueDeserializer(new NewtonsoftJsonValueSerializer<string>())
             .Build();
 
         consumer.Subscribe(TopicName);
+
+        // Act
+        await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
+
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
 
         // Assert
         var consumedMessages = messages

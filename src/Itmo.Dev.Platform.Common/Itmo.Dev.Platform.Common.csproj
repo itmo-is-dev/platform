@@ -17,6 +17,7 @@
         <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <PropertyGroup>

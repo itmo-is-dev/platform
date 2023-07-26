@@ -34,9 +34,9 @@ jobs:
         id: cache-packages
         uses: actions/cache@v3
         with:
-          path: .packages/Itmo.Dev.Platform.Common*
-          key: ${{ steps.create-cache-keys.outputs.common-key }}
-          restore-keys: ${{ steps.create-cache-keys.outputs.common-key }}
+          path: .packages
+          key: ${{ steps.create-cache-keys.outputs.cache-key }}
+          restore-keys: ${{ steps.create-cache-keys.outputs.cache-key }}
 
       - name: Cache nuget packages
         uses: actions/cache@v3

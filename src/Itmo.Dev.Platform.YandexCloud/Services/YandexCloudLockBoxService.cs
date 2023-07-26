@@ -54,10 +54,8 @@ internal class YandexCloudLockBoxService
         string respBody = await resp.Content.ReadAsStringAsync();
         try
         {
-            LockBoxEntry[]? entries = JsonConvert.DeserializeObject<JObject>(respBody)
-                ?
-                .GetValue("entries", StringComparison.Ordinal)
-                ?
+            LockBoxEntry[]? entries = JsonConvert.DeserializeObject<JObject>(respBody)?
+                .GetValue("entries", StringComparison.Ordinal)?
                 .ToObject<LockBoxEntry[]>();
 
             if (entries?.Any() is not true)

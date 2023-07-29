@@ -5,7 +5,7 @@ namespace Itmo.Dev.Platform.Postgres.Extensions;
 
 public static class ServiceScopeExtensions
 {
-    public static Task UsePlatformMigrationsAsync(this IServiceScope scope)
+    public static Task UsePlatformMigrationsAsync(this IServiceScope scope, CancellationToken cancellationToken)
     {
         IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateUp();

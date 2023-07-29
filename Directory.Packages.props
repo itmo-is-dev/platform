@@ -1,28 +1,32 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageVersion Include="Confluent.Kafka" Version="2.2.0"/>
-        <PackageVersion Include="FluentAssertions" Version="6.11.0"/>
-        <PackageVersion Include="FluentChaining" Version="1.0.4"/>
-        <PackageVersion Include="Google.Protobuf" Version="3.23.4"/>
-        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9"/>
-        <PackageVersion Include="Microsoft.Extensions.Configuration" Version="7.0.0"/>
-        <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0"/>
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
-        <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1"/>
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0"/>
-        <PackageVersion Include="Moq" Version="4.18.4"/>
-        <PackageVersion Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageVersion Include="Serilog" Version="3.0.1"/>
-        <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0"/>
-        <PackageVersion Include="Serilog.Sinks.XUnit" Version="3.0.5"/>
-        <PackageVersion Include="System.Linq.Async" Version="6.0.1"/>
-        <PackageVersion Include="Testcontainers.Kafka" Version="3.3.0"/>
-        <PackageVersion Include="xunit" Version="2.4.2"/>
-        <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5"/>
-        <PackageVersion Include="coverlet.collector" Version="3.2.0"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Confluent.Kafka" Version="2.2.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.11.0" />
+    <PackageVersion Include="FluentChaining" Version="1.0.4" />
+    <PackageVersion Include="FluentMigrator" Version="3.3.2" />
+    <PackageVersion Include="FluentMigrator.Runner" Version="3.3.2" />
+    <PackageVersion Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />
+    <PackageVersion Include="Google.Protobuf" Version="3.23.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageVersion Include="Moq" Version="4.18.4" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Npgsql" Version="7.0.4" />
+    <PackageVersion Include="Serilog" Version="3.0.1" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0" />
+    <PackageVersion Include="Serilog.Sinks.XUnit" Version="3.0.5" />
+    <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
+    <PackageVersion Include="Testcontainers.Kafka" Version="3.3.0" />
+    <PackageVersion Include="xunit" Version="2.4.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
+  </ItemGroup>
 </Project>

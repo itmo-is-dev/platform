@@ -1,45 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
+
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-    
+
     <PropertyGroup>
-        <Title>Itmo.Dev.Platform.Kafka</Title>
+        <Title>Itmo.Dev.Platform.Postgres</Title>
         <Authors>itmo-is-dev</Authors>
         <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Itmo.Dev.Kafka</PackageReleaseNotes>
+        <PackageReleaseNotes>Itmo.Dev.Postgres</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Confluent.Kafka" />
-      <PackageReference Include="Google.Protobuf" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" />
+      <PackageReference Include="FluentMigrator" />
+      <PackageReference Include="FluentMigrator.Runner" />
+      <PackageReference Include="FluentMigrator.Runner.Postgres" />
       <PackageReference Include="Microsoft.Extensions.Options" />
-      <PackageReference Include="Newtonsoft.Json" />
-      <PackageReference Include="Serilog" />
-      <PackageReference Include="System.Linq.Async" />
+      <PackageReference Include="Npgsql" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-    
-    <ItemGroup>
-        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

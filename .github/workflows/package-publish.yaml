@@ -60,9 +60,10 @@ jobs:
         run: |
           rm -rf .packages
           mkdir .packages
-           mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
-           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
-           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Postgres/bin/Release/*.nupkg .packages/
   
   
   publish:

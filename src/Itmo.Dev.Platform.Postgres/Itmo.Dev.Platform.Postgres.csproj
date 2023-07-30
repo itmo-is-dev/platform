@@ -18,20 +18,21 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Changed IPostgresConnectionProvider return type to NpgsqlConnection
+            Added parameter extensions for NpgsqlCommand
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentMigrator"/>
-        <PackageReference Include="FluentMigrator.Runner"/>
-        <PackageReference Include="FluentMigrator.Runner.Postgres"/>
-        <PackageReference Include="Microsoft.Extensions.Options"/>
-        <PackageReference Include="Npgsql"/>
+        <PackageReference Include="FluentMigrator" />
+        <PackageReference Include="FluentMigrator.Runner" />
+        <PackageReference Include="FluentMigrator.Runner.Postgres" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="Npgsql" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

@@ -16,6 +16,11 @@
         <packageSources>
             <add key="github" value="https://nuget.pkg.github.com/itmo-is-dev/index.json"/>
         </packageSources>
+         <packageSourceMapping>
+              <packageSource key="github">
+                  <package pattern="Itmo.Dev.Platform*" />
+              </packageSource>
+          </packageSourceMapping>
     </configuration>
     ```
 4. When prompted for authorization, use your github username as username, and generated PAT as password

@@ -41,8 +41,11 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
         {
             while (count is not 0 && _queue.TryDequeue(out NpgsqlCommand? command))
             {
+                command.Connection = connection;
+
                 count--;
                 await command.ExecuteNonQueryAsync(cancellationToken);
+                await command.DisposeAsync();
             }
 
             transaction.Commit();

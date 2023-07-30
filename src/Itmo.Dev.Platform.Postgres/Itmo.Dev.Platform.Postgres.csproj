@@ -17,19 +17,21 @@
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Itmo.Dev.Postgres</PackageReleaseNotes>
+        <PackageReleaseNotes>
+            Changed IPostgresConnectionProvider return type to NpgsqlConnection
+        </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentMigrator" />
-      <PackageReference Include="FluentMigrator.Runner" />
-      <PackageReference Include="FluentMigrator.Runner.Postgres" />
-      <PackageReference Include="Microsoft.Extensions.Options" />
-      <PackageReference Include="Npgsql" />
+        <PackageReference Include="FluentMigrator"/>
+        <PackageReference Include="FluentMigrator.Runner"/>
+        <PackageReference Include="FluentMigrator.Runner.Postgres"/>
+        <PackageReference Include="Microsoft.Extensions.Options"/>
+        <PackageReference Include="Npgsql"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>

@@ -1,16 +1,15 @@
 using Itmo.Dev.Platform.Postgres.Models;
 using Npgsql;
-using System.Data.Common;
 
 namespace Itmo.Dev.Platform.Postgres.Connection;
 
 internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncDisposable, IDisposable
 {
-    private readonly Lazy<Task<DbConnection>> _connection;
+    private readonly Lazy<Task<NpgsqlConnection>> _connection;
 
     public PostgresConnectionProvider(PostgresConnectionString connectionString)
     {
-        _connection = new Lazy<Task<DbConnection>>(async () =>
+        _connection = new Lazy<Task<NpgsqlConnection>>(async () =>
         {
             var connection = new NpgsqlConnection(connectionString.Value);
             await connection.OpenAsync();
@@ -19,7 +18,7 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
         });
     }
 
-    public async ValueTask<DbConnection> GetConnectionAsync(CancellationToken cancellationToken)
+    public async ValueTask<NpgsqlConnection> GetConnectionAsync(CancellationToken cancellationToken)
     {
         return await _connection.Value;
     }

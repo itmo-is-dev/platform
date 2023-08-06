@@ -31,7 +31,10 @@ public interface IConsumerConfigurationSelector<TKey, TValue>
 {
     IConsumerBuilder UseConfiguration<T>() where T : class, IKafkaConsumerConfiguration;
 
-    IConsumerBuilder UseNamedOptionsConfiguration(string name, IConfiguration configuration);
+    IConsumerBuilder UseNamedOptionsConfiguration(
+        string name,
+        IConfiguration configuration,
+        Action<IKafkaConsumerConfiguration>? postConfigure = null);
 }
 
 public interface IConsumerBuilder

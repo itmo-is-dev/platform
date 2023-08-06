@@ -6,11 +6,11 @@ internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
 
     public TimeSpan DisabledConsumerTimeout { get; init; }
 
-    public string Host { get; init; } = string.Empty;
+    public string Host { get; private set; } = string.Empty;
 
     public string Topic { get; init; } = string.Empty;
 
-    public string Group { get; init; } = string.Empty;
+    public string Group { get; private set; } = string.Empty;
 
     public int ParallelismDegree { get; init; }
 
@@ -19,4 +19,16 @@ internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
     public TimeSpan BufferWaitLimit { get; init; }
 
     public bool ReadLatest { get; init; }
+
+    public IKafkaConsumerConfiguration WithHost(string host)
+    {
+        Host = host;
+        return this;
+    }
+
+    public IKafkaConsumerConfiguration WithGroup(string group)
+    {
+        Group = group;
+        return this;
+    }
 }

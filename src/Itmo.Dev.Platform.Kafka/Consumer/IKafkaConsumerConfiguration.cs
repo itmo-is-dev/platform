@@ -19,4 +19,8 @@ public interface IKafkaConsumerConfiguration
     TimeSpan BufferWaitLimit { get; }
 
     bool ReadLatest { get; }
+
+    IKafkaConsumerConfiguration WithHost(string host);
+
+    IKafkaConsumerConfiguration WithGroup(string group);
 }

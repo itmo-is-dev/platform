@@ -1,22 +1,20 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Producer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
-using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Services;
 
 internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>, IDisposable
 {
     private readonly ILogger<KafkaMessageProducer<TKey, TValue>> _logger;
-    private readonly IOptionsSnapshot<IKafkaProducerConfiguration> _configuration;
+    private readonly IKafkaProducerConfiguration _configuration;
     private readonly IProducer<TKey, TValue> _producer;
 
     public KafkaMessageProducer(
         IServiceProvider provider,
         ILogger<KafkaMessageProducer<TKey, TValue>> logger,
-        TypeKeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>> configurationResolver,
+        IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration> configurationResolver,
         ISerializer<TKey>? keySerializer = null,
         ISerializer<TValue>? valueSerializer = null)
     {
@@ -25,8 +23,8 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
 
         var config = new ProducerConfig
         {
-            BootstrapServers = _configuration.Value.Host,
-            MessageMaxBytes = _configuration.Value.MessageMaxBytes,
+            BootstrapServers = _configuration.Host,
+            MessageMaxBytes = _configuration.MessageMaxBytes,
         };
 
         _producer = new ProducerBuilder<TKey, TValue>(config)
@@ -49,12 +47,12 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
                     Value = producerKafkaMessage.Value,
                 };
 
-                await _producer.ProduceAsync(_configuration.Value.Topic, message, cancellationToken);
+                await _producer.ProduceAsync(_configuration.Topic, message, cancellationToken);
             }
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error producing in topic {Topic}", _configuration.Value.Topic);
+            _logger.LogError(e, "Error producing in topic {Topic}", _configuration.Topic);
             throw;
         }
     }

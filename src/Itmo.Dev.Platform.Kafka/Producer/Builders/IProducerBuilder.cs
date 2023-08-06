@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Builders;
@@ -24,6 +25,11 @@ public interface IProducerValueSerializerSelector<TKey, TValue>
 public interface IProducerConfigurationSelector<TKey, TValue>
 {
     IProducerBuilder UseConfiguration<T>() where T : class, IKafkaProducerConfiguration;
+
+    IProducerBuilder UseNamedOptionsConfiguration(
+        string name,
+        IConfiguration configuration,
+        Action<IKafkaProducerConfiguration>? postConfigure = null);
 }
 
 public interface IProducerBuilder

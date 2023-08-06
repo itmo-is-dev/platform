@@ -1,9 +1,9 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Producer.Models;
 using Itmo.Dev.Platform.Kafka.Producer.Services;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
-using Itmo.Dev.Platform.Kafka.Tools;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Builders;
 
@@ -90,13 +90,33 @@ internal class ProducerBuilder<TKey, TValue> :
         {
             action(collection);
 
-            return collection
-                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptions<IKafkaProducerConfiguration>>(
-                    typeof(IOptions<T>)))
-                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>>(
-                    typeof(IOptionsSnapshot<T>)))
-                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaProducerConfiguration>>(
-                    typeof(IOptionsMonitor<T>)));
+            var s = new OptionsQualifiedService<TKey, TValue, T>();
+            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration>>(s);
+        };
+
+        return this;
+    }
+
+    public IProducerBuilder UseNamedOptionsConfiguration(
+        string name,
+        IConfiguration configuration,
+        Action<IKafkaProducerConfiguration>? postConfigure = null)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+
+            collection.Configure<KafkaProducerConfiguration>(name, configuration);
+
+            if (postConfigure is not null)
+            {
+                collection.PostConfigure<KafkaProducerConfiguration>(name, postConfigure);
+            }
+
+            var s = new NamedOptionsQualifiedService<TKey, TValue, KafkaProducerConfiguration>(name);
+            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration>>(s);
         };
 
         return this;

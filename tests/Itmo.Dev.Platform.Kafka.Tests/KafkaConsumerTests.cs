@@ -176,6 +176,8 @@ public class KafkaConsumerTests : IAsyncLifetime
 
         public bool ReadLatest => false;
 
+        public SecurityProtocol SecurityProtocol => SecurityProtocol.Plaintext;
+
         public IKafkaConsumerConfiguration WithHost(string host)
         {
             throw new NotImplementedException();

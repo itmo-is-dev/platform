@@ -34,6 +34,7 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
             BootstrapServers = configuration.Host,
             AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
+            SecurityProtocol = configuration.SecurityProtocol,
         };
 
         using IConsumer<TKey, TValue> consumer = new ConsumerBuilder<TKey, TValue>(consumerConfiguration)

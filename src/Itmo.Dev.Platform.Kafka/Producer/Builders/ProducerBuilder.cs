@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Producer.Services;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -54,11 +55,11 @@ internal class ProducerBuilder<TKey, TValue> :
             action(collection);
 
             return collection
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptions<IKafkaProducerConfiguration>>(
+                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptions<IKafkaProducerConfiguration>>(
                     typeof(IOptions<T>)))
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>>(
+                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>>(
                     typeof(IOptionsSnapshot<T>)))
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaProducerConfiguration>>(
+                .AddSingleton(new TypeKeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaProducerConfiguration>>(
                     typeof(IOptionsMonitor<T>)));
         };
 

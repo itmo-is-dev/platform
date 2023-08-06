@@ -1,9 +1,10 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.Consumer.Services;
-using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Builders;
 
@@ -32,8 +33,8 @@ internal class ConsumerBuilder<TKey, TValue> :
 
             collection.TryAddScoped<T>();
 
-            collection.AddSingleton(
-                new KeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>>(typeof(T)));
+            collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>>>(
+                new TypeKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>>(typeof(T)));
 
             return collection;
         };
@@ -75,13 +76,25 @@ internal class ConsumerBuilder<TKey, TValue> :
         {
             action(collection);
 
-            return collection
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptions<IKafkaConsumerConfiguration>>(
-                    typeof(IOptions<T>)))
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaConsumerConfiguration>>(
-                    typeof(IOptionsSnapshot<T>)))
-                .AddSingleton(new KeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaConsumerConfiguration>>(
-                    typeof(IOptionsMonitor<T>)));
+            var s = new OptionsQualifiedService<TKey, TValue, T>();
+            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>(s);
+        };
+
+        return this;
+    }
+
+    public IConsumerBuilder UseNamedOptionsConfiguration(string name, IConfiguration configuration)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+
+            collection.Configure<KafkaConsumerConfiguration>(name, configuration); 
+
+            var s = new NamedOptionsQualifiedService<TKey, TValue, KafkaConsumerConfiguration>(name);
+            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>(s);
         };
 
         return this;

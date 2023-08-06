@@ -1,17 +1,16 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
-using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
 internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKey, TValue>
 {
     public KafkaConsumerService(
-        KeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaConsumerConfiguration>> optionsResolver,
-        KeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration> optionsResolver,
+        IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerService<TKey, TValue>> logger,
         IDeserializer<TKey> keyDeserializer,

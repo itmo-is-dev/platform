@@ -1,10 +1,9 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
-using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
@@ -16,8 +15,8 @@ namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKey, TValue>
 {
     public BatchingKafkaConsumerService(
-        KeyValueQualifiedService<TKey, TValue, IOptionsMonitor<IKafkaConsumerConfiguration>> optionsResolver,
-        KeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration> optionsResolver,
+        IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
         IServiceScopeFactory scopeFactory,
         ILogger<BatchingKafkaConsumerService<TKey, TValue>> logger,
         IDeserializer<TKey> keyDeserializer,

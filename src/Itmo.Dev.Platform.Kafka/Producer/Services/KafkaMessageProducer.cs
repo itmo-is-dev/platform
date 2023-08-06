@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Producer.Models;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,7 +16,7 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
     public KafkaMessageProducer(
         IServiceProvider provider,
         ILogger<KafkaMessageProducer<TKey, TValue>> logger,
-        KeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>> configurationResolver,
+        TypeKeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>> configurationResolver,
         ISerializer<TKey> keySerializer,
         ISerializer<TValue> valueSerializer)
     {

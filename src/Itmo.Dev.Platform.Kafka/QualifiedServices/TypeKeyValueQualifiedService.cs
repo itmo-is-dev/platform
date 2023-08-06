@@ -1,12 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Itmo.Dev.Platform.Kafka.Tools;
+namespace Itmo.Dev.Platform.Kafka.QualifiedServices;
 
-internal class KeyValueQualifiedService<TKey, TValue, TService> : IServiceResolver<TService>
+internal class TypeKeyValueQualifiedService<TKey, TValue, TService> : IKeyValueQualifiedService<TKey, TValue, TService>
 {
     private readonly Type _implementationType;
 
-    public KeyValueQualifiedService(Type implementationType)
+    public TypeKeyValueQualifiedService(Type implementationType)
     {
         _implementationType = implementationType;
     }

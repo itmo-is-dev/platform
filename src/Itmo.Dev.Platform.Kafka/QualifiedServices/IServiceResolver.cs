@@ -1,4 +1,4 @@
-namespace Itmo.Dev.Platform.Kafka.Tools;
+namespace Itmo.Dev.Platform.Kafka.QualifiedServices;
 
 public interface IServiceResolver<out T>
 {

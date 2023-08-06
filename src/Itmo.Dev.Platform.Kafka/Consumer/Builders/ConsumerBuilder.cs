@@ -55,6 +55,24 @@ internal class ConsumerBuilder<TKey, TValue> :
         return this;
     }
 
+    public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith(IDeserializer<TKey> deserializer)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+            return collection.AddSingleton(deserializer);
+        };
+
+        return this;
+    }
+
+    public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyByDefault()
+    {
+        return this;
+    }
+
     public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueWith<T>() where T : class, IDeserializer<TValue>
     {
         var action = _action;
@@ -65,6 +83,25 @@ internal class ConsumerBuilder<TKey, TValue> :
             return collection.AddSingleton<IDeserializer<TValue>, T>();
         };
 
+        return this;
+    }
+
+    public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueWith(IDeserializer<TValue> deserializer)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+
+            return collection.AddSingleton(deserializer);
+        };
+
+        return this;
+    }
+
+    public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueByDefault()
+    {
         return this;
     }
 

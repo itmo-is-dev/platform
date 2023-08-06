@@ -17,7 +17,7 @@
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Extended serialization configuration</PackageReleaseNotes>
+        <PackageReleaseNotes>Added options post configure</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

@@ -175,5 +175,15 @@ public class KafkaConsumerTests : IAsyncLifetime
         public TimeSpan BufferWaitLimit => TimeSpan.FromSeconds(10);
 
         public bool ReadLatest => false;
+
+        public IKafkaConsumerConfiguration WithHost(string host)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IKafkaConsumerConfiguration WithGroup(string group)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

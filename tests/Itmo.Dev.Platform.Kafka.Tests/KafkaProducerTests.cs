@@ -134,5 +134,10 @@ public class KafkaProducerTests : IAsyncLifetime
         public string Host { get; }
 
         public string Topic => TopicName;
+
+        public IKafkaProducerConfiguration WithHost(string host)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

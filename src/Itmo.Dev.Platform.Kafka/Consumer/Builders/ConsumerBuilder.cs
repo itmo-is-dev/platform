@@ -120,7 +120,10 @@ internal class ConsumerBuilder<TKey, TValue> :
         return this;
     }
 
-    public IConsumerBuilder UseNamedOptionsConfiguration(string name, IConfiguration configuration)
+    public IConsumerBuilder UseNamedOptionsConfiguration(
+        string name,
+        IConfiguration configuration,
+        Action<IKafkaConsumerConfiguration>? postConfigure)
     {
         var action = _action;
 
@@ -128,7 +131,12 @@ internal class ConsumerBuilder<TKey, TValue> :
         {
             action(collection);
 
-            collection.Configure<KafkaConsumerConfiguration>(name, configuration); 
+            collection.Configure<KafkaConsumerConfiguration>(name, configuration);
+
+            if (postConfigure is not null)
+            {
+                collection.PostConfigure<KafkaConsumerConfiguration>(name, postConfigure);
+            }
 
             var s = new NamedOptionsQualifiedService<TKey, TValue, KafkaConsumerConfiguration>(name);
             return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>(s);

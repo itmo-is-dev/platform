@@ -33,6 +33,24 @@ internal class ProducerBuilder<TKey, TValue> :
         return this;
     }
 
+    public IProducerValueSerializerSelector<TKey, TValue> SerializeKeyWith(ISerializer<TKey> serializer)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+            return collection.AddSingleton(serializer);
+        };
+
+        return this;
+    }
+
+    public IProducerValueSerializerSelector<TKey, TValue> SerializeByDefault()
+    {
+        return this;
+    }
+
     public IProducerConfigurationSelector<TKey, TValue> SerializeValueWith<T>() where T : class, ISerializer<TValue>
     {
         var action = _action;
@@ -43,6 +61,24 @@ internal class ProducerBuilder<TKey, TValue> :
             return collection.AddSingleton<ISerializer<TValue>, T>();
         };
 
+        return this;
+    }
+
+    public IProducerConfigurationSelector<TKey, TValue> SerializeValueWith(ISerializer<TValue> serializer)
+    {
+        var action = _action;
+
+        _action = collection =>
+        {
+            action(collection);
+            return collection.AddSingleton(serializer);
+        };
+
+        return this;
+    }
+
+    public IProducerConfigurationSelector<TKey, TValue> SerializeValueByDefault()
+    {
         return this;
     }
 

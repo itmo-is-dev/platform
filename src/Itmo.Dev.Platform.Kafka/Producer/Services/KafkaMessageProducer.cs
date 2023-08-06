@@ -17,8 +17,8 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
         IServiceProvider provider,
         ILogger<KafkaMessageProducer<TKey, TValue>> logger,
         TypeKeyValueQualifiedService<TKey, TValue, IOptionsSnapshot<IKafkaProducerConfiguration>> configurationResolver,
-        ISerializer<TKey> keySerializer,
-        ISerializer<TValue> valueSerializer)
+        ISerializer<TKey>? keySerializer = null,
+        ISerializer<TValue>? valueSerializer = null)
     {
         _logger = logger;
         _configuration = configurationResolver.Resolve(provider);

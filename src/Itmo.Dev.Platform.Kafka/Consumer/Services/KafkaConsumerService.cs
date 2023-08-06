@@ -13,8 +13,8 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
         IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerService<TKey, TValue>> logger,
-        IDeserializer<TKey> keyDeserializer,
-        IDeserializer<TValue> valueDeserializer)
+        IDeserializer<TKey>? keyDeserializer = null,
+        IDeserializer<TValue>? valueDeserializer = null)
         : base(
             optionsResolver,
             handlerResolver,

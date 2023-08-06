@@ -16,16 +16,16 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
     private readonly IServiceScopeFactory _scopeFactory;
 
     protected ILogger<KafkaConsumerServiceBase<TKey, TValue>> Logger { get; }
-    protected IDeserializer<TKey> KeyDeserializer { get; }
-    protected IDeserializer<TValue> ValueDeserializer { get; }
+    protected IDeserializer<TKey>? KeyDeserializer { get; }
+    protected IDeserializer<TValue>? ValueDeserializer { get; }
 
     protected KafkaConsumerServiceBase(
         IServiceResolver<IKafkaConsumerConfiguration> optionsResolver,
         IServiceResolver<IKafkaMessageHandler<TKey, TValue>> handlerResolver,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerServiceBase<TKey, TValue>> logger,
-        IDeserializer<TKey> keyDeserializer,
-        IDeserializer<TValue> valueDeserializer)
+        IDeserializer<TKey>? keyDeserializer,
+        IDeserializer<TValue>? valueDeserializer)
     {
         _optionsResolver = optionsResolver;
         _scopeFactory = scopeFactory;

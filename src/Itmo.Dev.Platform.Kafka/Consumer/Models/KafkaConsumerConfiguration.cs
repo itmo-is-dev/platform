@@ -1,3 +1,5 @@
+using Confluent.Kafka;
+
 namespace Itmo.Dev.Platform.Kafka.Consumer.Models;
 
 internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
@@ -19,6 +21,8 @@ internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
     public TimeSpan BufferWaitLimit { get; init; }
 
     public bool ReadLatest { get; init; }
+
+    public SecurityProtocol SecurityProtocol { get; init; }
 
     public IKafkaConsumerConfiguration WithHost(string host)
     {

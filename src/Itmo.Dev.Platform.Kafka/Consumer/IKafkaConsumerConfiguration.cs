@@ -1,3 +1,5 @@
+using Confluent.Kafka;
+
 namespace Itmo.Dev.Platform.Kafka.Consumer;
 
 public interface IKafkaConsumerConfiguration
@@ -19,6 +21,8 @@ public interface IKafkaConsumerConfiguration
     TimeSpan BufferWaitLimit { get; }
 
     bool ReadLatest { get; }
+
+    SecurityProtocol SecurityProtocol { get; }
 
     IKafkaConsumerConfiguration WithHost(string host);
 

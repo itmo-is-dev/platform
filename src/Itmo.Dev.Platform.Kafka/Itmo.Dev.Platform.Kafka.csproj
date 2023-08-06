@@ -17,29 +17,29 @@
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Added GetLatestBy extension</PackageReleaseNotes>
+        <PackageReleaseNotes>Added named options support</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Confluent.Kafka"/>
-        <PackageReference Include="Google.Protobuf"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting"/>
-        <PackageReference Include="Microsoft.Extensions.Options"/>
-        <PackageReference Include="Newtonsoft.Json"/>
-        <PackageReference Include="Serilog"/>
-        <PackageReference Include="System.Linq.Async"/>
+        <PackageReference Include="Confluent.Kafka" />
+        <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="System.Linq.Async" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="$(AssemblyName).Tests"/>
+        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     </ItemGroup>
 
 </Project>

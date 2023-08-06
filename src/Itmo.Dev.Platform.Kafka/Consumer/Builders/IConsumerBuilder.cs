@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Builders;
@@ -21,6 +22,8 @@ public interface IConsumerValueDeserializerSelector<TKey, TValue>
 public interface IConsumerConfigurationSelector<TKey, TValue>
 {
     IConsumerBuilder UseConfiguration<T>() where T : class, IKafkaConsumerConfiguration;
+
+    IConsumerBuilder UseNamedOptionsConfiguration(string name, IConfiguration configuration);
 }
 
 public interface IConsumerBuilder

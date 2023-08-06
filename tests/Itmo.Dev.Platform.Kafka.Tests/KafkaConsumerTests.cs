@@ -25,8 +25,6 @@ public class KafkaConsumerTests : IAsyncLifetime
 
     private ApplicationFactory<int, string> _applicationFactory = null!;
 
-    private Task _serverTask = null!;
-
     public KafkaConsumerTests(KafkaFixture kafkaFixture, ITestOutputHelper output)
     {
         Log.Logger = new LoggerConfiguration()

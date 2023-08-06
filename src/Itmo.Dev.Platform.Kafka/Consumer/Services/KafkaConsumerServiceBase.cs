@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +10,7 @@ namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
 internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundService
 {
-    private readonly IServiceResolver<IOptionsMonitor<IKafkaConsumerConfiguration>> _optionsResolver;
+    private readonly IServiceResolver<IKafkaConsumerConfiguration> _optionsResolver;
     private readonly IServiceResolver<IKafkaMessageHandler<TKey, TValue>> _handlerResolver;
 
     private readonly IServiceScopeFactory _scopeFactory;
@@ -19,7 +20,7 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
     protected IDeserializer<TValue> ValueDeserializer { get; }
 
     protected KafkaConsumerServiceBase(
-        IServiceResolver<IOptionsMonitor<IKafkaConsumerConfiguration>> optionsResolver,
+        IServiceResolver<IKafkaConsumerConfiguration> optionsResolver,
         IServiceResolver<IKafkaMessageHandler<TKey, TValue>> handlerResolver,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerServiceBase<TKey, TValue>> logger,
@@ -42,8 +43,7 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
 
-            var optionsMonitor = _optionsResolver.Resolve(scope.ServiceProvider);
-            var options = optionsMonitor.CurrentValue;
+            var options = _optionsResolver.Resolve(scope.ServiceProvider);
 
             if (await CheckDisabledAsync(options, stoppingToken))
                 continue;

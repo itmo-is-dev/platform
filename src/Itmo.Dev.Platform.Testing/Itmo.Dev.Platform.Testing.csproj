@@ -37,4 +37,12 @@
     </ItemGroup>
 
 
+    <ItemGroup>
+      <ProjectReference Include="..\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj" />
+    </ItemGroup>
+
+
+
+
+
 </Project>

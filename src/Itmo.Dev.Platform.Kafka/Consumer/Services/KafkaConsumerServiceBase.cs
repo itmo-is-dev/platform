@@ -54,7 +54,7 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
             {
                 await ExecuteSingleAsync(options, handler, stoppingToken);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 Logger.LogError(e, "Failed to consume messages");
             }

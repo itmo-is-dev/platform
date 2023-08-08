@@ -1,4 +1,4 @@
-name: platform-kafka
+name: platform-postgres
 
 on:
   pull_request:

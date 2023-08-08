@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\package-publish.yaml = .github\workflows\package-publish.yaml
 		.github\workflows\dotnet.yaml = .github\workflows\dotnet.yaml
 		.github\workflows\build-test-kafka.yaml = .github\workflows\build-test-kafka.yaml
+		.github\workflows\build-test-postgres.yaml = .github\workflows\build-test-postgres.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}"
@@ -30,6 +31,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres", "src\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj", "{FF785BFD-FCB1-465E-9728-B15C7DF314FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Testing", "src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj", "{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres.Tests", "tests\Itmo.Dev.Platform.Postgres.Tests\Itmo.Dev.Platform.Postgres.Tests.csproj", "{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +64,10 @@ Global
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -70,5 +77,6 @@ Global
 		{713610E9-F866-4C7E-96ED-4B486509E3A3} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 		{FF785BFD-FCB1-465E-9728-B15C7DF314FF} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
+		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 	EndGlobalSection
 EndGlobal

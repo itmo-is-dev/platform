@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Postgres.Connection;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.Collections.Concurrent;
 using System.Data;
@@ -10,10 +11,12 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
     private readonly ConcurrentQueue<NpgsqlCommand> _queue;
     private readonly SemaphoreSlim _semaphore;
     private readonly IPostgresConnectionProvider _connectionProvider;
+    private readonly ILogger<ReusableUnitOfWork> _logger;
 
-    public ReusableUnitOfWork(IPostgresConnectionProvider connectionProvider)
+    public ReusableUnitOfWork(IPostgresConnectionProvider connectionProvider, ILogger<ReusableUnitOfWork> logger)
     {
         _connectionProvider = connectionProvider;
+        _logger = logger;
         _queue = new ConcurrentQueue<NpgsqlCommand>();
         _semaphore = new SemaphoreSlim(1, 1);
     }
@@ -50,8 +53,10 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
 
             transaction.Commit();
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogError(e, "Failed to commit work");
+            
             transaction.Rollback();
 
             // flushing remaining queue work if transaction failed

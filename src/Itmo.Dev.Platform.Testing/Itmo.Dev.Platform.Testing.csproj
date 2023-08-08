@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Title>Itmo.Dev.Platform.Testing</Title>
+        <Authors>itmo-is-dev</Authors>
+        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PatchVersion>0</PatchVersion>
+        <Version>1.0.$(PatchVersion)</Version>
+        <PackageReleaseNotes>
+            Itmo.Dev.Platform.Testing
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoBogus" />
+      <PackageReference Include="FluentAssertions" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Npgsql" />
+      <PackageReference Include="Respawn" />
+      <PackageReference Include="Serilog.Extensions.Logging" />
+      <PackageReference Include="Serilog.Sinks.XUnit" />
+      <PackageReference Include="Testcontainers.PostgreSql" />
+    </ItemGroup>
+
+
+</Project>

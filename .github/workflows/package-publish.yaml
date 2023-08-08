@@ -64,6 +64,7 @@ jobs:
           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Postgres/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Testing/bin/Release/*.nupkg .packages/
   
   
   publish:

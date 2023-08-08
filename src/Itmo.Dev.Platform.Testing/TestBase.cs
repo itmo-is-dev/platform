@@ -8,9 +8,10 @@ namespace Itmo.Dev.Platform.Testing;
 
 public class TestBase
 {
-    public TestBase(ITestOutputHelper? output)
+    public TestBase(ITestOutputHelper? output = null)
     {
         Randomizer.Seed = new Random(Seed);
+        Faker = new Faker();
         
         if (output is not null)
         {
@@ -20,6 +21,8 @@ public class TestBase
                 .CreateLogger();
         }
     }
+    
+    public Faker Faker { get; }
 
     public static int Seed { get; set; } =
         Assembly.GetExecutingAssembly().GetCustomAttribute<SeedAttribute>()?.Value ?? 101;

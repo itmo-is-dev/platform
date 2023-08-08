@@ -4,7 +4,6 @@ using Npgsql;
 using Respawn;
 using Serilog;
 using System.Data;
-using System.Data.Common;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -39,7 +38,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
 
     public Faker Faker { get; }
 
-    public DbConnection Connection { get; private set; }
+    public NpgsqlConnection Connection { get; private set; }
 
     protected PostgreSqlContainer Container { get; }
 
@@ -83,7 +82,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
         {
             await Connection.OpenAsync();
         }
-        
+
         _respawn = await Respawner.CreateAsync(Connection, options);
 
         if (oldState is not ConnectionState.Open)
@@ -115,7 +114,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
         };
     }
 
-    protected virtual DbConnection CreateConnection()
+    protected virtual NpgsqlConnection CreateConnection()
     {
         return new NpgsqlConnection(Container.GetConnectionString());
     }

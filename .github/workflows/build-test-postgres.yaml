@@ -1,18 +1,17 @@
-name: dotnet
+name: platform-kafka
 
 on:
   pull_request:
-    paths:
-      - 'src/**'
-      #     Ignored as there is a separate pipeline for these tests
-      - '!src/Itmo.Dev.Platform.Kafka/**'
-      - '!src/Itmo.Dev.Platform.Postgres/**'
     branches:
       - master
+    paths:
+      - 'src/Itmo.Dev.Platform.Postgres/**'
+      - 'tests/Itmo.Dev.Platform.Postgres.Tests/**'
+      - '.github/workflows/build-test-postgres.yaml'
 
 jobs:
   build:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
     
     steps:
@@ -35,4 +34,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build tests/Itmo.Dev.Platform.Postgres.Tests/Itmo.Dev.Platform.Postgres.Tests.csproj -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/Itmo.Dev.Platform.Postgres.Tests/Itmo.Dev.Platform.Postgres.Tests.csproj -c Release --no-restore --no-build

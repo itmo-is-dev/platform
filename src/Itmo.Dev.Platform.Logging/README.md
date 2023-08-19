@@ -14,7 +14,7 @@ var app = builder.Build();
 
 app.UseRouting();
 // UsePlatformSentryTracing should be placed right after UseRouting middleware
-app.UsePlatformSentryTracing();
+app.UsePlatformSentryTracing(builder.Configuration);
 ```
 
 Sentry application settings example:

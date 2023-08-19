@@ -1,9 +1,13 @@
 # Itmo.Dev.Platform.Common
 
-Package contains method to connect Serilog and Sink to Sentry.
+Package contains methods to connect Serilog and Sink to Sentry.
 
-### Prerequisites
-- Sentry could be configured in project.
+
+Usage example:
+```csharp
+builder.AddPlatformSentry();
+builder.Host.UseSerilogForAppLogs(builder.Configuration);
+```
 
 Sentry application settings example:
 ```json
@@ -16,11 +20,6 @@ Sentry application settings example:
     "MinimumEventLevel": "Warning"
   }
 }
-```
-
-Usage example:
-```csharp
-builder.Host.UseSerilogForAppLogs(builder.Configuration);
 ```
 
 Serilog application settings example:

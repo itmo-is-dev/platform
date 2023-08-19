@@ -26,6 +26,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Sentry.AspNetCore" />
+      <PackageReference Include="Sentry.AspNetCore.Grpc" />
       <PackageReference Include="Sentry.Serilog" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.AspNetCore" />

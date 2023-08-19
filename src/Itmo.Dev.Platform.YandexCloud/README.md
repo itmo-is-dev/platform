@@ -28,5 +28,5 @@ Configuration parameters:
 | Path                                  | Description                                         | Respected values   |
 |---------------------------------------|-----------------------------------------------------|--------------------|
 | Platform:Environment                  | Running environment identifier                      | Local, YandexCloud |
-| Platform:YandexCloud:ServiceUri       | Uri, user for token fetching                        |                    |
+| Platform:YandexCloud:ServiceUri       | Uri, used for token fetching                        |                    |
 | Platform:YandexCloud:LockBox:SecretId | Id of LockBox secrets where configuration is stored |                    |

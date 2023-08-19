@@ -7,6 +7,14 @@ Usage example:
 ```csharp
 builder.AddPlatformSentry();
 builder.Host.AddPlatformSerilog(builder.Configuration);
+
+// ...
+
+var app = builder.Build();
+
+app.UseRouting();
+// UsePlatformSentryTracing should be placed right after UseRouting middleware
+app.UsePlatformSentryTracing();
 ```
 
 Sentry application settings example:
@@ -59,3 +67,10 @@ Serilog application settings example:
   }
 }
 ```
+
+
+N.B.
+
+Don't forget to add required Sinks:
+ - Serilog.Sinks.Console
+ - Serilog.Sinks.File

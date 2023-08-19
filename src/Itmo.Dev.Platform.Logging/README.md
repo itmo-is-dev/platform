@@ -6,7 +6,7 @@ Package contains methods to connect Serilog and Sink to Sentry.
 Usage example:
 ```csharp
 builder.AddPlatformSentry();
-builder.Host.UseSerilogForAppLogs(builder.Configuration);
+builder.Host.AddPlatformSerilog(builder.Configuration);
 ```
 
 Sentry application settings example:

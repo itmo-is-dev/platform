@@ -4,7 +4,7 @@ namespace Itmo.Dev.Platform.Logging.Extensions;
 
 public static class ConfigureHostBuilderExtensions
 {
-    public static IHostBuilder UseSerilogForAppLogs(this ConfigureHostBuilder hostBuilder, IConfiguration configuration)
+    public static IHostBuilder AddPlatformSerilog(this ConfigureHostBuilder hostBuilder, IConfiguration configuration)
     {
         LoggerConfiguration loggerConfiguration = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration);

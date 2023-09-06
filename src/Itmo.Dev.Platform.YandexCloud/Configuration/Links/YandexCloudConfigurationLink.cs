@@ -20,7 +20,7 @@ internal class YandexCloudConfigurationLink : IAsyncLink<ConfigurationCommand>
             return await next(request, context);
         }
 
-        string secretId = request.ApplicationBuilder.Configuration.GetValue<string>("Platform:YandexCloud:SecretId")
+        string secretId = request.ApplicationBuilder.Configuration.GetValue<string>("Platform:YandexCloud:LockBox:SecretId")
                           ?? throw new YandexCloudException("SecretId must be defined for Yandex Cloud deployment");
 
         var yandexCloudService = new YandexCloudService(request.ApplicationBuilder.Configuration);

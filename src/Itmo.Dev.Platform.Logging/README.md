@@ -22,6 +22,7 @@ Sentry application settings example:
 {
   "Sentry": {
     "Enabled": true,
+    "Environment": "Production",
     "Dsn": "",
     "Debug": false,
     "TracesSampleRate": 1.0,

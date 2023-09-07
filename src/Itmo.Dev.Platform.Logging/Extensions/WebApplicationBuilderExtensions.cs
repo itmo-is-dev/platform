@@ -7,14 +7,23 @@ public static class WebApplicationBuilderExtensions
 {
     public static WebApplicationBuilder AddPlatformSentry(this WebApplicationBuilder builder)
     {
-        if (builder.Configuration.GetSection("Sentry:Enabled").Get<bool>())
+        if (builder.Configuration.GetSection("Sentry:Enabled").Get<bool>() is false)
         {
-            builder.WebHost.UseSentry(sentryBuilder =>
-            {
-                sentryBuilder.AddGrpc();
-                sentryBuilder.AddSentryOptions(options => options.Environment = builder.Environment.EnvironmentName);
-            });
+            return builder;
         }
+
+        var environment = builder.Configuration.GetSection("Sentry:Environment").Get<string?>();
+        
+        if (string.IsNullOrWhiteSpace(environment))
+        {
+            environment = builder.Environment.EnvironmentName;
+        }
+            
+        builder.WebHost.UseSentry(sentryBuilder =>
+        {
+            sentryBuilder.AddGrpc();
+            sentryBuilder.AddSentryOptions(options => options.Environment = environment);
+        });
 
         return builder;
     }

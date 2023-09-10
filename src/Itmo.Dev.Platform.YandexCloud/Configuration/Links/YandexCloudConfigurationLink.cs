@@ -3,12 +3,14 @@ using Itmo.Dev.Platform.YandexCloud.Configuration.Commands;
 using Itmo.Dev.Platform.YandexCloud.Exceptions;
 using Itmo.Dev.Platform.YandexCloud.Models;
 using Itmo.Dev.Platform.YandexCloud.Services;
+using Itmo.Dev.Platform.YandexCloud.Tools;
 
 namespace Itmo.Dev.Platform.YandexCloud.Configuration.Links;
 
 internal class YandexCloudConfigurationLink : IAsyncLink<ConfigurationCommand>
 {
     private const string EnvironmentName = "YandexCloud";
+    private const string SecretIdKey = "Platform:YandexCloud:LockBox:SecretId";
 
     public async Task<Unit> Process(
         ConfigurationCommand request,
@@ -20,18 +22,28 @@ internal class YandexCloudConfigurationLink : IAsyncLink<ConfigurationCommand>
             return await next(request, context);
         }
 
-        string secretId = request.ApplicationBuilder.Configuration.GetValue<string>("Platform:YandexCloud:LockBox:SecretId")
-                          ?? throw new YandexCloudException("SecretId must be defined for Yandex Cloud deployment");
+        string? secretId = request.ApplicationBuilder.Configuration.GetValue<string>(SecretIdKey);
 
-        var yandexCloudService = new YandexCloudService(request.ApplicationBuilder.Configuration);
-        string token = await yandexCloudService.GetTokenAsync();
+        if (secretId is null)
+            throw new YandexCloudException("SecretId must be defined for Yandex Cloud deployment");
 
-        var lockBoxClient = new YandexCloudLockBoxService(token);
+        request.ApplicationBuilder.Services
+            .AddOptions<YandexCloudLockboxConfiguration>()
+            .BindConfiguration("Platform:YandexCloud:LockBox");
 
-        LockBoxEntry[] entries = await lockBoxClient.GetEntries(secretId);
+        var tokenProvider = new YandexCloudTokenProvider(request.ApplicationBuilder.Configuration);
+        var lockBoxService = new YandexCloudLockBoxService(tokenProvider);
+
+        request.ApplicationBuilder.Services.AddSingleton(tokenProvider);
+        request.ApplicationBuilder.Services.AddSingleton(lockBoxService);
+
+        LockBoxEntry[] entries = await lockBoxService.GetEntries(secretId, context.CancellationToken);
+
+        var provider = new LockBoxEntryConfigurationProvider(entries);
+        request.ApplicationBuilder.Services.AddSingleton(provider);
 
         IConfigurationBuilder configurationBuilder = request.ApplicationBuilder.Configuration;
-        configurationBuilder.Add(new LockBoxEntryConfigurationSource(entries));
+        configurationBuilder.Add(new ConfigurationSource(provider));
 
         return Unit.Value;
     }

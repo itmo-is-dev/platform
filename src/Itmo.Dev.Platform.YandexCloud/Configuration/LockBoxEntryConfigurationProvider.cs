@@ -7,14 +7,38 @@ internal class LockBoxEntryConfigurationProvider : ConfigurationProvider
 {
     public LockBoxEntryConfigurationProvider(IEnumerable<LockBoxEntry> entries)
     {
-        var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        Data = new Dictionary<string, string?>();
+        UpdateValues(entries);
+    }
 
-        foreach (LockBoxEntry lockBoxEntry in entries)
+    public void UpdateValues(IEnumerable<LockBoxEntry> entries)
+    {
+        var updated = false;
+
+        var entryData = entries.ToDictionary(
+            x => Normalize(x.Key),
+            x => (string?)x.Value,
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach ((string key, string? oldValue) in Data)
         {
-            data[Normalize(lockBoxEntry.Key)] = lockBoxEntry.Value;
+            if (entryData.TryGetValue(key, out string? newValue))
+            {
+                if (StringComparer.Ordinal.Equals(oldValue, newValue) is false)
+                    updated = true;
+            }
+            else
+            {
+                updated = true;
+            }
         }
 
-        Data = data;
+        updated = updated || entryData.Keys.Any(k => Data.ContainsKey(k) is false);
+
+        Data = entryData;
+
+        if (updated)
+            OnReload();
     }
 
     private static string Normalize(string key)

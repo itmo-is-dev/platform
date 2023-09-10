@@ -10,29 +10,26 @@ namespace Itmo.Dev.Platform.YandexCloud.Services;
 
 internal class YandexCloudLockBoxService
 {
-    private readonly string _token;
+    private readonly YandexCloudTokenProvider _tokenProvider;
 
-    public YandexCloudLockBoxService(string token)
+    public YandexCloudLockBoxService(YandexCloudTokenProvider tokenProvider)
     {
-        _token = token;
+        _tokenProvider = tokenProvider;
     }
 
-    internal async Task<LockBoxEntry[]> GetEntries(string secretId)
+    internal async Task<LockBoxEntry[]> GetEntries(string secretId, CancellationToken cancellationToken)
     {
         const string baseUrl = "https://payload.lockbox.api.cloud.yandex.net/";
         string requestUri = $"/lockbox/v1/secrets/{secretId}/payload";
 
-        using var httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(baseUrl),
-            DefaultRequestHeaders =
-            {
-                Authorization = new AuthenticationHeaderValue("Bearer", _token),
-            },
-        };
+        var token = await _tokenProvider.GetTokenAsync(cancellationToken);
+
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri(baseUrl);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        HttpResponseMessage resp = await httpClient.SendAsync(request);
+        HttpResponseMessage resp = await httpClient.SendAsync(request, cancellationToken);
 
         if (resp.StatusCode is not HttpStatusCode.OK)
         {
@@ -40,7 +37,7 @@ internal class YandexCloudLockBoxService
             stringBuilder.AppendLine("Unable to receive secrets from Yandex LockBox.");
             stringBuilder.AppendLine($"HTTP Status code: {resp.StatusCode:D)}");
 
-            string body = await resp.Content.ReadAsStringAsync();
+            string body = await resp.Content.ReadAsStringAsync(cancellationToken);
 
             if (string.IsNullOrWhiteSpace(body) is false)
             {
@@ -51,10 +48,12 @@ internal class YandexCloudLockBoxService
             throw new YandexCloudException(stringBuilder.ToString());
         }
 
-        string respBody = await resp.Content.ReadAsStringAsync();
+        string respBody = await resp.Content.ReadAsStringAsync(cancellationToken);
+
         try
         {
-            LockBoxEntry[]? entries = JsonConvert.DeserializeObject<JObject>(respBody)?
+            LockBoxEntry[]? entries = JsonConvert
+                .DeserializeObject<JObject>(respBody)?
                 .GetValue("entries", StringComparison.Ordinal)?
                 .ToObject<LockBoxEntry[]>();
 

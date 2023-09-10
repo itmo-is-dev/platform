@@ -17,6 +17,7 @@ Configuration parameters:
     "Environment": "string",
     "YandexCloud": {
       "ServiceUri": "string",
+      "MinRemainingTokenLifetimeSeconds": int,
       "LockBox": {
         "SecretId": "string"
       }
@@ -25,8 +26,9 @@ Configuration parameters:
 }
 ```
 
-| Path                                  | Description                                         | Respected values   |
-|---------------------------------------|-----------------------------------------------------|--------------------|
-| Platform:Environment                  | Running environment identifier                      | Local, YandexCloud |
-| Platform:YandexCloud:ServiceUri       | Uri, used for token fetching                        |                    |
-| Platform:YandexCloud:LockBox:SecretId | Id of LockBox secrets where configuration is stored |                    |
+| Path                                                  | Description                                                                                                                                                                                        | Respected values   |
+|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|
+| Platform:Environment                                  | Running environment identifier                                                                                                                                                                     | Local, YandexCloud |
+| Platform:YandexCloud:ServiceUri                       | Uri, used for token fetching                                                                                                                                                                       |                    |
+| Platform:YandexCloud:MinRemainingTokenLifetimeSeconds | Minimal remaining lifetime of token when it is retrieved for any operation, if token will expire prior to DateTimeOffset.UtcNow + TimeSpan.FromSeconds(threshold), the new token will be generated |                    |
+| Platform:YandexCloud:LockBox:SecretId                 | Id of LockBox secrets where configuration is stored                                                                                                                                                |                    |

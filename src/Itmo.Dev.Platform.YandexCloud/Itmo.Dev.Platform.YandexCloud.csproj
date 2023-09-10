@@ -21,7 +21,9 @@
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Itmo.Dev.Platform.YandexCloud</PackageReleaseNotes>
+        <PackageReleaseNotes>
+            Added secrets polling for IOptionsMonitor support
+        </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,5 +39,6 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
+
 
 </Project>

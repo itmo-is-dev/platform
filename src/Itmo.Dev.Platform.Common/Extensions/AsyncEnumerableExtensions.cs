@@ -1,72 +1,87 @@
-using Itmo.Dev.Platform.Common.Tools;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.Common.Extensions;
 
 internal static class AsyncEnumerableExtensions
 {
-    public static async IAsyncEnumerable<IAsyncEnumerable<T>> ChunkAsync<T>(
+    public static IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync<T>(
         this IAsyncEnumerable<T> enumerable,
         int count,
-        TimeSpan timeout,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        TimeSpan timeout)
     {
-        await using var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
+        if (count <= 1)
+            throw new ArgumentOutOfRangeException(nameof(count));
 
-        var finished = new Box<bool>(false);
+        return AsyncEnumerable.Create(ChunkInternal);
 
-        while (finished.Value is false)
+        async IAsyncEnumerator<IReadOnlyList<T>> ChunkInternal(CancellationToken cancellationToken)
         {
-            yield return GetChunkAsync(enumerator, finished, count, timeout, cancellationToken);
-        }
-    }
+            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
 
-    private static async IAsyncEnumerable<T> GetChunkAsync<T>(
-        IAsyncEnumerator<T> enumerator,
-        Box<bool> finished,
-        int count,
-        TimeSpan timeout,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool ShouldProceed(IAsyncResult task, int yieldedCount1)
-        {
-            return cancellationToken.IsCancellationRequested is false
-                   && task.IsCompleted is false
-                   && yieldedCount1 < count;
-        }
+            var enumerator = enumerable
+                .WithCancellation(cancellationSource.Token)
+                .ConfigureAwait(false)
+                .GetAsyncEnumerator();
 
-        var delayTask = Task.Delay(timeout, cancellationToken);
-        var nextTask = enumerator.MoveNextAsync();
+            var enumeratorTask = default(ConfiguredValueTaskAwaitable<bool>);
+            var buffer = new List<T>();
 
-        var yieldedCount = 0;
-
-        while (ShouldProceed(delayTask, yieldedCount))
-        {
-            if (nextTask.IsFaulted)
+            try
             {
-                await nextTask;
-                yield break;
-            }
+                while (true)
+                {
+                    enumeratorTask = enumerator.MoveNextAsync();
+                    var awaiter = enumeratorTask.GetAwaiter();
 
-            if (nextTask.IsCompletedSuccessfully is false)
+                    if (awaiter.IsCompleted is false && timeout > TimeSpan.Zero)
+                    {
+                        await Task.Delay(timeout, cancellationToken);
+                    }
+
+                    if (awaiter.IsCompleted is false && buffer.Count > 0)
+                    {
+                        yield return buffer.ToArray();
+                        buffer.Clear();
+                    }
+
+                    var hasNext = awaiter.IsCompleted
+                        ? awaiter.GetResult()
+                        : await enumeratorTask;
+
+                    if (hasNext is false)
+                    {
+                        if (buffer.Count > 0)
+                            yield return buffer;
+
+                        yield break;
+                    }
+
+                    buffer.Add(enumerator.Current);
+
+                    if (buffer.Count < count)
+                        continue;
+
+                    yield return buffer.ToArray();
+                    buffer.Clear();
+                }
+            }
+            finally
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken);
-                continue;
+                try
+                {
+                    cancellationSource.Cancel();
+                    await enumeratorTask;
+                }
+                catch
+                {
+                    // We are not interested in any exceptions here
+                    // because the fetch operation was scheduled while
+                    // no one expects it.
+                }
+
+                cancellationSource.Dispose();
+                await enumerator.DisposeAsync();
             }
-
-            var result = await nextTask;
-
-            if (result is false)
-            {
-                finished.Value = true;
-                yield break;
-            }
-
-            yieldedCount++;
-            yield return enumerator.Current;
-
-            nextTask = enumerator.MoveNextAsync();
         }
     }
 }

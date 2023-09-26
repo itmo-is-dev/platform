@@ -1,38 +1,40 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
-using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
 internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundService
 {
-    private readonly IServiceResolver<IKafkaConsumerConfiguration> _optionsResolver;
-    private readonly IServiceResolver<IKafkaMessageHandler<TKey, TValue>> _handlerResolver;
-
+    private readonly IServiceProvider _serviceProvider;
     private readonly IServiceScopeFactory _scopeFactory;
 
     protected ILogger<KafkaConsumerServiceBase<TKey, TValue>> Logger { get; }
     protected IDeserializer<TKey>? KeyDeserializer { get; }
     protected IDeserializer<TValue>? ValueDeserializer { get; }
+    protected IServiceResolver<IKafkaMessageHandler<TKey, TValue>> HandlerResolver { get; }
+
+    protected IServiceResolver<IKafkaConsumerConfiguration> OptionsResolver { get; }
 
     protected KafkaConsumerServiceBase(
         IServiceResolver<IKafkaConsumerConfiguration> optionsResolver,
         IServiceResolver<IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        IServiceProvider serviceProvider,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerServiceBase<TKey, TValue>> logger,
         IDeserializer<TKey>? keyDeserializer,
         IDeserializer<TValue>? valueDeserializer)
     {
-        _optionsResolver = optionsResolver;
-        _scopeFactory = scopeFactory;
+        OptionsResolver = optionsResolver;
+        _serviceProvider = serviceProvider;
         Logger = logger;
         KeyDeserializer = keyDeserializer;
         ValueDeserializer = valueDeserializer;
-        _handlerResolver = handlerResolver;
+        _scopeFactory = scopeFactory;
+        HandlerResolver = handlerResolver;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -41,18 +43,14 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
 
         while (stoppingToken.IsCancellationRequested is false)
         {
-            await using var scope = _scopeFactory.CreateAsyncScope();
-
-            var options = _optionsResolver.Resolve(scope.ServiceProvider);
+            var options = OptionsResolver.Resolve(_serviceProvider);
 
             if (await CheckDisabledAsync(options, stoppingToken))
                 continue;
 
-            var handler = _handlerResolver.Resolve(scope.ServiceProvider);
-
             try
             {
-                await ExecuteSingleAsync(options, handler, stoppingToken);
+                await ExecuteSingleAsync(options, _scopeFactory, stoppingToken);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
@@ -63,7 +61,7 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
 
     protected abstract Task ExecuteSingleAsync(
         IKafkaConsumerConfiguration configuration,
-        IKafkaMessageHandler<TKey, TValue> handler,
+        IServiceScopeFactory factory,
         CancellationToken cancellationToken);
 
     private async Task<bool> CheckDisabledAsync(IKafkaConsumerConfiguration options, CancellationToken stoppingToken)

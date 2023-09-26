@@ -4,19 +4,16 @@ using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
-/// <summary>
-///     Implementation optimized for batching (incomplete, not tested)
-///     Waiting for the better times
-/// </summary>
 internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKey, TValue>
 {
     public BatchingKafkaConsumerService(
         IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration> optionsResolver,
         IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        IServiceProvider serviceProvider,
         IServiceScopeFactory scopeFactory,
         ILogger<BatchingKafkaConsumerService<TKey, TValue>> logger,
         IDeserializer<TKey> keyDeserializer,
@@ -24,6 +21,7 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
         : base(
             optionsResolver,
             handlerResolver,
+            serviceProvider,
             scopeFactory,
             logger,
             keyDeserializer,
@@ -31,37 +29,50 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
 
     protected override async Task ExecuteSingleAsync(
         IKafkaConsumerConfiguration configuration,
-        IKafkaMessageHandler<TKey, TValue> handler,
+        IServiceScopeFactory scopeFactory,
         CancellationToken cancellationToken)
     {
-        var enumerable = EnumerateMessagesAsync(configuration, cancellationToken)
-            .ChunkAsync(configuration.BufferSize, configuration.BufferWaitLimit, cancellationToken)
-            .WithCancellation(cancellationToken);
-
-        await foreach (var chunk in enumerable)
+        var channelOptions = new BoundedChannelOptions(configuration.BufferSize * 2)
         {
-            var consumerMessages = await chunk
-                .Where(x => x.Message.Value is not null)
-                .ToArrayAsync(cancellationToken);
+            SingleReader = configuration.ParallelismDegree is 1,
+            SingleWriter = true,
+        };
 
-            var messages = consumerMessages.Select(x => x.Message);
-            await handler.HandleAsync(messages, cancellationToken);
+        var channel = Channel.CreateBounded<InternalConsumerMessage<TKey, TValue>>(channelOptions);
 
-            foreach (var consumerMessage in consumerMessages)
+        var writeTask = WriteMessagesAsync(configuration, channel.Writer, cancellationToken);
+
+        var handleTasks = Enumerable
+            .Range(0, configuration.ParallelismDegree)
+            .Select(async _ =>
             {
-                consumerMessage.Commit();
-            }
-        }
+                await using var scope = scopeFactory.CreateAsyncScope();
+
+                var options = OptionsResolver.Resolve(scope.ServiceProvider);
+                var handler = HandlerResolver.Resolve(scope.ServiceProvider);
+
+                await HandleMessagesAsync(options, channel.Reader, handler, cancellationToken);
+            });
+
+        var tasks = handleTasks.Prepend(writeTask);
+
+        await Task.WhenAll(tasks);
     }
 
-    private async IAsyncEnumerable<InternalConsumerMessage<TKey, TValue>> EnumerateMessagesAsync(
+    private async Task WriteMessagesAsync(
         IKafkaConsumerConfiguration configuration,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+        ChannelWriter<InternalConsumerMessage<TKey, TValue>> writer,
+        CancellationToken cancellationToken)
     {
+        await Task.Yield();
+
         var consumerConfiguration = new ConsumerConfig
         {
             GroupId = configuration.Group,
             BootstrapServers = configuration.Host,
+            AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,
+            EnableAutoCommit = false,
+            SecurityProtocol = configuration.SecurityProtocol,
         };
 
         using IConsumer<TKey, TValue> consumer = new ConsumerBuilder<TKey, TValue>(consumerConfiguration)
@@ -74,7 +85,37 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
         while (cancellationToken.IsCancellationRequested is false)
         {
             ConsumeResult<TKey, TValue> result = consumer.Consume(cancellationToken);
-            yield return new InternalConsumerMessage<TKey, TValue>(result, consumer);
+            var message = new InternalConsumerMessage<TKey, TValue>(result, consumer);
+
+            await writer.WriteAsync(message, cancellationToken);
+        }
+    }
+
+    private static async Task HandleMessagesAsync(
+        IKafkaConsumerConfiguration configuration,
+        ChannelReader<InternalConsumerMessage<TKey, TValue>> reader,
+        IKafkaMessageHandler<TKey, TValue> handler,
+        CancellationToken cancellationToken)
+    {
+        await Task.Yield();
+
+        var enumerable = reader
+            .ReadAllAsync(cancellationToken)
+            .ChunkAsync(configuration.BufferSize, configuration.BufferWaitLimit);
+
+        await foreach (var chunk in enumerable)
+        {
+            var consumerMessages = chunk
+                .Where(x => x.Message.Value is not null)
+                .ToArray();
+
+            var messages = consumerMessages.Select(x => x.Message);
+            await handler.HandleAsync(messages, cancellationToken);
+
+            foreach (var consumerMessage in consumerMessages)
+            {
+                consumerMessage.Commit();
+            }
         }
     }
 }

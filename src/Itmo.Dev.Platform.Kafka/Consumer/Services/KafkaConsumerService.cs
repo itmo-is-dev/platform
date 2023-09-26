@@ -11,6 +11,7 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
     public KafkaConsumerService(
         IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration> optionsResolver,
         IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        IServiceProvider serviceProvider,
         IServiceScopeFactory scopeFactory,
         ILogger<KafkaConsumerService<TKey, TValue>> logger,
         IDeserializer<TKey>? keyDeserializer = null,
@@ -18,16 +19,21 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
         : base(
             optionsResolver,
             handlerResolver,
+            serviceProvider,
             scopeFactory,
             logger,
             keyDeserializer,
             valueDeserializer) { }
 
     protected override async Task ExecuteSingleAsync(
-        IKafkaConsumerConfiguration configuration,
-        IKafkaMessageHandler<TKey, TValue> handler,
+        IKafkaConsumerConfiguration _,
+        IServiceScopeFactory scopeFactory,
         CancellationToken cancellationToken)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+
+        var configuration = OptionsResolver.Resolve(scope.ServiceProvider);
+        
         var consumerConfiguration = new ConsumerConfig
         {
             GroupId = configuration.Group,
@@ -43,6 +49,8 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
             .Build();
 
         consumer.Subscribe(configuration.Topic);
+
+        var handler = HandlerResolver.Resolve(scope.ServiceProvider);
 
         while (cancellationToken.IsCancellationRequested is false)
         {

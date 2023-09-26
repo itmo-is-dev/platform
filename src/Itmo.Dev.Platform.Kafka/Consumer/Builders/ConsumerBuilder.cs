@@ -19,7 +19,7 @@ internal class ConsumerBuilder<TKey, TValue> :
 
     public ConsumerBuilder()
     {
-        _action = _ => _;
+        _action = x => x;
     }
 
     public IConsumerKeyDeserializerSelector<TKey, TValue> HandleWith<T>()
@@ -148,6 +148,19 @@ internal class ConsumerBuilder<TKey, TValue> :
     public void Add(IServiceCollection collection)
     {
         _action.Invoke(collection);
-        collection.AddHostedService<KafkaConsumerService<TKey, TValue>>();
+
+        collection.AddHostedService(p =>
+        {
+            var optionsResolver = p
+                .GetRequiredService<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>();
+
+            var options = optionsResolver.Resolve(p);
+
+            KafkaConsumerServiceBase<TKey, TValue> service = options.BufferSize is 1
+                ? ActivatorUtilities.CreateInstance<KafkaConsumerService<TKey, TValue>>(p)
+                : ActivatorUtilities.CreateInstance<BatchingKafkaConsumerService<TKey, TValue>>(p);
+
+            return service;
+        });
     }
 }

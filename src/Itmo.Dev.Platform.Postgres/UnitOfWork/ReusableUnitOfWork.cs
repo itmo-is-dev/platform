@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Postgres.Connection;
+using Itmo.Dev.Platform.Postgres.UnitOfWork.Handlers;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.Collections.Concurrent;
@@ -8,7 +9,7 @@ namespace Itmo.Dev.Platform.Postgres.UnitOfWork;
 
 public class ReusableUnitOfWork : IUnitOfWork, IDisposable
 {
-    private readonly ConcurrentQueue<NpgsqlCommand> _queue;
+    private readonly ConcurrentQueue<IWorkHandler> _queue;
     private readonly SemaphoreSlim _semaphore;
     private readonly IPostgresConnectionProvider _connectionProvider;
     private readonly ILogger<ReusableUnitOfWork> _logger;
@@ -17,13 +18,18 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
     {
         _connectionProvider = connectionProvider;
         _logger = logger;
-        _queue = new ConcurrentQueue<NpgsqlCommand>();
+        _queue = new ConcurrentQueue<IWorkHandler>();
         _semaphore = new SemaphoreSlim(1, 1);
     }
 
     public void Enqueue(NpgsqlCommand command)
     {
-        _queue.Enqueue(command);
+        _queue.Enqueue(new NonQueryWorkHandler(command));
+    }
+
+    public void Enqueue(NpgsqlCommand command, IUnitOfWorkResultHandler handler)
+    {
+        _queue.Enqueue(new ReaderWorkHandler(command, handler));
     }
 
     public async ValueTask CommitAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
@@ -42,13 +48,10 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
 
         try
         {
-            while (count is not 0 && _queue.TryDequeue(out NpgsqlCommand? command))
+            while (count is not 0 && _queue.TryDequeue(out IWorkHandler? handler))
             {
-                command.Connection = connection;
-
                 count--;
-                await command.ExecuteNonQueryAsync(cancellationToken);
-                await command.DisposeAsync();
+                await handler.HandleAsync(connection, cancellationToken);
             }
 
             transaction.Commit();

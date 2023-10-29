@@ -107,7 +107,7 @@ jobs:
           path: .packages
           key: ${{ needs.build.outputs.cache-key }}
 
-      - name: publish to GitHub nuget repository
+      - name: publish to NuGet.org
         run: |
           for file in .packages/*.nupkg
           do

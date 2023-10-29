@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.Common.Extensions;
 
-internal static class AsyncEnumerableExtensions
+public static class AsyncEnumerableExtensions
 {
     public static IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync<T>(
         this IAsyncEnumerable<T> enumerable,

@@ -156,7 +156,7 @@ internal class ConsumerBuilder<TKey, TValue> :
 
             var options = optionsResolver.Resolve(p);
 
-            KafkaConsumerServiceBase<TKey, TValue> service = options.BufferSize is 1
+            KafkaConsumerServiceBase<TKey, TValue> service = options.BufferSize <= 1
                 ? ActivatorUtilities.CreateInstance<KafkaConsumerService<TKey, TValue>>(p)
                 : ActivatorUtilities.CreateInstance<BatchingKafkaConsumerService<TKey, TValue>>(p);
 

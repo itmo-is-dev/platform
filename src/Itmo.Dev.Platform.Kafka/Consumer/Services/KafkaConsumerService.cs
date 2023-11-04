@@ -33,7 +33,7 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
         await using var scope = scopeFactory.CreateAsyncScope();
 
         var configuration = OptionsResolver.Resolve(scope.ServiceProvider);
-        
+
         var consumerConfiguration = new ConsumerConfig
         {
             GroupId = configuration.Group,
@@ -60,7 +60,7 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
             try
             {
                 await handler.HandleAsync(new[] { consumerMessage.Message }, cancellationToken);
-                consumer.Commit(result);
+                consumerMessage.Commit();
             }
             catch (Exception e)
             {

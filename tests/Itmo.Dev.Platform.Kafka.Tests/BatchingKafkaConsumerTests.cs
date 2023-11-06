@@ -15,8 +15,7 @@ using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
 
-[Collection(nameof(KafkaCollectionFixture))]
-public class BatchingKafkaConsumerTests : IAsyncLifetime
+public class BatchingKafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
 {
     private const string TopicName = $"{nameof(BatchingKafkaConsumerTests)}_topic";
 

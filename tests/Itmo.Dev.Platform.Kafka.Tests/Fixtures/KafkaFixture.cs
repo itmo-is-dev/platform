@@ -14,11 +14,6 @@ public class KafkaFixture : IAsyncLifetime
     {
         Container = new KafkaBuilder()
             .WithImage("confluentinc/cp-kafka:latest")
-
-#if DEBUG
-            .WithPortBinding(50007, 9092)
-#endif
-
             .Build();
 
         _createdTopics = new HashSet<string>();

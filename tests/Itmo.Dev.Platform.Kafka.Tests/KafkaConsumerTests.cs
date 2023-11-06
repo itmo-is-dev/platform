@@ -15,8 +15,7 @@ using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
 
-[Collection(nameof(KafkaCollectionFixture))]
-public class KafkaConsumerTests : IAsyncLifetime
+public class KafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
 {
     private const string TopicName = $"{nameof(KafkaConsumerTests)}_topic";
 
@@ -143,7 +142,7 @@ public class KafkaConsumerTests : IAsyncLifetime
                 .DeserializeValueWithNewtonsoft()
                 .UseConfiguration<Configuration>());
 
-            collection.AddSerilog();
+            collection.AddLogging(x => x.AddSerilog());
 
             var configuration = new Configuration(_kafkaFixture.Host);
 

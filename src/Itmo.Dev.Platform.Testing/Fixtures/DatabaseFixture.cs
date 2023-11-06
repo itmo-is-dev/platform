@@ -1,4 +1,5 @@
 using Bogus;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
@@ -20,11 +21,6 @@ public abstract class DatabaseFixture : IAsyncLifetime
     // ReSharper disable once ConvertConstructorToMemberInitializers
     protected DatabaseFixture()
     {
-        Faker = new Faker
-        {
-            Random = new Randomizer(420),
-        };
-
         Container = new PostgreSqlBuilder()
             .WithUsername(User)
             .WithPassword(Password)
@@ -35,8 +31,6 @@ public abstract class DatabaseFixture : IAsyncLifetime
         Provider = null!;
         _respawn = null!;
     }
-
-    public Faker Faker { get; }
 
     public NpgsqlConnection Connection { get; private set; }
 

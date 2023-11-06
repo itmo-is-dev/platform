@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj"/>
+    </ItemGroup>
+
+</Project>

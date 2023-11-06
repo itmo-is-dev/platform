@@ -7,6 +7,7 @@ using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.Testing.ApplicationFactories;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Xunit;
@@ -119,7 +120,7 @@ public class BatchingKafkaConsumerTests : IAsyncLifetime
         await _applicationFactory.DisposeAsync();
     }
 
-    public class ApplicationFactory<TKey, TValue> : ConfigurableWebApplicationFactory<EmptyStartup>
+    public class ApplicationFactory<TKey, TValue> : ConfigurableWebApplicationFactory<KafkaEmptyStartup>
     {
         private readonly KafkaFixture _kafkaFixture;
         private readonly CollectionConsumerHandler<TKey, TValue> _handler;

@@ -2,11 +2,12 @@ using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.Common.BackgroundServices;
+using Itmo.Dev.Platform.Postgres.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Transactions;
-using BackgroundTaskQuery = Itmo.Dev.Platform.BackgroundTasks.Models.BackgroundTaskQuery;
+using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Scheduling;
 
@@ -51,16 +52,16 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
         CancellationToken cancellationToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-
         var repository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskInfrastructureRepository>();
         var scheduler = scope.ServiceProvider.GetRequiredService<IBackgroundTaskScheduler>();
+        var transactionProvider = scope.ServiceProvider.GetRequiredService<IPostgresTransactionProvider>();
 
         while (cancellationToken.IsCancellationRequested is false)
         {
-            using var transaction = new TransactionScope(
-                TransactionScopeOption.Required,
-                new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
-                TransactionScopeAsyncFlowOption.Enabled);
+            await Task.Delay(options.PollingDelay, cancellationToken);
+
+            await using var transaction = await transactionProvider
+                .CreateTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
             var query = BackgroundTaskQuery.Build(builder => builder
                 .WithState(BackgroundTaskState.Pending)
@@ -75,9 +76,7 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
             await scheduler.ScheduleAsync(backgroundTaskIds, cancellationToken);
             await repository.UpdateStateAsync(backgroundTaskIds, BackgroundTaskState.Enqueued, cancellationToken);
 
-            transaction.Complete();
-
-            await Task.Delay(options.PollingDelay, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 }

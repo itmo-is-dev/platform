@@ -1,6 +1,7 @@
 using FluentMigrator.Runner;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Models;
+using Itmo.Dev.Platform.Postgres.Transactions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
         collection.AddSingleton<PostgresConnectionString>();
 
         collection.AddScoped<IPostgresConnectionProvider, PostgresConnectionProvider>();
+        collection.AddScoped<IPostgresTransactionProvider, PostgresTransactionProvider>();
         collection.AddScoped<IUnitOfWork, ReusableUnitOfWork>();
 
         var optionsBuilder = collection.AddOptions<PostgresConnectionConfiguration>();

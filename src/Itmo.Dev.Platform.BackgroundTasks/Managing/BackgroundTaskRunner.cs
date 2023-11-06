@@ -3,7 +3,6 @@ using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.Common.DateTime;
-using System.Transactions;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Managing;
 
@@ -37,17 +36,9 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
             Result: null,
             Error: null);
 
-
-        using var transaction = new TransactionScope(
-            TransactionScopeOption.Required,
-            new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
-            TransactionScopeAsyncFlowOption.Enabled);
-
         var id = await _repository
             .AddRangeAsync(new[] { backgroundTask }, cancellationToken)
             .SingleAsync(cancellationToken);
-
-        transaction.Complete();
 
         return id;
     }

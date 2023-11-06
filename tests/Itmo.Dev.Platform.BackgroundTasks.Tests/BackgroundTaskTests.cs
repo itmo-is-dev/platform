@@ -92,11 +92,11 @@ public class BackgroundTaskTests : TestBase
             .RunWithAsync<TestBackgroundTask>(default);
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(30));
-        await Task.WhenAny(timeout, _completionManager.Task);
+        await Task.WhenAny(timeout, _completionManager.WaitTask);
 
         // Assert
-        _completionManager.Task.IsCompletedSuccessfully.Should().BeTrue();
-        _completionManager.Task.Result.Should().Be(metadata.Value);
+        _completionManager.WaitTask.IsCompletedSuccessfully.Should().BeTrue();
+        _completionManager.WaitTask.Result.Should().Be(metadata.Value);
 
         var repository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
@@ -154,7 +154,6 @@ public class BackgroundTaskTests : TestBase
         await using var scope = application.Services.CreateAsyncScope();
 
         var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();
-        var repository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
         var metadata = EmptyMetadata.Value;
 
@@ -168,6 +167,10 @@ public class BackgroundTaskTests : TestBase
 
         var checker = Task.Run(async () =>
         {
+            // ReSharper disable once AccessToDisposedClosure
+            await using var checkerScope = application.Services.CreateAsyncScope();
+            var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
+
             BackgroundTask task;
 
             do

@@ -38,5 +38,9 @@
         <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="SourceKit.Generators.Builder"/>
     </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="$(AssemblyName).Tests"/>
+    </ItemGroup>
 
 </Project>

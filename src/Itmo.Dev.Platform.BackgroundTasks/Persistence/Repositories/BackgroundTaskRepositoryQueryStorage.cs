@@ -80,7 +80,8 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
             and (:metadata is null or background_task_metadata @> :metadata)
             and background_task_created_at >= :cursor
         order by background_task_created_at
-        limit :page_size;
+        limit :page_size
+        for update skip locked;
         """;
     }
 

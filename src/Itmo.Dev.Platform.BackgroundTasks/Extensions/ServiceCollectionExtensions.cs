@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         var builder = new BackgroundTaskConfigurationBuilder(collection);
         action.Invoke(builder);
 
-        collection.AddScoped<IBackgroundTaskExecutor, BackgroundTaskExecutionWrapper>();
+        collection.AddScoped<IBackgroundTaskManager, BackgroundTaskExecutionWrapper>();
         collection.AddScoped<IBackgroundTaskRunner, BackgroundTaskRunner>();
 
         collection.AddSingleton<BackgroundTaskRepositoryQueryStorage>();
@@ -52,6 +52,7 @@ public static class ServiceCollectionExtensions
             {
                 Attempts = configuration.Value.SchedulerRetryCount,
                 DelaysInSeconds = configuration.Value.SchedulerRetryDelays,
+                OnAttemptsExceeded = AttemptsExceededAction.Delete,
             });
         });
 

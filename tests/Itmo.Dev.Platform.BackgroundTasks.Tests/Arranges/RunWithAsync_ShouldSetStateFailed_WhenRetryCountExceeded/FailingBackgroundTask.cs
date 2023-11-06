@@ -3,7 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 
-namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailedWhenRetryCountExceeded;
+namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
 
 public class FailingBackgroundTask :
     IBackgroundTask<EmptyMetadata, EmptyExecutionResult, EmptyError>

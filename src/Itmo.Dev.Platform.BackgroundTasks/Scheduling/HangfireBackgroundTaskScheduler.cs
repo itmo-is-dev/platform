@@ -17,8 +17,13 @@ internal class HangfireBackgroundTaskScheduler : IBackgroundTaskScheduler
     {
         foreach (BackgroundTaskId backgroundTaskId in ids)
         {
-            _backgroundJobClient.Enqueue<IBackgroundTaskExecutor>(
-                e => e.ExecuteAsync(backgroundTaskId, default));
+            var jobId = _backgroundJobClient.Enqueue<IBackgroundTaskManager>(
+                x => x.ExecuteAsync(backgroundTaskId, default));
+
+            _backgroundJobClient.ContinueJobWith<IBackgroundTaskManager>(
+                jobId,
+                x => x.FailedAsync(backgroundTaskId, default),
+                JobContinuationOptions.OnlyOnDeletedState);
         }
 
         return ValueTask.CompletedTask;

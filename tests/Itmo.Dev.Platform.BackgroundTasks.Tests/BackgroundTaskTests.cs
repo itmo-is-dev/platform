@@ -7,7 +7,8 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
-using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailedWhenRetryCountExceeded;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Models;
@@ -110,7 +111,7 @@ public class BackgroundTaskTests : TestBase
     }
 
     [Fact]
-    public async Task RunWithAsync_ShouldSetStateFailedWhenRetryCountExceeded()
+    public async Task RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded()
     {
         // Arrange
         await using var fixtureScope = _backgroundTasksFixture.Scope;
@@ -180,7 +181,89 @@ public class BackgroundTaskTests : TestBase
         });
 
         await Task.WhenAny(checker, timeout);
-        
+
+        // Assert
+        checker.IsCompletedSuccessfully.Should().BeTrue();
+        checker.Result.State.Should().Be(BackgroundTaskState.Failed);
+    }
+
+    [Fact]
+    public async Task RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds()
+    {
+        // Arrange
+        await using var fixtureScope = _backgroundTasksFixture.Scope;
+
+        await using var application = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
+            {
+                var configuration = new ConfigurationManager();
+
+                collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBuilder
+                    .ConfigurePersistence(configuration, options => options.SchemaName = "background_tasks")
+                    .ConfigureScheduling(
+                        configuration,
+                        options =>
+                        {
+                            options.BatchSize = 100;
+                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
+                            options.SchedulerRetryCount = 1;
+                            options.SchedulerRetryDelays = new[] { 0, 0, 0 };
+                        })
+                    .ConfigureExecution(configuration, options => options.MaxRetryCount = 0)
+                    .AddBackgroundTask(task => task
+                        .WithMetadata<EmptyMetadata>()
+                        .WithResult<EmptyExecutionResult>()
+                        .WithError<EmptyError>()
+                        .HandleBy<ThrowingBackgroundTask>()));
+
+                // ReSharper disable once AccessToDisposedClosure
+                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+
+                collection.AddPlatformPostgres(_ => { });
+                collection.RemoveAll<PostgresConnectionString>();
+                collection.AddSingleton(connectionString);
+
+                collection.AddSingleton(_completionManager);
+
+                collection.AddLogging(b => b.AddSerilog());
+            }));
+
+        application.CreateClient();
+
+        await using var scope = application.Services.CreateAsyncScope();
+
+        var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();
+
+        var metadata = EmptyMetadata.Value;
+
+        // Act
+        var backgroundTaskId = await manager
+            .StartBackgroundTask
+            .WithMetadata(metadata)
+            .RunWithAsync<ThrowingBackgroundTask>(default);
+
+        var timeout = Task.Delay(TimeSpan.FromSeconds(10));
+
+        var checker = Task.Run(async () =>
+        {
+            // ReSharper disable once AccessToDisposedClosure
+            await using var checkerScope = application.Services.CreateAsyncScope();
+            var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
+
+            BackgroundTask task;
+
+            do
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+                task = await GetBackgroundTask(backgroundTaskId, repository);
+            }
+            while (task.State is not BackgroundTaskState.Failed);
+
+            return task;
+        });
+
+        await Task.WhenAny(checker, timeout);
+
         // Assert
         checker.IsCompletedSuccessfully.Should().BeTrue();
         checker.Result.State.Should().Be(BackgroundTaskState.Failed);

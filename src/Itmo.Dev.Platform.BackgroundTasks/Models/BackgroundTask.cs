@@ -1,5 +1,5 @@
-using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 
@@ -13,5 +13,6 @@ public record BackgroundTask(
     BackgroundTaskState State,
     int RetryNumber,
     IBackgroundTaskMetadata Metadata,
+    IBackgroundTaskExecutionMetadata ExecutionMetadata,
     IBackgroundTaskResult? Result,
     IBackgroundTaskError? Error);

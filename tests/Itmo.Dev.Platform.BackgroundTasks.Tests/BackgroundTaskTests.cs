@@ -4,6 +4,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Managing;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
@@ -62,6 +63,7 @@ public class BackgroundTaskTests : TestBase
                     .ConfigureExecution(configuration, options => options.MaxRetryCount = 10)
                     .AddBackgroundTask(task => task
                         .WithMetadata<TestBackgroundTaskMetadata>()
+                        .WithExecutionMetadata<EmptyExecutionMetadata>()
                         .WithResult<TestBackgroundTaskResult>()
                         .WithError<EmptyError>()
                         .HandleBy<TestBackgroundTask>()));
@@ -89,6 +91,7 @@ public class BackgroundTaskTests : TestBase
         var backgroundTaskId = await manager
             .StartBackgroundTask
             .WithMetadata(metadata)
+            .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<TestBackgroundTask>(default);
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(30));
@@ -133,6 +136,7 @@ public class BackgroundTaskTests : TestBase
                     .ConfigureExecution(configuration, options => options.MaxRetryCount = 2)
                     .AddBackgroundTask(task => task
                         .WithMetadata<EmptyMetadata>()
+                        .WithExecutionMetadata<EmptyExecutionMetadata>()
                         .WithResult<EmptyExecutionResult>()
                         .WithError<EmptyError>()
                         .HandleBy<FailingBackgroundTask>()));
@@ -155,12 +159,11 @@ public class BackgroundTaskTests : TestBase
 
         var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();
 
-        var metadata = EmptyMetadata.Value;
-
         // Act
         var backgroundTaskId = await manager
             .StartBackgroundTask
-            .WithMetadata(metadata)
+            .WithMetadata(EmptyMetadata.Value)
+            .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<FailingBackgroundTask>(default);
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(10));
@@ -215,6 +218,7 @@ public class BackgroundTaskTests : TestBase
                     .ConfigureExecution(configuration, options => options.MaxRetryCount = 0)
                     .AddBackgroundTask(task => task
                         .WithMetadata<EmptyMetadata>()
+                        .WithExecutionMetadata<EmptyExecutionMetadata>()
                         .WithResult<EmptyExecutionResult>()
                         .WithError<EmptyError>()
                         .HandleBy<ThrowingBackgroundTask>()));
@@ -237,12 +241,11 @@ public class BackgroundTaskTests : TestBase
 
         var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();
 
-        var metadata = EmptyMetadata.Value;
-
         // Act
         var backgroundTaskId = await manager
             .StartBackgroundTask
-            .WithMetadata(metadata)
+            .WithMetadata(EmptyMetadata.Value)
+            .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<ThrowingBackgroundTask>(default);
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(10));

@@ -34,6 +34,7 @@ internal class Initial : SqlMigration
             background_task_state background_task_state not null default 'pending',
             background_task_retry_number int not null default 0,
             background_task_metadata jsonb not null ,
+            background_task_execution_metadata jsonb not null ,
             background_task_result jsonb ,
             background_task_error jsonb
         );

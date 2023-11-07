@@ -6,7 +6,6 @@ using Itmo.Dev.Platform.Postgres.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Transactions;
 using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Scheduling;

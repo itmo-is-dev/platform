@@ -54,6 +54,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
                background_task_state,
                background_task_retry_number,
                background_task_metadata,
+               background_task_execution_metadata,
                background_task_result,
                background_task_error
         from {_schemaName}.background_tasks
@@ -92,9 +93,10 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
         (
             background_task_name,
             background_task_created_at,
-            background_task_metadata
+            background_task_metadata,
+            background_task_execution_metadata
         )
-        select * from unnest(:names, :created_at, :metadata)
+        select * from unnest(:names, :created_at, :metadata, :execution_metadata)
         returning background_task_id;
         """;
     }
@@ -114,6 +116,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
         update {_schemaName}.background_tasks
         set background_task_state = :state,
             background_task_retry_number = :retry_number,
+            background_task_execution_metadata = :execution_metadata,
             background_task_result = :result,
             background_task_error = :error
         where background_task_id = :id;

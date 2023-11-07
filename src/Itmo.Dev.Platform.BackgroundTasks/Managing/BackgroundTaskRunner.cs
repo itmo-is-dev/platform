@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.Common.DateTime;
 
@@ -19,11 +20,13 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
 
     public IMetadataConfigurator StartBackgroundTask => new MetadataConfigurator(this);
 
-    private async Task<BackgroundTaskId> RunTaskAsync<TTask, TMetadata>(
-        IBackgroundTaskMetadata metadata,
+    private async Task<BackgroundTaskId> RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+        TMetadata metadata,
+        TExecutionMetadata executionMetadata,
         CancellationToken cancellationToken)
         where TMetadata : IBackgroundTaskMetadata
-        where TTask : IBackgroundTask<TMetadata>
+        where TExecutionMetadata : IBackgroundTaskExecutionMetadata
+        where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>
     {
         var backgroundTask = new BackgroundTask(
             Id: new BackgroundTaskId(0),
@@ -33,6 +36,7 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
             State: BackgroundTaskState.Pending,
             RetryNumber: 0,
             Metadata: metadata,
+            ExecutionMetadata: executionMetadata,
             Result: null,
             Error: null);
 
@@ -52,28 +56,53 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
             _runner = runner;
         }
 
-        public IRunTaskRequest<T> WithMetadata<T>(T metadata) where T : IBackgroundTaskMetadata
+        public IExecutionMetadataConfigurator<T> WithMetadata<T>(T metadata) where T : IBackgroundTaskMetadata
         {
-            return new RunTaskRequest<T>(_runner, metadata);
+            return new ExecutionMetadataConfigurator<T>(_runner, metadata);
         }
     }
 
-    private class RunTaskRequest<TMetadata> : IRunTaskRequest<TMetadata>
+    private class ExecutionMetadataConfigurator<TMetadata> : IExecutionMetadataConfigurator<TMetadata>
         where TMetadata : IBackgroundTaskMetadata
     {
         private readonly BackgroundTaskRunner _runner;
         private readonly TMetadata _metadata;
 
-        public RunTaskRequest(BackgroundTaskRunner runner, TMetadata metadata)
+        public ExecutionMetadataConfigurator(BackgroundTaskRunner runner, TMetadata metadata)
         {
             _runner = runner;
             _metadata = metadata;
         }
 
-        public Task<BackgroundTaskId> RunWithAsync<TTask>(CancellationToken cancellationToken)
-            where TTask : IBackgroundTask<TMetadata>
+        public IRunTaskRequest<TMetadata, T> WithExecutionMetadata<T>(T executionMetadata)
+            where T : IBackgroundTaskExecutionMetadata
         {
-            return _runner.RunTaskAsync<TTask, TMetadata>(_metadata, cancellationToken);
+            return new RunTaskRequest<TMetadata, T>(_runner, _metadata, executionMetadata);
+        }
+    }
+
+    private class RunTaskRequest<TMetadata, TExecutionMetadata> : IRunTaskRequest<TMetadata, TExecutionMetadata>
+        where TMetadata : IBackgroundTaskMetadata
+        where TExecutionMetadata : IBackgroundTaskExecutionMetadata
+    {
+        private readonly BackgroundTaskRunner _runner;
+        private readonly TMetadata _metadata;
+        private readonly TExecutionMetadata _executionMetadata;
+
+        public RunTaskRequest(BackgroundTaskRunner runner, TMetadata metadata, TExecutionMetadata executionMetadata)
+        {
+            _runner = runner;
+            _metadata = metadata;
+            _executionMetadata = executionMetadata;
+        }
+
+        public Task<BackgroundTaskId> RunWithAsync<TTask>(CancellationToken cancellationToken)
+            where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>
+        {
+            return _runner.RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+                _metadata,
+                _executionMetadata,
+                cancellationToken);
         }
     }
 }

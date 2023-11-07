@@ -1,4 +1,3 @@
-using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using SourceKit.Generators.Builder.Annotations;
 

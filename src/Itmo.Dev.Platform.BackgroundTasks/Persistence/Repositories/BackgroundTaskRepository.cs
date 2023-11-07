@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Registry;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.Postgres.Connection;
@@ -54,6 +55,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
         var state = reader.GetOrdinal("background_task_state");
         var retryNumber = reader.GetOrdinal("background_task_retry_number");
         var metadata = reader.GetOrdinal("background_task_metadata");
+        var executionMetadata = reader.GetOrdinal("background_task_execution_metadata");
         var result = reader.GetOrdinal("background_task_result");
         var error = reader.GetOrdinal("background_task_error");
 
@@ -61,13 +63,18 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
         {
             var record = _backgroundTaskRegistry[reader.GetString(name)];
 
-            var metadataValue = reader.GetNullableString(metadata);
+            var metadataValue = reader.GetString(metadata);
+            var executionMetadataValue = reader.GetString(executionMetadata);
             var resultValue = reader.GetNullableString(result);
             var errorValue = reader.GetNullableString(error);
 
             var deserializedMetadata =
                 Deserialize<IBackgroundTaskMetadata>(metadataValue, record.MetadataType)
                 ?? throw new InvalidOperationException("Failed to deserialize metadata");
+
+            var deserializedExecutionMetadata =
+                Deserialize<IBackgroundTaskExecutionMetadata>(executionMetadataValue, record.ExecutionMetadataType)
+                ?? throw new InvalidOperationException("Failed to deserialize execution metadata");
 
             yield return new BackgroundTask(
                 Id: new BackgroundTaskId(reader.GetInt64(id)),
@@ -77,6 +84,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
                 State: reader.GetFieldValue<BackgroundTaskState>(state),
                 RetryNumber: reader.GetInt32(retryNumber),
                 Metadata: deserializedMetadata,
+                ExecutionMetadata: deserializedExecutionMetadata,
                 Result: Deserialize<IBackgroundTaskResult>(resultValue, record.ResultType),
                 Error: Deserialize<IBackgroundTaskError>(errorValue, record.ErrorType));
         }
@@ -119,8 +127,8 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("names", tasks.Select(x => x.Name).ToArray())
             .AddParameter("types", tasks.Select(x => x.Type.AssemblyQualifiedName).ToArray())
             .AddParameter("created_at", tasks.Select(x => x.CreatedAt).ToArray())
-            .AddParameter("metadata_type", tasks.Select(x => x.Metadata.GetType().AssemblyQualifiedName).ToArray())
-            .AddJsonArrayParameter("metadata", tasks.Select(x => x.Metadata), _serializerSettings);
+            .AddJsonArrayParameter("metadata", tasks.Select(x => x.Metadata), _serializerSettings)
+            .AddJsonArrayParameter("execution_metadata", tasks.Select(x => x.ExecutionMetadata), _serializerSettings);
 #pragma warning restore CA2100
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -156,6 +164,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("id", backgroundTask.Id.Value)
             .AddParameter("state", backgroundTask.State)
             .AddParameter("retry_number", backgroundTask.RetryNumber)
+            .AddJsonParameter("execution_metadata", backgroundTask.ExecutionMetadata, _serializerSettings)
             .AddNullableJsonParameter("result", backgroundTask.Result, _serializerSettings)
             .AddNullableJsonParameter("error", backgroundTask.Error, _serializerSettings);
 #pragma warning restore CA2100

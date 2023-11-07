@@ -1,10 +1,11 @@
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 
 public class TestBackgroundTask :
-    IBackgroundTask<TestBackgroundTaskMetadata, TestBackgroundTaskResult, EmptyError>
+    IBackgroundTask<TestBackgroundTaskMetadata, EmptyExecutionMetadata, TestBackgroundTaskResult, EmptyError>
 {
     private readonly CompletionManager _completionManager;
 
@@ -16,7 +17,7 @@ public class TestBackgroundTask :
     public static string Name => nameof(TestBackgroundTask);
 
     public async Task<BackgroundTaskExecutionResult<TestBackgroundTaskResult, EmptyError>> ExecuteAsync(
-        BackgroundTaskExecutionContext<TestBackgroundTaskMetadata> executionContext,
+        BackgroundTaskExecutionContext<TestBackgroundTaskMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
         var metadata = executionContext.Metadata;

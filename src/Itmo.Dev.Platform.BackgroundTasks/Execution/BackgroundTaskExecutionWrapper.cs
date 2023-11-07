@@ -34,9 +34,10 @@ internal class BackgroundTaskExecutionWrapper : IBackgroundTaskManager
 
         var registryRecord = _taskRegistry[backgroundTask.Name];
 
-        var executorType = typeof(BackgroundTaskExecutor<,,,>).MakeGenericType(
+        var executorType = typeof(BackgroundTaskExecutor<,,,,>).MakeGenericType(
             registryRecord.TaskType,
             registryRecord.MetadataType,
+            registryRecord.ExecutionMetadataType,
             registryRecord.ResultType,
             registryRecord.ErrorType);
 

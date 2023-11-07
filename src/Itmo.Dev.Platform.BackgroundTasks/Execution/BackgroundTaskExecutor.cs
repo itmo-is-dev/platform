@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
+using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,11 +11,13 @@ using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Execution;
 
-internal class BackgroundTaskExecutor<TTask, TMetadata, TResult, TError> : IBackgroundTaskInternalExecutor
+internal class BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TResult, TError> :
+    IBackgroundTaskInternalExecutor
     where TMetadata : IBackgroundTaskMetadata
+    where TExecutionMetadata : IBackgroundTaskExecutionMetadata
     where TResult : IBackgroundTaskResult
     where TError : IBackgroundTaskError
-    where TTask : IBackgroundTask<TMetadata, TResult, TError>
+    where TTask : IBackgroundTask<TMetadata, TExecutionMetadata, TResult, TError>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundTaskExecutionOptions _options;
@@ -35,26 +38,39 @@ internal class BackgroundTaskExecutor<TTask, TMetadata, TResult, TError> : IBack
         CancellationToken cancellationToken)
     {
         var metadata = (TMetadata)backgroundTask.Metadata;
-        var context = new BackgroundTaskExecutionContext<TMetadata>(backgroundTask.Id, metadata);
+        var executionMetadata = (TExecutionMetadata)backgroundTask.ExecutionMetadata;
+
+        var context = new BackgroundTaskExecutionContext<TMetadata, TExecutionMetadata>(
+            backgroundTask.Id,
+            metadata,
+            executionMetadata);
 
         var task = _serviceProvider.GetRequiredService<TTask>();
-        var result = await task.ExecuteAsync(context, cancellationToken);
 
-        backgroundTask = result switch
+        try
         {
-            BackgroundTaskExecutionResult<TResult, TError>.Success success
-                => HandleSuccess(backgroundTask, success),
+            var result = await task.ExecuteAsync(context, cancellationToken);
 
-            BackgroundTaskExecutionResult<TResult, TError>.Failure failure
-                => HandleFailure(backgroundTask, failure),
+            backgroundTask = result switch
+            {
+                BackgroundTaskExecutionResult<TResult, TError>.Success success
+                    => HandleSuccess(backgroundTask, success),
 
-            BackgroundTaskExecutionResult<TResult, TError>.Cancellation cancellation
-                => HandleCancelled(backgroundTask, cancellation),
+                BackgroundTaskExecutionResult<TResult, TError>.Failure failure
+                    => HandleFailure(backgroundTask, failure),
 
-            _ => HandleFailure(backgroundTask, new BackgroundTaskExecutionResult<TResult, TError>.Failure(default)),
-        };
+                BackgroundTaskExecutionResult<TResult, TError>.Cancellation cancellation
+                    => HandleCancelled(backgroundTask, cancellation),
 
-        await _repository.UpdateAsync(backgroundTask, cancellationToken);
+                _ => HandleFailure(backgroundTask, new BackgroundTaskExecutionResult<TResult, TError>.Failure(default)),
+            };
+
+            await _repository.UpdateAsync(backgroundTask, cancellationToken);
+        }
+        catch (Exception e) when (e is OperationCanceledException or TaskCanceledException)
+        {
+            await _repository.UpdateAsync(backgroundTask, default);
+        }
     }
 
     private BackgroundTask HandleSuccess(

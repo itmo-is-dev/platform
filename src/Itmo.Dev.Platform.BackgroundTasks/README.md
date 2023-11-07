@@ -1,5 +1,21 @@
 # Itmo.Dev.Platform.BackgroundTasks
 
+- [Execution metadata](#executionmetadata)
+- [Configuration](#configuration)
+
+## ExecutionMetadata
+
+Execution metadata used for restoring task's execution progress from the point it was suspended.
+
+Suspension can occur when task execution is cancelled due to application shutdown
+(when OperationCancelledException or TaskCancelledException is thrown).
+
+In this case, execution metadata is persisted and would be loaded when task execution proceeds (when application is restarted).
+
+You can use mutable model as execution metadata, modifying it as the execution process goes. \
+To avoid repeating operation execution (ensuring idempotency) modify execution metadata only when changes are persisted,
+ex: transaction is committed and you update page token of some long running operataion. 
+
 ## Configuration
 
 ```csharp

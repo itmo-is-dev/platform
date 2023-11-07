@@ -13,6 +13,8 @@ public interface IKafkaConsumerConfiguration
     string Topic { get; }
 
     string Group { get; }
+    
+    string InstanceId { get; }
 
     int ParallelismDegree { get; }
 
@@ -27,4 +29,6 @@ public interface IKafkaConsumerConfiguration
     IKafkaConsumerConfiguration WithHost(string host);
 
     IKafkaConsumerConfiguration WithGroup(string group);
+
+    IKafkaConsumerConfiguration WithInstanceId(string instanceId);
 }

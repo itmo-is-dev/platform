@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Postgres.Models;
+using Itmo.Dev.Platform.Postgres.Plugins;
 using Npgsql;
 
 namespace Itmo.Dev.Platform.Postgres.Connection;
@@ -7,14 +8,20 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
 {
     private readonly Lazy<Task<NpgsqlConnection>> _connection;
 
-    public PostgresConnectionProvider(PostgresConnectionString connectionString)
+    public PostgresConnectionProvider(PostgresConnectionString connectionString, IEnumerable<IDataSourcePlugin> plugins)
     {
         _connection = new Lazy<Task<NpgsqlConnection>>(async () =>
         {
-            var connection = new NpgsqlConnection(connectionString.Value);
-            await connection.OpenAsync();
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString.Value);
 
-            return connection;
+            foreach (IDataSourcePlugin plugin in plugins)
+            {
+                plugin.Configure(dataSourceBuilder);
+            }
+
+            var dataSource = dataSourceBuilder.Build();
+
+            return await dataSource.OpenConnectionAsync();
         });
     }
 

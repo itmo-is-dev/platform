@@ -18,7 +18,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Fixed unit of work
+            Added plugins and transaction provider
         </PackageReleaseNotes>
     </PropertyGroup>
 
@@ -33,6 +33,11 @@
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.BackgroundTasks"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.BackgroundTasks.Tests"/>
     </ItemGroup>
 
 </Project>

@@ -13,6 +13,7 @@ internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
     public string Topic { get; init; } = string.Empty;
 
     public string Group { get; private set; } = string.Empty;
+    public string InstanceId { get; private set; } = string.Empty;
 
     public int ParallelismDegree { get; init; }
 
@@ -33,6 +34,12 @@ internal class KafkaConsumerConfiguration : IKafkaConsumerConfiguration
     public IKafkaConsumerConfiguration WithGroup(string group)
     {
         Group = group;
+        return this;
+    }
+
+    public IKafkaConsumerConfiguration WithInstanceId(string instanceId)
+    {
+        InstanceId = instanceId;
         return this;
     }
 }

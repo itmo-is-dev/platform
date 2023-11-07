@@ -28,6 +28,7 @@
     <ItemGroup>
       <PackageReference Include="AutoBogus" />
       <PackageReference Include="FluentAssertions" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
       <PackageReference Include="Npgsql" />
       <PackageReference Include="Respawn" />

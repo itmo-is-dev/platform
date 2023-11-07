@@ -7,6 +7,7 @@ using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.Testing.ApplicationFactories;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Xunit;
@@ -119,7 +120,7 @@ public class KafkaConsumerTests : IAsyncLifetime
         await _applicationFactory.DisposeAsync();
     }
 
-    public class ApplicationFactory<TKey, TValue> : ConfigurableWebApplicationFactory<EmptyStartup>
+    public class ApplicationFactory<TKey, TValue> : ConfigurableWebApplicationFactory<KafkaEmptyStartup>
     {
         private readonly KafkaFixture _kafkaFixture;
         private readonly CollectionConsumerHandler<TKey, TValue> _handler;
@@ -142,7 +143,7 @@ public class KafkaConsumerTests : IAsyncLifetime
                 .DeserializeValueWithNewtonsoft()
                 .UseConfiguration<Configuration>());
 
-            collection.AddSerilog();
+            collection.AddLogging(x => x.AddSerilog());
 
             var configuration = new Configuration(_kafkaFixture.Host);
 
@@ -168,11 +169,13 @@ public class KafkaConsumerTests : IAsyncLifetime
 
         public string Group => nameof(KafkaConsumerTests);
 
+        public string InstanceId => nameof(KafkaConsumerTests);
+
         public int ParallelismDegree => 1;
 
         public int BufferSize => 1;
 
-        public TimeSpan BufferWaitLimit => TimeSpan.FromSeconds(10);
+        public TimeSpan BufferWaitLimit => TimeSpan.FromMilliseconds(200);
 
         public bool ReadLatest => false;
 
@@ -184,6 +187,11 @@ public class KafkaConsumerTests : IAsyncLifetime
         }
 
         public IKafkaConsumerConfiguration WithGroup(string group)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IKafkaConsumerConfiguration WithInstanceId(string instanceId)
         {
             throw new NotImplementedException();
         }

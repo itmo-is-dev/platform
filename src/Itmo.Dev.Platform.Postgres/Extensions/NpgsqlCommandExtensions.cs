@@ -32,6 +32,26 @@ public static class NpgsqlCommandExtensions
         return command;
     }
 
+    public static NpgsqlCommand AddNullableJsonParameter<T>(
+        this NpgsqlCommand command,
+        string parameterName,
+        T? value,
+        JsonSerializerSettings? serializerSettings = null)
+        where T : class
+    {
+        object serialized = value is null ? DBNull.Value : JsonConvert.SerializeObject(value, serializerSettings);
+
+        var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
+        {
+            NpgsqlDbType = NpgsqlDbType.Jsonb,
+            IsNullable = true,
+        };
+
+        command.Parameters.Add(parameter);
+
+        return command;
+    }
+
     public static NpgsqlCommand AddJsonArrayParameter<T>(
         this NpgsqlCommand command,
         string parameterName,

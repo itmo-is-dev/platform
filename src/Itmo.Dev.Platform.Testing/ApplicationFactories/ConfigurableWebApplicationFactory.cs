@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Itmo.Dev.Platform.Kafka.Tests.Tools;
+namespace Itmo.Dev.Platform.Testing.ApplicationFactories;
 
 public abstract class ConfigurableWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup>
     where TStartup : class
@@ -15,7 +15,9 @@ public abstract class ConfigurableWebApplicationFactory<TStartup> : WebApplicati
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseContentRoot(Environment.CurrentDirectory).ConfigureServices(ConfigureServices).UseStartup<TStartup>();
+        builder.UseContentRoot(Environment.CurrentDirectory)
+            .ConfigureServices(ConfigureServices)
+            .UseStartup<TStartup>();
     }
 
     protected virtual void ConfigureServices(IServiceCollection collection) { }

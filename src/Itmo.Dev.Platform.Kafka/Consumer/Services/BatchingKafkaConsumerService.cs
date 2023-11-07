@@ -68,6 +68,7 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
 
         var consumerConfiguration = new ConsumerConfig
         {
+            GroupInstanceId = configuration.InstanceId,
             GroupId = configuration.Group,
             BootstrapServers = configuration.Host,
             AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,

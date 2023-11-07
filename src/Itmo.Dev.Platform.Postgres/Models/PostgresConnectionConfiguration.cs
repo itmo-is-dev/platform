@@ -2,19 +2,19 @@ namespace Itmo.Dev.Platform.Postgres.Models;
 
 public class PostgresConnectionConfiguration
 {
-    public string Host { get; init; } = string.Empty;
+    public string Host { get; set; } = string.Empty;
 
-    public int Port { get; init; }
+    public int Port { get; set; }
 
-    public string Database { get; init; } = string.Empty;
+    public string Database { get; set; } = string.Empty;
 
-    public string Username { get; init; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
 
-    public string Password { get; init; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 
-    public string SslMode { get; init; } = string.Empty;
+    public string SslMode { get; set; } = string.Empty;
 
-    public bool Pooling { get; init; } = true;
+    public bool Pooling { get; set; } = true;
 
     public string ToConnectionString()
     {

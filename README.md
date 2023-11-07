@@ -5,6 +5,7 @@
 - [Itmo.Dev.Platform.Kafka](src/Itmo.Dev.Platform.Kafka/README.md)
 - [Itmo.Dev.Platform.Postgres](src/Itmo.Dev.Platform.Postgres/README.md)
 - [Itmo.Dev.Platform.Logging](src/Itmo.Dev.Platform.Logging/README.md)
+- [Itmo.Dev.Platform.BackgroundTasks](src/Itmo.Dev.Platform.BackgroundTasks/README.md)
 
 ## Package source installation
 
@@ -33,7 +34,7 @@ If you want to add it into local config, you should run it with option `--config
 dotnet nuget add source --username YOUR_USERNAME --password YOUR_GITHUB_PAT --store-password-in-clear-text --name github "https://nuget.pkg.github.com/itmo-is-dev/index.json"
 ```
 
-### <p style="color: red">WARNING! </p>
+### <p style="color: red"> WARNING! </p>
 
 Adding source into local config, will result in credentials be written into local file \
 Be aware that it may lead to credentials leaking into VSC \

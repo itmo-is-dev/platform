@@ -15,7 +15,8 @@ using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
 
-public class KafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
+[Collection(nameof(KafkaCollectionFixture))]
+public class KafkaConsumerTests : IAsyncLifetime
 {
     private const string TopicName = $"{nameof(KafkaConsumerTests)}_topic";
 
@@ -168,11 +169,13 @@ public class KafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
 
         public string Group => nameof(KafkaConsumerTests);
 
+        public string InstanceId => nameof(KafkaConsumerTests);
+
         public int ParallelismDegree => 1;
 
         public int BufferSize => 1;
 
-        public TimeSpan BufferWaitLimit => TimeSpan.FromSeconds(10);
+        public TimeSpan BufferWaitLimit => TimeSpan.FromMilliseconds(200);
 
         public bool ReadLatest => false;
 
@@ -184,6 +187,11 @@ public class KafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
         }
 
         public IKafkaConsumerConfiguration WithGroup(string group)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IKafkaConsumerConfiguration WithInstanceId(string instanceId)
         {
             throw new NotImplementedException();
         }

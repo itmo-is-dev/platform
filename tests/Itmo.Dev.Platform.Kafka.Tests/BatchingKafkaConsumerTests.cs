@@ -15,7 +15,8 @@ using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
 
-public class BatchingKafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
+[Collection(nameof(KafkaCollectionFixture))]
+public class BatchingKafkaConsumerTests : IAsyncLifetime
 {
     private const string TopicName = $"{nameof(BatchingKafkaConsumerTests)}_topic";
 
@@ -166,7 +167,9 @@ public class BatchingKafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLif
 
         public string Topic => TopicName;
 
-        public string Group => nameof(KafkaConsumerTests);
+        public string Group => nameof(BatchingKafkaConsumerTests);
+
+        public string InstanceId => nameof(BatchingKafkaConsumerTests);
 
         public int ParallelismDegree => 1;
 
@@ -184,6 +187,11 @@ public class BatchingKafkaConsumerTests : IClassFixture<KafkaFixture>, IAsyncLif
         }
 
         public IKafkaConsumerConfiguration WithGroup(string group)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IKafkaConsumerConfiguration WithInstanceId(string instanceId)
         {
             throw new NotImplementedException();
         }

@@ -13,7 +13,8 @@ using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
 
-public class KafkaProducerTests : IClassFixture<KafkaFixture>, IAsyncLifetime
+[Collection(nameof(KafkaCollectionFixture))]
+public class KafkaProducerTests : IAsyncLifetime
 {
     private const string TopicName = $"{nameof(KafkaProducerTests)}_topic";
 

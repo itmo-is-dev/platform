@@ -1,6 +1,8 @@
 using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
+using System.Numerics;
+using System.Text;
 
 namespace Itmo.Dev.Platform.Postgres.Extensions;
 
@@ -12,6 +14,36 @@ public static class NpgsqlCommandExtensions
         command.Parameters.Add(parameter);
 
         return command;
+    }
+
+    public static NpgsqlCommand AddMultiArrayStringParameter<T>(
+        this NpgsqlCommand command,
+        string parameterName,
+        IEnumerable<IEnumerable<T>> values)
+        where T : INumber<T>
+    {
+        var serialized = values
+            .Select(Serialize)
+            .ToArray();
+
+        var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
+        {
+            // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+            NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text,
+        };
+
+        command.Parameters.Add(parameter);
+
+        return command;
+
+        static string Serialize(IEnumerable<T> values)
+        {
+            var builder = new StringBuilder("{");
+            builder.AppendJoin(", ", values);
+            builder.Append('}');
+
+            return builder.ToString();
+        }
     }
 
     public static NpgsqlCommand AddJsonParameter<T>(

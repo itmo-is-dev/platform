@@ -18,7 +18,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added json reader extension
+            Added AddMultiArrayStringParameter extension
         </PackageReleaseNotes>
     </PropertyGroup>
 

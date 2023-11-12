@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Tests.Fixtures;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
+using Itmo.Dev.Platform.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System.Data;
@@ -11,7 +12,7 @@ using Xunit;
 namespace Itmo.Dev.Platform.Postgres.Tests;
 
 [Collection(nameof(PostgresCollectionFixture))]
-public class UnitOfWorkTests
+public class UnitOfWorkTests : IAsyncDisposeLifetime
 {
     private readonly PostgresDatabaseFixture _fixture;
 
@@ -75,5 +76,10 @@ public class UnitOfWorkTests
 
         hasNext = await reader.ReadAsync();
         hasNext.Should().BeFalse();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _fixture.ResetAsync();
     }
 }

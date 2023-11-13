@@ -22,28 +22,15 @@ public static class NpgsqlCommandExtensions
         IEnumerable<IEnumerable<T>> values)
         where T : INumber<T>
     {
-        var serialized = values
-            .Select(Serialize)
-            .ToArray();
+        return command.AddMultiArrayStringParameterCore(parameterName, values);
+    }
 
-        var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
-        {
-            // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
-            NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text,
-        };
-
-        command.Parameters.Add(parameter);
-
-        return command;
-
-        static string Serialize(IEnumerable<T> values)
-        {
-            var builder = new StringBuilder("{");
-            builder.AppendJoin(", ", values);
-            builder.Append('}');
-
-            return builder.ToString();
-        }
+    public static NpgsqlCommand AddMultiArrayStringParameter(
+        this NpgsqlCommand command,
+        string parameterName,
+        IEnumerable<IEnumerable<string>> values)
+    {
+        return command.AddMultiArrayStringParameterCore(parameterName, values);
     }
 
     public static NpgsqlCommand AddJsonParameter<T>(
@@ -103,5 +90,34 @@ public static class NpgsqlCommandExtensions
         command.Parameters.Add(parameter);
 
         return command;
+    }
+
+    private static NpgsqlCommand AddMultiArrayStringParameterCore<T>(
+        this NpgsqlCommand command,
+        string parameterName,
+        IEnumerable<IEnumerable<T>> values)
+    {
+        var serialized = values
+            .Select(Serialize)
+            .ToArray();
+
+        var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
+        {
+            // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+            NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text,
+        };
+
+        command.Parameters.Add(parameter);
+
+        return command;
+
+        static string Serialize(IEnumerable<T> values)
+        {
+            var builder = new StringBuilder("{");
+            builder.AppendJoin(", ", values);
+            builder.Append('}');
+
+            return builder.ToString();
+        }
     }
 }

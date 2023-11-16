@@ -59,15 +59,15 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
                 throw new PostgresPlatformException(message);
             }
 
-            var batch = new NpgsqlBatch(connection);
-
-            foreach (NpgsqlBatchCommand command in handles.Select(x => x.BatchCommand))
+            await using (var batch = new NpgsqlBatch(connection))
             {
-                batch.BatchCommands.Add(command);
-            }
+                foreach (NpgsqlBatchCommand command in handles.Select(x => x.BatchCommand))
+                {
+                    batch.BatchCommands.Add(command);
+                }
 
-            await using (var reader = await batch.ExecuteReaderAsync(cancellationToken))
-            {
+                await using var reader = await batch.ExecuteReaderAsync(cancellationToken);
+
                 foreach (IWorkHandle handle in handles)
                 {
                     await handle.HandleResult(reader, cancellationToken);

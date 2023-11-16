@@ -51,14 +51,25 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         select s.value::int[] from unnest(:values) as s(value);
         """;
 
-        await using var insertCommand = new NpgsqlCommand(insertSql, connection)
-            .AddMultiArrayStringParameter("values", values);
+        await using (var insertCommand = new NpgsqlCommand(insertSql, connection))
+        {
+            insertCommand.AddMultiArrayStringParameter("values", values);
+            await insertCommand.ExecuteNonQueryAsync();
+        }
 
-        await insertCommand.ExecuteNonQueryAsync();
+        // Cleanup
+        const string cleanupSql = """
+        drop table test;
+        """;
+
+        await using (var cleanupCommand = new NpgsqlCommand(cleanupSql, connection))
+        {
+            await cleanupCommand.ExecuteNonQueryAsync();
+        }
     }
 
     public async Task DisposeAsync()
     {
-        await _fixture.DisposeAsync();
+        await _fixture.ResetAsync();
     }
 }

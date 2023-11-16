@@ -66,11 +66,12 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
                 batch.BatchCommands.Add(command);
             }
 
-            var reader = await batch.ExecuteReaderAsync(cancellationToken);
-
-            foreach (IWorkHandle handle in handles)
+            await using (var reader = await batch.ExecuteReaderAsync(cancellationToken))
             {
-                await handle.HandleResult(reader, cancellationToken);
+                foreach (IWorkHandle handle in handles)
+                {
+                    await handle.HandleResult(reader, cancellationToken);
+                }
             }
 
             transaction.Commit();

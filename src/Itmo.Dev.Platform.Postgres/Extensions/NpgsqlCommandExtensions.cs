@@ -8,6 +8,19 @@ namespace Itmo.Dev.Platform.Postgres.Extensions;
 
 public static class NpgsqlCommandExtensions
 {
+    public static NpgsqlBatchCommand ToBatchCommand(this NpgsqlCommand command)
+    {
+        var batchCommand = new NpgsqlBatchCommand(command.CommandText);
+
+        foreach (NpgsqlParameter parameter in command.Parameters)
+        {
+            parameter.Collection = null;
+            batchCommand.Parameters.Add(parameter);
+        }
+
+        return batchCommand;
+    }
+
     public static NpgsqlCommand AddParameter<T>(this NpgsqlCommand command, string parameterName, T value)
     {
         var parameter = new NpgsqlParameter<T>(parameterName: parameterName, value: value);

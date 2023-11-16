@@ -16,9 +16,9 @@
 
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
-        <Version>1.0.$(PatchVersion)</Version>
+        <Version>1.1.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added RestartableBackgroundSerivce
+            Added Semaphore subscription
         </PackageReleaseNotes>
     </PropertyGroup>
 
@@ -28,8 +28,9 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.Postgres"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.YandexCloud"/>
     </ItemGroup>
-
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>

@@ -42,6 +42,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Backgroun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.BackgroundTasks.Tests.Startup", "tests\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup.csproj", "{C1167004-5A6C-4420-A784-7186F427A458}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{EBA4A79B-F695-4E03-AACD-147E981335FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres.Benchmarks", "benchmarks\Itmo.Dev.Platform.Postgres.Benchmarks\Itmo.Dev.Platform.Postgres.Benchmarks.csproj", "{352E1FB1-84E6-4852-8059-CCC223D50317}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +96,10 @@ Global
 		{C1167004-5A6C-4420-A784-7186F427A458}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1167004-5A6C-4420-A784-7186F427A458}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1167004-5A6C-4420-A784-7186F427A458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{352E1FB1-84E6-4852-8059-CCC223D50317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{352E1FB1-84E6-4852-8059-CCC223D50317}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{352E1FB1-84E6-4852-8059-CCC223D50317}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{352E1FB1-84E6-4852-8059-CCC223D50317}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -106,5 +114,6 @@ Global
 		{4B746FAA-12FA-4E89-879B-3C456BAED2D2} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{5DD567D1-35DE-4B65-98AC-14FB652BF6C7} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 		{C1167004-5A6C-4420-A784-7186F427A458} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
+		{352E1FB1-84E6-4852-8059-CCC223D50317} = {EBA4A79B-F695-4E03-AACD-147E981335FD}
 	EndGlobalSection
 EndGlobal

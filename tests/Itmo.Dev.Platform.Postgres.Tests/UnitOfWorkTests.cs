@@ -8,15 +8,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System.Data;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Postgres.Tests;
 
 [Collection(nameof(PostgresCollectionFixture))]
-public class UnitOfWorkTests : IAsyncDisposeLifetime
+public class UnitOfWorkTests : TestBase, IAsyncDisposeLifetime
 {
     private readonly PostgresDatabaseFixture _fixture;
 
-    public UnitOfWorkTests(PostgresDatabaseFixture fixture)
+    public UnitOfWorkTests(PostgresDatabaseFixture fixture, ITestOutputHelper output) : base(output)
     {
         _fixture = fixture;
     }
@@ -27,7 +28,7 @@ public class UnitOfWorkTests : IAsyncDisposeLifetime
         // Arrange
         const long id = 12;
         const string value = "aboba";
-        
+
         await using var scope = _fixture.Scope;
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
@@ -65,17 +66,29 @@ public class UnitOfWorkTests : IAsyncDisposeLifetime
         select id, value from test
         """;
 
-        await using var queryCommand = new NpgsqlCommand(querySql, connection);
-        await using var reader = await queryCommand.ExecuteReaderAsync();
+        await using (var queryCommand = new NpgsqlCommand(querySql, connection))
+        {
+            await using var reader = await queryCommand.ExecuteReaderAsync();
 
-        var hasNext = await reader.ReadAsync();
-        hasNext.Should().BeTrue();
+            var hasNext = await reader.ReadAsync();
+            hasNext.Should().BeTrue();
 
-        reader.GetInt64(0).Should().Be(id);
-        reader.GetString(1).Should().Be(value);
+            reader.GetInt64(0).Should().Be(id);
+            reader.GetString(1).Should().Be(value);
 
-        hasNext = await reader.ReadAsync();
-        hasNext.Should().BeFalse();
+            hasNext = await reader.ReadAsync();
+            hasNext.Should().BeFalse();
+        }
+
+        // Cleanup
+        const string cleanupSql = """
+        drop table test;
+        """;
+
+        await using (var cleanupCommand = new NpgsqlCommand(cleanupSql, connection))
+        {
+            await cleanupCommand.ExecuteNonQueryAsync();
+        }
     }
 
     public async Task DisposeAsync()

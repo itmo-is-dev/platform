@@ -8,6 +8,6 @@ public partial record BackgroundTaskQuery(
     BackgroundTaskId[] Ids,
     string[] Names,
     BackgroundTaskState[] States,
-    IBackgroundTaskMetadata Metadata,
+    IBackgroundTaskMetadata[] Metadatas,
     DateTimeOffset Cursor,
     int? PageSize);

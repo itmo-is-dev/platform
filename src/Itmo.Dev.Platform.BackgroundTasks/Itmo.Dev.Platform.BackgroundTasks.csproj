@@ -18,7 +18,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added BackgroundTasks
+            Added multiple metadata search
         </PackageReleaseNotes>
     </PropertyGroup>
 

@@ -42,7 +42,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("ids", query.Ids.Select(x => x.Value).ToArray())
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
-            .AddNullableJsonParameter("metadata", query.Metadata, _serializerSettings)
+            .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
 #pragma warning restore CA2100
@@ -101,7 +101,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("ids", query.Ids.Select(x => x.Value).ToArray())
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
-            .AddNullableJsonParameter("metadata", query.Metadata, _serializerSettings)
+            .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
 #pragma warning restore CA2100

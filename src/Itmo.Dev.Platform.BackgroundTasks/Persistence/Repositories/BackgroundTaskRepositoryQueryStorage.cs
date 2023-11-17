@@ -62,7 +62,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
             (cardinality(:ids) = 0 or background_task_id = any (:ids))
             and (cardinality(:names) = 0 or background_task_name = any (:names))
             and (cardinality(:states) = 0 or background_task_state = any (:states))
-            and (:metadata is null or background_task_metadata @> :metadata)
+            and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
             and background_task_created_at >= :cursor
         order by background_task_created_at
         limit :page_size;
@@ -78,7 +78,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
             (cardinality(:ids) = 0 or background_task_id = any (:ids))
             and (cardinality(:names) = 0 or background_task_name = any (:names))
             and (cardinality(:states) = 0 or background_task_state = any (:states))
-            and (:metadata is null or background_task_metadata @> :metadata)
+            and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
             and background_task_created_at >= :cursor
         order by background_task_created_at
         limit :page_size

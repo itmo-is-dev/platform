@@ -59,6 +59,9 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
                 throw new PostgresPlatformException(message);
             }
 
+            for (var i = 0; i < count; i++)
+                _queue.TryDequeue(out _);
+
             await using (var batch = new NpgsqlBatch(connection))
             {
                 foreach (NpgsqlBatchCommand command in handles.Select(x => x.BatchCommand))

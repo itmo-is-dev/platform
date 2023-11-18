@@ -25,6 +25,8 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
         _semaphore = new SemaphoreSlim(1, 1);
     }
 
+    internal int Count => _queue.Count;
+
     public void Enqueue(NpgsqlCommand command)
     {
         _queue.Enqueue(new NonQueryWorkHandle(command.ToBatchCommand()));

@@ -91,6 +91,40 @@ public class UnitOfWorkTests : TestBase, IAsyncDisposeLifetime
         }
     }
 
+    [Fact]
+    public async Task CommitAsync_ShouldEmptyUnitOfWork()
+    {
+        // Arrange
+        const string migrateSql = """
+        create table test(id bigint);
+        """;
+
+        await using var scope = _fixture.Scope;
+
+        var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
+        var connection = await connectionProvider.GetConnectionAsync(default);
+
+        var unitOfWork = (ReusableUnitOfWork)scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+        await using (var migrateCommand = new NpgsqlCommand(migrateSql, connection))
+        {
+            await migrateCommand.ExecuteNonQueryAsync();
+        }
+
+        // Act
+        const string actSql = """
+        insert into test(id) values(:id);
+        """;
+
+        await using var actCommand = new NpgsqlCommand(actSql).AddParameter("id", 1);
+        unitOfWork.Enqueue(actCommand);
+
+        await unitOfWork.CommitAsync(IsolationLevel.ReadCommitted, default);
+
+        // Assert
+        unitOfWork.Count.Should().Be(0);
+    }
+
     public async Task DisposeAsync()
     {
         await _fixture.ResetAsync();

@@ -60,7 +60,12 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
             }
 
             for (var i = 0; i < count; i++)
-                _queue.TryDequeue(out _);
+            {
+                if (_queue.TryDequeue(out _) is false)
+                {
+                    throw new PostgresPlatformException("Failed to dequeue work handles");
+                }
+            }
 
             await using (var batch = new NpgsqlBatch(connection))
             {

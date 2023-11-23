@@ -1,5 +1,3 @@
-using Itmo.Dev.Platform.Postgres.Models;
-using Itmo.Dev.Platform.Postgres.Plugins;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -11,24 +9,14 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
     private readonly ILogger<PostgresConnectionProvider> _logger;
 
     public PostgresConnectionProvider(
-        PostgresConnectionString connectionString,
-        IEnumerable<IDataSourcePlugin> plugins,
+        NpgsqlDataSource dataSource,
         ILogger<PostgresConnectionProvider> logger)
     {
         _logger = logger;
+
         _connection = new Lazy<Task<NpgsqlConnection>>(async () =>
         {
-            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString.Value);
-
-            foreach (IDataSourcePlugin plugin in plugins)
-            {
-                plugin.Configure(dataSourceBuilder);
-            }
-
-            var dataSource = dataSourceBuilder.Build();
-            
             _logger.LogTrace("Opening connection");
-
             return await dataSource.OpenConnectionAsync();
         });
     }
@@ -45,7 +33,7 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
             _logger.LogTrace("Connection was not created");
             return;
         }
-        
+
         _logger.LogTrace("Disposing connection");
 
         var connection = await _connection.Value;

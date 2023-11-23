@@ -1,10 +1,12 @@
 using FluentMigrator.Runner;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Models;
+using Itmo.Dev.Platform.Postgres.Plugins;
 using Itmo.Dev.Platform.Postgres.Transactions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using System.Reflection;
 
 namespace Itmo.Dev.Platform.Postgres.Extensions;
@@ -16,6 +18,21 @@ public static class ServiceCollectionExtensions
         Action<OptionsBuilder<PostgresConnectionConfiguration>> configuration)
     {
         collection.AddSingleton<PostgresConnectionString>();
+
+        collection.AddSingleton(p =>
+        {
+            var connectionString = p.GetRequiredService<PostgresConnectionString>();
+            var plugins = p.GetRequiredService<IEnumerable<IDataSourcePlugin>>();
+
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString.Value);
+
+            foreach (IDataSourcePlugin plugin in plugins)
+            {
+                plugin.Configure(dataSourceBuilder);
+            }
+
+            return dataSourceBuilder.Build();
+        });
 
         collection.AddScoped<IPostgresConnectionProvider, PostgresConnectionProvider>();
         collection.AddScoped<IPostgresTransactionProvider, PostgresTransactionProvider>();

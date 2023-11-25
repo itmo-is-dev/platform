@@ -16,6 +16,8 @@ public class PostgresConnectionConfiguration
 
     public bool Pooling { get; set; } = true;
 
+    public int MaximumPoolSize { get; set; } = 10;
+
     public string ToConnectionString()
     {
         return $"Host={Host};" +
@@ -24,6 +26,7 @@ public class PostgresConnectionConfiguration
                $"Username={Username};" +
                $"Password={Password};" +
                $"Ssl Mode={SslMode};" +
-               $"Pooling={Pooling}";
+               $"Pooling={Pooling};" +
+               $"Maximum Pool Size={MaximumPoolSize}";
     }
 }

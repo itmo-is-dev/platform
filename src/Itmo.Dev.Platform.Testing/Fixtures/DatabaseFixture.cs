@@ -1,5 +1,3 @@
-using Bogus;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;

@@ -3,7 +3,6 @@ using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 

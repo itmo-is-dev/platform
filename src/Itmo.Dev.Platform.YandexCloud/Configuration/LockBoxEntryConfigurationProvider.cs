@@ -1,5 +1,4 @@
 using Itmo.Dev.Platform.YandexCloud.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace Itmo.Dev.Platform.YandexCloud.Configuration;
 

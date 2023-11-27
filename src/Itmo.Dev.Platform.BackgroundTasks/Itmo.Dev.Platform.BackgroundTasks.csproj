@@ -16,9 +16,9 @@
 
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
-        <Version>1.0.$(PatchVersion)</Version>
+        <Version>1.1.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added multiple metadata search
+            Added background tasks suspension
         </PackageReleaseNotes>
     </PropertyGroup>
 

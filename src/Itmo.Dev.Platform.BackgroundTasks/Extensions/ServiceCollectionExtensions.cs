@@ -57,7 +57,11 @@ public static class ServiceCollectionExtensions
             });
         });
 
-        collection.AddHangfireServer();
+        collection.AddHangfireServer((p, o) =>
+        {
+            var options = p.GetRequiredService<IOptions<BackgroundTaskSchedulingOptions>>().Value;
+            o.WorkerCount = options.SchedulerWorkerCount < 1 ? 1 : options.SchedulerWorkerCount;
+        });
 
         return collection;
     }

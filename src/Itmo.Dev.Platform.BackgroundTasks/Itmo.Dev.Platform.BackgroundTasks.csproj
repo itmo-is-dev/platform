@@ -18,7 +18,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.1.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added background tasks suspension
+            Added worker count configuration
         </PackageReleaseNotes>
     </PropertyGroup>
 

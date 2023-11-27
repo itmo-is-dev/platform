@@ -34,7 +34,7 @@ internal class DataSourceConnectionFactory : IPostgresConnectionFactory
                 "Creating connection at\n{Trace}",
                 formattedStackTrace);
         }
-        
+
         return _dataSource.CreateConnection();
     }
 }

@@ -5,6 +5,7 @@ using Itmo.Dev.Platform.Postgres.Plugins;
 using Itmo.Dev.Platform.Postgres.Transactions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Reflection;
@@ -22,9 +23,11 @@ public static class ServiceCollectionExtensions
         collection.AddSingleton(p =>
         {
             var connectionString = p.GetRequiredService<PostgresConnectionString>();
+            var loggerFactory = p.GetRequiredService<ILoggerFactory>();
             var plugins = p.GetRequiredService<IEnumerable<IDataSourcePlugin>>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString.Value);
+            dataSourceBuilder.UseLoggerFactory(loggerFactory);
 
             foreach (IDataSourcePlugin plugin in plugins)
             {

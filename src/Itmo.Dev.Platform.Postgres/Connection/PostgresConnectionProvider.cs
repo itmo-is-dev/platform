@@ -9,7 +9,7 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
     private readonly ILogger<PostgresConnectionProvider> _logger;
 
     public PostgresConnectionProvider(
-        NpgsqlDataSource dataSource,
+        IPostgresConnectionFactory connectionFactory,
         ILogger<PostgresConnectionProvider> logger)
     {
         _logger = logger;
@@ -17,7 +17,11 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
         _connection = new Lazy<Task<NpgsqlConnection>>(async () =>
         {
             _logger.LogTrace("Opening connection");
-            return await dataSource.OpenConnectionAsync();
+            
+            var connection = connectionFactory.CreateConnection();
+            await connection.OpenAsync();
+
+            return connection;
         });
     }
 

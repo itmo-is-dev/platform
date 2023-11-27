@@ -34,6 +34,8 @@ public static class ServiceCollectionExtensions
             return dataSourceBuilder.Build();
         });
 
+        collection.AddSingleton<IPostgresConnectionFactory, DataSourceConnectionFactory>();
+
         collection.AddScoped<IPostgresConnectionProvider, PostgresConnectionProvider>();
         collection.AddScoped<IPostgresTransactionProvider, PostgresTransactionProvider>();
         collection.AddScoped<IUnitOfWork, ReusableUnitOfWork>();

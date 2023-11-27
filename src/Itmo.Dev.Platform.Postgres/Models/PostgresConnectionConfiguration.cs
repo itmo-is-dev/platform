@@ -17,6 +17,8 @@ public class PostgresConnectionConfiguration
     public bool Pooling { get; set; } = true;
 
     public int MaximumPoolSize { get; set; } = 10;
+    
+    public bool EnableConnectionProviderLogging { get; set; }
 
     public string ToConnectionString()
     {

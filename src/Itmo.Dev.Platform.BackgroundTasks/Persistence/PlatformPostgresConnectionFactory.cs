@@ -1,19 +1,20 @@
 using Hangfire.PostgreSql;
+using Itmo.Dev.Platform.Postgres.Connection;
 using Npgsql;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Persistence;
 
 internal class PlatformPostgresConnectionFactory : IConnectionFactory
 {
-    private readonly NpgsqlDataSource _dataSource;
+    private readonly IPostgresConnectionFactory _connectionFactory;
 
-    public PlatformPostgresConnectionFactory(NpgsqlDataSource dataSource)
+    public PlatformPostgresConnectionFactory(IPostgresConnectionFactory connectionFactory)
     {
-        _dataSource = dataSource;
+        _connectionFactory = connectionFactory;
     }
 
     public NpgsqlConnection GetOrCreateConnection()
     {
-        return _dataSource.CreateConnection();
+        return _connectionFactory.CreateConnection();
     }
 }

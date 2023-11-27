@@ -9,6 +9,8 @@ public abstract record BackgroundTaskExecutionResult<TResult, TError>
 {
     public sealed record Success(TResult Result) : BackgroundTaskExecutionResult<TResult, TError>;
 
+    public sealed record Suspended : BackgroundTaskExecutionResult<TResult, TError>;
+
     public sealed record Failure(TError? Error) : BackgroundTaskExecutionResult<TResult, TError>;
 
     public sealed record Cancellation(TError? Error) : BackgroundTaskExecutionResult<TResult, TError>;

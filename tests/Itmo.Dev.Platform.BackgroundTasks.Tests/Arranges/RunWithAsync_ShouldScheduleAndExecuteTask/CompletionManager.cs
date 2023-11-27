@@ -2,23 +2,37 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSc
 
 public class CompletionManager
 {
-    private readonly TaskCompletionSource<string> _tcs;
+    private TaskCompletionSource<string> _tcs;
 
     public CompletionManager()
     {
         _tcs = new TaskCompletionSource<string>();
+        WaitTask = GetTask(_tcs);
+    }
 
-        WaitTask = Task.Run(async () =>
+    public Task<string> WaitTask { get; private set; }
+    
+    public int Version { get; private set; }
+
+    public void Complete(string value)
+        => _tcs.SetResult(value);
+
+    public void Reset()
+    {
+        _tcs = new TaskCompletionSource<string>();
+        WaitTask = GetTask(_tcs);
+
+        Version++;
+    }
+
+    private static Task<string> GetTask(TaskCompletionSource<string> tcs)
+    {
+        return Task.Run(async () =>
         {
-            var value = await _tcs.Task;
+            var value = await tcs.Task;
             await Task.Delay(TimeSpan.FromMilliseconds(1500));
 
             return value;
         });
     }
-
-    public Task<string> WaitTask { get; }
-
-    public void Complete(string value)
-        => _tcs.SetResult(value);
 }

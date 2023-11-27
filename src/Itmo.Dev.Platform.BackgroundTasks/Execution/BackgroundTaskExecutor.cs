@@ -55,6 +55,9 @@ internal class BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TRes
             {
                 BackgroundTaskExecutionResult<TResult, TError>.Success success
                     => HandleSuccess(backgroundTask, success),
+                
+                BackgroundTaskExecutionResult<TResult, TError>.Suspended suspended
+                    => HandleSuspended(backgroundTask, suspended),
 
                 BackgroundTaskExecutionResult<TResult, TError>.Failure failure
                     => HandleFailure(backgroundTask, failure),
@@ -81,6 +84,16 @@ internal class BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TRes
         {
             State = BackgroundTaskState.Completed,
             Result = success.Result,
+        };
+    }
+
+    private BackgroundTask HandleSuspended(
+        BackgroundTask backgroundTask,
+        BackgroundTaskExecutionResult<TResult, TError>.Suspended suspended)
+    {
+        return backgroundTask with
+        {
+            State = BackgroundTaskState.Suspended,
         };
     }
 

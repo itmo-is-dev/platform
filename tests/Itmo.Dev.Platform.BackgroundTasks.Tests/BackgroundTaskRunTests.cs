@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Models;
@@ -29,12 +30,12 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tests;
 #pragma warning disable CA1506
 
 [Collection(nameof(BackgroundTasksCollectionFixture))]
-public class BackgroundTaskTests : TestBase
+public class BackgroundTaskRunTests : TestBase
 {
     private readonly BackgroundTasksDatabaseFixture _backgroundTasksFixture;
     private readonly CompletionManager _completionManager;
 
-    public BackgroundTaskTests(BackgroundTasksDatabaseFixture backgroundTasksFixture, ITestOutputHelper output)
+    public BackgroundTaskRunTests(BackgroundTasksDatabaseFixture backgroundTasksFixture, ITestOutputHelper output)
         : base(output, LogEventLevel.Warning)
     {
         _backgroundTasksFixture = backgroundTasksFixture;
@@ -179,7 +180,7 @@ public class BackgroundTaskTests : TestBase
             do
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
-                task = await GetBackgroundTask(backgroundTaskId, repository);
+                task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
             }
             while (task.State is not BackgroundTaskState.Failed);
 
@@ -261,7 +262,7 @@ public class BackgroundTaskTests : TestBase
             do
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
-                task = await GetBackgroundTask(backgroundTaskId, repository);
+                task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
             }
             while (task.State is not BackgroundTaskState.Failed);
 
@@ -273,13 +274,5 @@ public class BackgroundTaskTests : TestBase
         // Assert
         checker.IsCompletedSuccessfully.Should().BeTrue();
         checker.Result.State.Should().Be(BackgroundTaskState.Failed);
-    }
-
-    private static async Task<BackgroundTask> GetBackgroundTask(
-        BackgroundTaskId id,
-        IBackgroundTaskRepository repository)
-    {
-        var query = BackgroundTaskQuery.Build(x => x.WithId(id));
-        return await repository.QueryAsync(query, default).SingleAsync();
     }
 }

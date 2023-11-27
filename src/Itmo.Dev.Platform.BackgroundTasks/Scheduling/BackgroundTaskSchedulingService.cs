@@ -65,6 +65,7 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
             var query = BackgroundTaskQuery.Build(builder => builder
                 .WithState(BackgroundTaskState.Pending)
                 .WithState(BackgroundTaskState.Retrying)
+                .WithState(BackgroundTaskState.Proceeded)
                 .WithCursor(DateTimeOffset.UnixEpoch)
                 .WithPageSize(options.BatchSize));
 

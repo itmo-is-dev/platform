@@ -3,7 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 
-namespace Itmo.Dev.Platform.BackgroundTasks.Managing;
+namespace Itmo.Dev.Platform.BackgroundTasks.Managing.Running;
 
 public interface IMetadataConfigurator
 {

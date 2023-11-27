@@ -1,3 +1,5 @@
+using Itmo.Dev.Platform.BackgroundTasks.Managing.Proceeding;
+using Itmo.Dev.Platform.BackgroundTasks.Managing.Running;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
@@ -20,7 +22,9 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
 
     public IMetadataConfigurator StartBackgroundTask => new MetadataConfigurator(this);
 
-    private async Task<BackgroundTaskId> RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+    public IQueryParameterConfigurator ProceedBackgroundTask => new QueryParameterConfigurator(this);
+
+    internal async Task<BackgroundTaskId> RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
         TMetadata metadata,
         TExecutionMetadata executionMetadata,
         CancellationToken cancellationToken)
@@ -47,62 +51,34 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
         return id;
     }
 
-    private class MetadataConfigurator : IMetadataConfigurator
+    internal async Task<ProceedTaskResult> ProceedAsync(
+        BackgroundTaskQuery query,
+        ExecutionMetadataModification modification,
+        CancellationToken cancellationToken)
     {
-        private readonly BackgroundTaskRunner _runner;
+        var backgroundTasks = await _repository
+            .QueryAsync(query, cancellationToken)
+            .ToArrayAsync(cancellationToken);
 
-        public MetadataConfigurator(BackgroundTaskRunner runner)
+        if (backgroundTasks is not [var backgroundTask])
+            return new ProceedTaskResult.MultipleTasksFound(backgroundTasks);
+
+        var modificationResult = modification.Modify(backgroundTask.ExecutionMetadata);
+
+        if (modificationResult is ExecutionMetadataModificationResult.Failure modificationFailure)
+            return new ProceedTaskResult.ExecutionMetadataModificationFailure(modificationFailure.Message);
+
+        if (modificationResult is not ExecutionMetadataModificationResult.Success modificationSuccess)
+            throw new InvalidOperationException("Execution metadata modification yielded unexpected result");
+
+        backgroundTask = backgroundTask with
         {
-            _runner = runner;
-        }
+            State = BackgroundTaskState.Proceeded,
+            ExecutionMetadata = modificationSuccess.Metadata,
+        };
 
-        public IExecutionMetadataConfigurator<T> WithMetadata<T>(T metadata) where T : IBackgroundTaskMetadata
-        {
-            return new ExecutionMetadataConfigurator<T>(_runner, metadata);
-        }
-    }
+        await _repository.UpdateAsync(backgroundTask, cancellationToken);
 
-    private class ExecutionMetadataConfigurator<TMetadata> : IExecutionMetadataConfigurator<TMetadata>
-        where TMetadata : IBackgroundTaskMetadata
-    {
-        private readonly BackgroundTaskRunner _runner;
-        private readonly TMetadata _metadata;
-
-        public ExecutionMetadataConfigurator(BackgroundTaskRunner runner, TMetadata metadata)
-        {
-            _runner = runner;
-            _metadata = metadata;
-        }
-
-        public IRunTaskRequest<TMetadata, T> WithExecutionMetadata<T>(T executionMetadata)
-            where T : IBackgroundTaskExecutionMetadata
-        {
-            return new RunTaskRequest<TMetadata, T>(_runner, _metadata, executionMetadata);
-        }
-    }
-
-    private class RunTaskRequest<TMetadata, TExecutionMetadata> : IRunTaskRequest<TMetadata, TExecutionMetadata>
-        where TMetadata : IBackgroundTaskMetadata
-        where TExecutionMetadata : IBackgroundTaskExecutionMetadata
-    {
-        private readonly BackgroundTaskRunner _runner;
-        private readonly TMetadata _metadata;
-        private readonly TExecutionMetadata _executionMetadata;
-
-        public RunTaskRequest(BackgroundTaskRunner runner, TMetadata metadata, TExecutionMetadata executionMetadata)
-        {
-            _runner = runner;
-            _metadata = metadata;
-            _executionMetadata = executionMetadata;
-        }
-
-        public Task<BackgroundTaskId> RunWithAsync<TTask>(CancellationToken cancellationToken)
-            where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>
-        {
-            return _runner.RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
-                _metadata,
-                _executionMetadata,
-                cancellationToken);
-        }
+        return new ProceedTaskResult.Success(backgroundTask);
     }
 }

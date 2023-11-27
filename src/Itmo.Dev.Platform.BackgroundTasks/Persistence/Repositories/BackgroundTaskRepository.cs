@@ -61,7 +61,8 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            var record = _backgroundTaskRegistry[reader.GetString(name)];
+            var nameValue = reader.GetString(name);
+            var record = _backgroundTaskRegistry[nameValue];
 
             var metadataValue = reader.GetString(metadata);
             var executionMetadataValue = reader.GetString(executionMetadata);

@@ -49,6 +49,7 @@ collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBui
 {
   "BatchSize": int,
   "PollingDelay": timespan,
+  "CancellationCheckInterval": timespan,
   "SchedulerRetryCount": int,
   "SchedulerRetryDelays": [int]
 }
@@ -58,6 +59,8 @@ collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBui
   Number of tasks fetched per enqueuing run
 - PollingDelay \
   Delay between enqueuing runs
+- CancellationCheckInterval \
+  Delay between cancellation checks
 - SchedulerRetryCount \
   Count of retries that hangfire will do, before marking task failed
 - SchedulerRetryDelays \

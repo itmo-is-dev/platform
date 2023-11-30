@@ -46,6 +46,7 @@ public static class ServiceCollectionExtensions
             var connectionFactory = sp.GetRequiredService<PlatformPostgresConnectionFactory>();
             var configuration = sp.GetRequiredService<IOptions<BackgroundTaskSchedulingOptions>>();
 
+
             hangfire.UseSerializerSettings(sp.GetRequiredService<JsonSerializerSettings>());
             hangfire.UsePostgreSqlStorage(x => x.UseConnectionFactory(connectionFactory));
 
@@ -60,7 +61,9 @@ public static class ServiceCollectionExtensions
         collection.AddHangfireServer((p, o) =>
         {
             var options = p.GetRequiredService<IOptions<BackgroundTaskSchedulingOptions>>().Value;
+
             o.WorkerCount = options.SchedulerWorkerCount < 1 ? 1 : options.SchedulerWorkerCount;
+            o.CancellationCheckInterval = options.CancellationCheckDelay;
         });
 
         return collection;

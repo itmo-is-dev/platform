@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Common.Extensions;
+using Itmo.Dev.Platform.Common.Tools;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,27 +37,27 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
         {
             SingleReader = configuration.ParallelismDegree is 1,
             SingleWriter = true,
+            FullMode = BoundedChannelFullMode.Wait,
         };
 
         var channel = Channel.CreateBounded<InternalConsumerMessage<TKey, TValue>>(channelOptions);
 
-        var writeTask = WriteMessagesAsync(configuration, channel.Writer, cancellationToken);
+        await ParallelAction.ExecuteAsync(
+            cancellationToken,
+            new ParallelAction(1, c => WriteMessagesAsync(configuration, channel.Writer, c)),
+            new ParallelAction(configuration.ParallelismDegree, HandleMessagesSingleAsync));
 
-        var handleTasks = Enumerable
-            .Range(0, configuration.ParallelismDegree)
-            .Select(async _ =>
-            {
-                await using var scope = scopeFactory.CreateAsyncScope();
+        return;
 
-                var options = OptionsResolver.Resolve(scope.ServiceProvider);
-                var handler = HandlerResolver.Resolve(scope.ServiceProvider);
+        async Task HandleMessagesSingleAsync(CancellationToken c)
+        {
+            await using var scope = scopeFactory.CreateAsyncScope();
 
-                await HandleMessagesAsync(options, channel.Reader, handler, cancellationToken);
-            });
+            var options = OptionsResolver.Resolve(scope.ServiceProvider);
+            var handler = HandlerResolver.Resolve(scope.ServiceProvider);
 
-        var tasks = handleTasks.Prepend(writeTask);
-
-        await Task.WhenAll(tasks);
+            await HandleMessagesAsync(options, channel.Reader, handler, c);
+        }
     }
 
     private async Task WriteMessagesAsync(

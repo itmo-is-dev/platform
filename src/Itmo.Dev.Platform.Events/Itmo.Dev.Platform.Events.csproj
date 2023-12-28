@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Title>Itmo.Dev.Platform.Events</Title>
+        <Authors>itmo-is-dev</Authors>
+        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PatchVersion>0</PatchVersion>
+        <Version>1.0.$(PatchVersion)</Version>
+        <PackageReleaseNotes>
+            Added events
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentScanning.DependencyInjection" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    </ItemGroup>
+
+</Project>

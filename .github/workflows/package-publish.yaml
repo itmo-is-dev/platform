@@ -68,6 +68,7 @@ jobs:
           mv src/Itmo.Dev.Platform.Logging/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.BackgroundTasks/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
   
   
   publish-github:

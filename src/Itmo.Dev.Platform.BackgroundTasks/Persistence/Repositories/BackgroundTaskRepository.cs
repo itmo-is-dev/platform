@@ -43,6 +43,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
             .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
+            .AddJsonArrayParameter("execution_metadata", query.ExecutionMetadatas, _serializerSettings)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
 #pragma warning restore CA2100

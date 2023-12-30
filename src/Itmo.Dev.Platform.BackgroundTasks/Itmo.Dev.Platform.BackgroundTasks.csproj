@@ -18,7 +18,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.1.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added CancellationCheckInterval config
+            Added execution metadata query parameter
         </PackageReleaseNotes>
     </PropertyGroup>
 

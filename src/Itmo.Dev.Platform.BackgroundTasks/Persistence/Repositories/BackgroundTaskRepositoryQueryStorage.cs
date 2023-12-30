@@ -63,6 +63,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
             and (cardinality(:names) = 0 or background_task_name = any (:names))
             and (cardinality(:states) = 0 or background_task_state = any (:states))
             and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
+            and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata)) 
             and background_task_created_at >= :cursor
         order by background_task_created_at
         limit :page_size;

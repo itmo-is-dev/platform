@@ -15,7 +15,8 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
     private readonly IDisposable? _disposable;
     private string _schemaName;
 
-    private Lazy<string> _querySql;
+    private Lazy<string> _queryAscendingSql;
+    private Lazy<string> _queryDescendingSql;
     private Lazy<string> _searchIdsSql;
     private Lazy<string> _addRangeSql;
     private Lazy<string> _updateStateSql;
@@ -27,14 +28,16 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
 
         _schemaName = options.CurrentValue.SchemaName;
 
-        _querySql = new Lazy<string>(CreateQuerySql);
+        _queryAscendingSql = new Lazy<string>(CreateQueryAscendingSql);
+        _queryDescendingSql = new Lazy<string>(CreateQueryDescendingSql);
         _searchIdsSql = new Lazy<string>(CreateSearchIdsSql);
         _addRangeSql = new Lazy<string>(CreateAddRangeSql);
         _updateStateSql = new Lazy<string>(CreateUpdateStateSql);
         _updateSql = new Lazy<string>(CreateUpdateSql);
     }
 
-    public string QuerySql => _querySql.Value;
+    public string QueryAscendingSql => _queryAscendingSql.Value;
+    public string QueryDescendingSql => _queryAscendingSql.Value;
     public string SearchIdsSql => _searchIdsSql.Value;
     public string AddRangeSql => _addRangeSql.Value;
     public string UpdateStateSql => _updateStateSql.Value;
@@ -45,7 +48,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
         _disposable?.Dispose();
     }
 
-    private string CreateQuerySql()
+    private string CreateQueryAscendingSql()
     {
         return $"""
         select background_task_id,
@@ -66,6 +69,31 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
             and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata)) 
             and background_task_created_at >= :cursor
         order by background_task_created_at
+        limit :page_size;
+        """;
+    }
+
+    private string CreateQueryDescendingSql()
+    {
+        return $"""
+        select background_task_id,
+               background_task_name,
+               background_task_created_at,
+               background_task_state,
+               background_task_retry_number,
+               background_task_metadata,
+               background_task_execution_metadata,
+               background_task_result,
+               background_task_error
+        from {_schemaName}.background_tasks
+        where 
+            (cardinality(:ids) = 0 or background_task_id = any (:ids))
+            and (cardinality(:names) = 0 or background_task_name = any (:names))
+            and (cardinality(:states) = 0 or background_task_state = any (:states))
+            and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
+            and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata)) 
+            and background_task_created_at >= :cursor
+        order by background_task_created_at desc 
         limit :page_size;
         """;
     }
@@ -128,7 +156,8 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
     {
         _schemaName = options.SchemaName;
 
-        _querySql = _querySql.RecreateIfComputed(CreateQuerySql);
+        _queryAscendingSql = _queryAscendingSql.RecreateIfComputed(CreateQueryAscendingSql);
+        _queryDescendingSql = _queryDescendingSql.RecreateIfComputed(CreateQueryDescendingSql);
         _searchIdsSql = _searchIdsSql.RecreateIfComputed(CreateSearchIdsSql);
         _addRangeSql = _searchIdsSql.RecreateIfComputed(CreateAddRangeSql);
         _updateStateSql = _updateStateSql.RecreateIfComputed(CreateUpdateStateSql);

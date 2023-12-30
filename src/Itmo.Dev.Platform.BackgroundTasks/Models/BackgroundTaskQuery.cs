@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
+using Itmo.Dev.Platform.Common.Models;
 using SourceKit.Generators.Builder.Annotations;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Models;
@@ -12,4 +13,5 @@ public partial record BackgroundTaskQuery(
     IBackgroundTaskMetadata[] Metadatas,
     IBackgroundTaskExecutionMetadata[] ExecutionMetadatas,
     DateTimeOffset Cursor,
-    int? PageSize);
+    int? PageSize,
+    OrderDirection? OrderDirection);

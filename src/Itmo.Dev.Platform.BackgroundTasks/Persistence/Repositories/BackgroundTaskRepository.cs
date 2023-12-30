@@ -4,6 +4,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.Common.Models;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Newtonsoft.Json;
@@ -37,8 +38,12 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
     {
         var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
+        var sql = query.OrderDirection is OrderDirection.Descending
+            ? _queryStorage.QueryDescendingSql
+            : _queryStorage.QueryAscendingSql;
+
 #pragma warning disable CA2100
-        await using var command = new NpgsqlCommand(_queryStorage.QuerySql, connection)
+        await using var command = new NpgsqlCommand(sql, connection)
             .AddParameter("ids", query.Ids.Select(x => x.Value).ToArray())
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)

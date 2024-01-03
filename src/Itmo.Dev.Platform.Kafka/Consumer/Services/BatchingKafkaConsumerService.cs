@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Tools;
+using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,7 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
             valueDeserializer) { }
 
     protected override async Task ExecuteSingleAsync(
+        KafkaConfiguration kafkaConfiguration,
         IKafkaConsumerConfiguration configuration,
         IServiceScopeFactory scopeFactory,
         CancellationToken cancellationToken)
@@ -44,7 +46,9 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
 
         await ParallelAction.ExecuteAsync(
             cancellationToken,
-            new ParallelAction(1, c => WriteMessagesAsync(configuration, channel.Writer, c)),
+            new ParallelAction(
+                1,
+                c => WriteMessagesAsync(kafkaConfiguration, configuration, channel.Writer, c)),
             new ParallelAction(configuration.ParallelismDegree, HandleMessagesSingleAsync));
 
         return;
@@ -61,6 +65,7 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
     }
 
     private async Task WriteMessagesAsync(
+        KafkaConfiguration kafkaConfiguration,
         IKafkaConsumerConfiguration configuration,
         ChannelWriter<InternalConsumerMessage<TKey, TValue>> writer,
         CancellationToken cancellationToken)
@@ -69,12 +74,17 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumer
 
         var consumerConfiguration = new ConsumerConfig
         {
-            GroupInstanceId = configuration.InstanceId,
+            BootstrapServers = kafkaConfiguration.Host,
+            SecurityProtocol = kafkaConfiguration.SecurityProtocol,
+            SslCaPem = kafkaConfiguration.SslCaPem,
+            SaslMechanism = kafkaConfiguration.SaslMechanism,
+            SaslUsername = kafkaConfiguration.SaslUsername,
+            SaslPassword = kafkaConfiguration.SaslPassword,
+
             GroupId = configuration.Group,
-            BootstrapServers = configuration.Host,
+            GroupInstanceId = configuration.InstanceId,
             AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            SecurityProtocol = configuration.SecurityProtocol,
         };
 
         using IConsumer<TKey, TValue> consumer = new ConsumerBuilder<TKey, TValue>(consumerConfiguration)

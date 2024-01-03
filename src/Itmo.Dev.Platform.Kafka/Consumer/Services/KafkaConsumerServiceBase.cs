@@ -1,8 +1,10 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
@@ -47,9 +49,11 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
             if (await CheckDisabledAsync(options, stoppingToken))
                 continue;
 
+            var kafkaOptions = _serviceProvider.GetRequiredService<IOptionsMonitor<KafkaConfiguration>>();
+
             try
             {
-                await ExecuteSingleAsync(options, _scopeFactory, stoppingToken);
+                await ExecuteSingleAsync(kafkaOptions.CurrentValue, options, _scopeFactory, stoppingToken);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
@@ -59,6 +63,7 @@ internal abstract class KafkaConsumerServiceBase<TKey, TValue> : BackgroundServi
     }
 
     protected abstract Task ExecuteSingleAsync(
+        KafkaConfiguration kafkaConfiguration,
         IKafkaConsumerConfiguration configuration,
         IServiceScopeFactory factory,
         CancellationToken cancellationToken);

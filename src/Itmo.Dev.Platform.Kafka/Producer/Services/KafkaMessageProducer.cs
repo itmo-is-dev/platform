@@ -1,7 +1,9 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.Producer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Services;
 
@@ -15,6 +17,7 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
         IServiceProvider provider,
         ILogger<KafkaMessageProducer<TKey, TValue>> logger,
         IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration> configurationResolver,
+        IOptionsSnapshot<KafkaConfiguration> kafkaConfiguration,
         ISerializer<TKey>? keySerializer = null,
         ISerializer<TValue>? valueSerializer = null)
     {
@@ -23,7 +26,13 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
 
         var config = new ProducerConfig
         {
-            BootstrapServers = _configuration.Host,
+            BootstrapServers = kafkaConfiguration.Value.Host,
+            SecurityProtocol = kafkaConfiguration.Value.SecurityProtocol,
+            SslCaPem = kafkaConfiguration.Value.SslCaPem,
+            SaslMechanism = kafkaConfiguration.Value.SaslMechanism,
+            SaslUsername = kafkaConfiguration.Value.SaslUsername,
+            SaslPassword = kafkaConfiguration.Value.SaslPassword,
+
             MessageMaxBytes = _configuration.MessageMaxBytes,
         };
 

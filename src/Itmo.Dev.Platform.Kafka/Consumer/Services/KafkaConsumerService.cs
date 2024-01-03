@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
             valueDeserializer) { }
 
     protected override async Task ExecuteSingleAsync(
+        KafkaConfiguration kafkaConfiguration,
         IKafkaConsumerConfiguration _,
         IServiceScopeFactory scopeFactory,
         CancellationToken cancellationToken)
@@ -36,11 +38,17 @@ internal class KafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKe
 
         var consumerConfiguration = new ConsumerConfig
         {
+            BootstrapServers = kafkaConfiguration.Host,
+            SecurityProtocol = kafkaConfiguration.SecurityProtocol,
+            SslCaPem = kafkaConfiguration.SslCaPem,
+            SaslMechanism = kafkaConfiguration.SaslMechanism,
+            SaslUsername = kafkaConfiguration.SaslUsername,
+            SaslPassword = kafkaConfiguration.SaslPassword,
+
             GroupId = configuration.Group,
-            BootstrapServers = configuration.Host,
+            GroupInstanceId = configuration.InstanceId,
             AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            SecurityProtocol = configuration.SecurityProtocol,
         };
 
         using IConsumer<TKey, TValue> consumer = new ConsumerBuilder<TKey, TValue>(consumerConfiguration)

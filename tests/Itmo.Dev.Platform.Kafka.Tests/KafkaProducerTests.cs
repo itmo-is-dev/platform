@@ -36,13 +36,14 @@ public class KafkaProducerTests : IAsyncLifetime
         // Arrange
         var collection = new ServiceCollection();
 
-        var configuration = new Configuration(_kafkaFixture.Host);
-        collection.AddObjectAsOptions(configuration);
+        collection.AddObjectAsOptions(new Configuration());
 
-        collection.AddKafkaProducer<int, string>(builder => builder
-            .SerializeKeyWithNewtonsoft()
-            .SerializeValueWithNewtonsoft()
-            .UseConfiguration<Configuration>());
+        collection.AddKafka(builder => builder
+            .ConfigureTestOptions(_kafkaFixture.Host)
+            .AddProducer<int, string>(b => b
+                .SerializeKeyWithNewtonsoft()
+                .SerializeValueWithNewtonsoft()
+                .UseConfiguration<Configuration>()));
 
         collection.AddLogging();
         collection.AddSerilog();
@@ -54,7 +55,7 @@ public class KafkaProducerTests : IAsyncLifetime
         var consumerConfig = new ConsumerConfig
         {
             GroupId = nameof(KafkaProducerTests),
-            BootstrapServers = configuration.Host,
+            BootstrapServers = _kafkaFixture.Host,
             AutoOffsetReset = AutoOffsetReset.Earliest,
         };
 
@@ -126,18 +127,6 @@ public class KafkaProducerTests : IAsyncLifetime
 
     public class Configuration : IKafkaProducerConfiguration
     {
-        public Configuration(string host)
-        {
-            Host = host;
-        }
-
-        public string Host { get; }
-
         public string Topic => TopicName;
-
-        public IKafkaProducerConfiguration WithHost(string host)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

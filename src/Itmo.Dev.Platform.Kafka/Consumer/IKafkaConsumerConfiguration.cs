@@ -8,12 +8,10 @@ public interface IKafkaConsumerConfiguration
 
     TimeSpan DisabledConsumerTimeout { get; }
 
-    string Host { get; }
-
     string Topic { get; }
 
     string Group { get; }
-    
+
     string InstanceId { get; }
 
     int ParallelismDegree { get; }
@@ -23,10 +21,6 @@ public interface IKafkaConsumerConfiguration
     TimeSpan BufferWaitLimit { get; }
 
     bool ReadLatest { get; }
-
-    SecurityProtocol SecurityProtocol { get; }
-
-    IKafkaConsumerConfiguration WithHost(string host);
 
     IKafkaConsumerConfiguration WithGroup(string group);
 

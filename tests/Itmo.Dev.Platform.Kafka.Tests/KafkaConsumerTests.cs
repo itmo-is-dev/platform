@@ -137,33 +137,26 @@ public class KafkaConsumerTests : IAsyncLifetime
         {
             collection.AddScoped(_ => _handler);
 
-            collection.AddKafkaConsumer<TKey, TValue>(builder => builder
-                .HandleWith<CollectionConsumerHandler<TKey, TValue>>()
-                .DeserializeKeyWithNewtonsoft()
-                .DeserializeValueWithNewtonsoft()
-                .UseConfiguration<Configuration>());
+            collection.AddKafka(builder => builder
+                .ConfigureTestOptions(_kafkaFixture.Host)
+                .AddConsumer<TKey, TValue>(b => b
+                    .HandleWith<CollectionConsumerHandler<TKey, TValue>>()
+                    .DeserializeKeyWithNewtonsoft()
+                    .DeserializeValueWithNewtonsoft()
+                    .UseConfiguration<Configuration>()));
 
             collection.AddLogging(x => x.AddSerilog());
 
-            var configuration = new Configuration(_kafkaFixture.Host);
-
             collection.AddOptions();
-            collection.AddObjectAsOptions(configuration);
+            collection.AddObjectAsOptions(new Configuration());
         }
     }
 
     public class Configuration : IKafkaConsumerConfiguration
     {
-        public Configuration(string host)
-        {
-            Host = host;
-        }
-
         public bool IsDisabled => false;
 
         public TimeSpan DisabledConsumerTimeout => TimeSpan.FromSeconds(10);
-
-        public string Host { get; }
 
         public string Topic => TopicName;
 
@@ -178,13 +171,6 @@ public class KafkaConsumerTests : IAsyncLifetime
         public TimeSpan BufferWaitLimit => TimeSpan.FromMilliseconds(200);
 
         public bool ReadLatest => false;
-
-        public SecurityProtocol SecurityProtocol => SecurityProtocol.Plaintext;
-
-        public IKafkaConsumerConfiguration WithHost(string host)
-        {
-            throw new NotImplementedException();
-        }
 
         public IKafkaConsumerConfiguration WithGroup(string group)
         {

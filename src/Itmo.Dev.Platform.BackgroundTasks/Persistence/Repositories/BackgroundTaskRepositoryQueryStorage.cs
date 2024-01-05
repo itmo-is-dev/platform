@@ -37,7 +37,7 @@ internal class BackgroundTaskRepositoryQueryStorage : IDisposable
     }
 
     public string QueryAscendingSql => _queryAscendingSql.Value;
-    public string QueryDescendingSql => _queryAscendingSql.Value;
+    public string QueryDescendingSql => _queryDescendingSql.Value;
     public string SearchIdsSql => _searchIdsSql.Value;
     public string AddRangeSql => _addRangeSql.Value;
     public string UpdateStateSql => _updateStateSql.Value;

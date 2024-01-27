@@ -64,6 +64,10 @@ public class StateBackgroundTask : IBackgroundTask<
                 .CreateInstance<StartingStateHandler>(_serviceProvider)
                 .HandleAsync(state, context, cancellationToken),
 
+            WaitingFirstState state => ActivatorUtilities
+                .CreateInstance<WaitingFirstStateHandler>(_serviceProvider)
+                .HandleAsync(state, context, cancellationToken),
+
             FirstState state => ActivatorUtilities
                 .CreateInstance<FirstStateHandler>(_serviceProvider)
                 .HandleAsync(state, context, cancellationToken),

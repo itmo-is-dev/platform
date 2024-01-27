@@ -28,7 +28,7 @@ public class UsageScenario
             .WithName(StateBackgroundTask.Name)
             .WithState(BackgroundTaskState.Suspended)
             .WithMetadata(new StateTaskMetadata(operationId))
-            .WithExecutionMetadata(new StateTaskExecutionMetadata { State = new FirstState() }));
+            .WithExecutionMetadata(new StateTaskExecutionMetadata { State = new WaitingFirstState() }));
 
         await _runner
             .ProceedBackgroundTask

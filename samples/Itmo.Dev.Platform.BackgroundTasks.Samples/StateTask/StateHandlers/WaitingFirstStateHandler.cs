@@ -1,20 +1,16 @@
 using Itmo.Dev.Platform.BackgroundTasks.Samples.StateTask.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Samples.StateTask.States;
-using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Samples.StateTask.StateHandlers;
 
-public class StartingStateHandler : IStateHandler<StartingState>
+public class WaitingFirstStateHandler : IStateHandler<WaitingFirstState>
 {
     public ValueTask<StateHandlerResult> HandleAsync(
-        StartingState state,
+        WaitingFirstState state,
         StateHandlerContext context,
         CancellationToken cancellationToken)
     {
-        var result = new StateHandlerResult.FinishedWithResult(
-            new WaitingFirstState(),
-            BackgroundTaskExecutionResult.Suspended.ForEmptyResult().ForError<StateTaskError>());
-
+        var result = new StateHandlerResult.Finished(new FirstState());
         return ValueTask.FromResult<StateHandlerResult>(result);
     }
 }

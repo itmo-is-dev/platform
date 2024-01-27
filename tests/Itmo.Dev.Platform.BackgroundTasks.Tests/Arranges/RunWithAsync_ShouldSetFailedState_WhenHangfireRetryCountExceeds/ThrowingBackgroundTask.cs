@@ -7,8 +7,11 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.
     RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 
-public class ThrowingBackgroundTask :
-    IBackgroundTask<EmptyMetadata, EmptyExecutionMetadata, EmptyExecutionResult, EmptyError>
+public class ThrowingBackgroundTask : IBackgroundTask<
+    EmptyMetadata,
+    EmptyExecutionMetadata,
+    EmptyExecutionResult,
+    EmptyError>
 {
     public static string Name => nameof(ThrowingBackgroundTask);
 

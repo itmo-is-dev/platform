@@ -8,8 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.ProceedAsync_ShouldProceedTaskExecution;
 
-public class ProceedableBackgroundTask :
-    IBackgroundTask<EmptyMetadata, EmptyExecutionMetadata, EmptyExecutionResult, EmptyError>
+public class ProceedableBackgroundTask : IBackgroundTask<
+    EmptyMetadata,
+    EmptyExecutionMetadata,
+    EmptyExecutionResult,
+    EmptyError>
 {
     private readonly CompletionManager _completionManager;
     private readonly ILogger<ProceedableBackgroundTask> _logger;
@@ -22,7 +25,7 @@ public class ProceedableBackgroundTask :
 
     public static string Name => nameof(ProceedableBackgroundTask);
 
-    public async Task<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>> ExecuteAsync(
+    public Task<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>> ExecuteAsync(
         BackgroundTaskExecutionContext<EmptyMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
@@ -30,11 +33,15 @@ public class ProceedableBackgroundTask :
         {
             _logger.LogInformation("Suspending task");
             _completionManager.Complete(string.Empty);
-            return new BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>.Suspended();
+
+            return Task.FromResult<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>>(
+                BackgroundTaskExecutionResult.Suspended.ForEmptyResult().ForEmptyError());
         }
 
         _completionManager.Complete(string.Empty);
         _logger.LogInformation("Completing task");
-        return new BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>.Success(EmptyExecutionResult.Value);
+
+        return Task.FromResult<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>>(
+            BackgroundTaskExecutionResult.Success.WithEmptyResult().ForEmptyError());
     }
 }

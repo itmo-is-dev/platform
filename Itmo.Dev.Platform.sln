@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\dotnet.yaml = .github\workflows\dotnet.yaml
 		.github\workflows\build-test-kafka.yaml = .github\workflows\build-test-kafka.yaml
 		.github\workflows\build-test-postgres.yaml = .github\workflows\build-test-postgres.yaml
+		.github\workflows\build-test-background-tasks.yaml = .github\workflows\build-test-background-tasks.yaml
+		.github\workflows\build-test-message-persistence.yaml = .github\workflows\build-test-message-persistence.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}"

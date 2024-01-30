@@ -17,7 +17,7 @@ public readonly record struct SuccessBuilder
             => new ErrorBuilder<TResult, TError>(Result);
 
         public ErrorBuilder<TResult, EmptyError> ForEmptyError()
-            => new ErrorBuilder<TResult, EmptyError>();
+            => new ErrorBuilder<TResult, EmptyError>(Result);
     }
 
     public readonly record struct ErrorBuilder<TResult, TError>(TResult Result)

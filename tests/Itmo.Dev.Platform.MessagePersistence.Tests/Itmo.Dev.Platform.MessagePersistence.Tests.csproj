@@ -10,21 +10,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1"/>
-        <PackageReference Include="xunit" Version="2.4.2"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="3.2.0">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="xunit"/>
+        <PackageReference Include="xunit.runner.visualstudio" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" PrivateAssets="all"/>
+        <PackageReference Include="coverlet.collector" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" PrivateAssets="all"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj" />
-      <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence.Tests.Startup\Itmo.Dev.Platform.MessagePersistence.Tests.Startup.csproj" />
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence.Tests.Startup\Itmo.Dev.Platform.MessagePersistence.Tests.Startup.csproj"/>
     </ItemGroup>
 
 </Project>

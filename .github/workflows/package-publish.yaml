@@ -24,7 +24,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 7.0.203
+          dotnet-version: 8.0.100
           
       - name: Create cache keys
         id: create-cache-keys
@@ -70,6 +70,7 @@ jobs:
           mv src/Itmo.Dev.Platform.BackgroundTasks/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.MessagePersistence/bin/Release/*.nupkg .packages/
   
   
   publish-github:

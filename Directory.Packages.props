@@ -5,46 +5,48 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AutoBogus" Version="2.13.1" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.2.0" />
-    <PackageVersion Include="FluentAssertions" Version="6.11.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
     <PackageVersion Include="FluentChaining" Version="1.0.4" />
-    <PackageVersion Include="FluentMigrator" Version="3.3.2" />
-    <PackageVersion Include="FluentMigrator.Runner" Version="3.3.2" />
-    <PackageVersion Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />
+    <PackageVersion Include="FluentMigrator" Version="5.0.0" />
+    <PackageVersion Include="FluentMigrator.Runner" Version="5.0.0" />
+    <PackageVersion Include="FluentMigrator.Runner.Postgres" Version="5.0.0" />
     <PackageVersion Include="FluentScanning.DependencyInjection" Version="2.0.1" />
-    <PackageVersion Include="Google.Protobuf" Version="3.23.4" />
-    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.6" />
-    <PackageVersion Include="Hangfire.PostgreSql" Version="1.20.4" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.25.2" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.9" />
+    <PackageVersion Include="Hangfire.PostgreSql" Version="1.20.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Npgsql" Version="7.0.4" />
-    <PackageVersion Include="Respawn" Version="6.1.0" />
+    <PackageVersion Include="Npgsql" Version="8.0.1" />
+    <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="ronimizy.FluentSerialization.Extensions.NewtonsoftJson" Version="1.3.0" />
-    <PackageVersion Include="Sentry.AspNetCore" Version="3.35.1" />
-    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="3.35.1" />
-    <PackageVersion Include="Sentry.Serilog" Version="3.35.1" />
-    <PackageVersion Include="Serilog" Version="3.0.1" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="7.0.0" />
+    <PackageVersion Include="Sentry.AspNetCore" Version="3.41.4" />
+    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="3.41.4" />
+    <PackageVersion Include="Sentry.Serilog" Version="3.41.4" />
+    <PackageVersion Include="Serilog" Version="3.1.1" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.0" />
     <PackageVersion Include="Serilog.Sinks.XUnit" Version="3.0.5" />
-    <PackageVersion Include="SourceKit.Generators.Builder" Version="1.0.4" />
+    <PackageVersion Include="SourceKit.Generators.Builder" Version="1.1.24" />
+    <PackageVersion Include="SourceKit.Generators.Builder.Annotations" Version="1.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
-    <PackageVersion Include="Testcontainers.Kafka" Version="3.3.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="3.3.0" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
+    <PackageVersion Include="Testcontainers.Kafka" Version="3.7.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="3.7.0" />
+    <PackageVersion Include="xunit" Version="2.6.6" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
   </ItemGroup>
 </Project>

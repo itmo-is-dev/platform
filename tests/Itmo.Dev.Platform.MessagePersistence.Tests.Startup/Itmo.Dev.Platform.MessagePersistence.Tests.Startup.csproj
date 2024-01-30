@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.MessagePersistence\Itmo.Dev.Platform.MessagePersistence.csproj"/>
+    </ItemGroup>
+
+</Project>

@@ -29,6 +29,19 @@ public static class NpgsqlCommandExtensions
         return command;
     }
 
+    public static NpgsqlCommand AddParameter<T>(
+        this NpgsqlCommand command,
+        string parameterName,
+        IEnumerable<T> values)
+    {
+        var value = values is List<T> or T[] ? values : values.ToArray();
+
+        var parameter = new NpgsqlParameter(parameterName: parameterName, value: value);
+        command.Parameters.Add(parameter);
+
+        return command;
+    }
+
     public static NpgsqlCommand AddMultiArrayStringParameter<T>(
         this NpgsqlCommand command,
         string parameterName,
@@ -97,6 +110,23 @@ public static class NpgsqlCommandExtensions
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
             // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+            NpgsqlDbType = NpgsqlDbType.Jsonb | NpgsqlDbType.Array,
+        };
+
+        command.Parameters.Add(parameter);
+
+        return command;
+    }
+
+    public static NpgsqlCommand AddJsonArrayParameter(
+        this NpgsqlCommand command,
+        string parameterName,
+        IEnumerable<string> values)
+    {
+        var value = values is List<string> or string[] ? values : values.ToArray();
+
+        var parameter = new NpgsqlParameter(parameterName: parameterName, value: value)
+        {
             NpgsqlDbType = NpgsqlDbType.Jsonb | NpgsqlDbType.Array,
         };
 

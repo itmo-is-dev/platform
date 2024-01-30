@@ -1,6 +1,6 @@
 namespace Itmo.Dev.Platform.MessagePersistence.Models;
 
-public record SerializedMessage(
+internal record SerializedMessage(
     long Id,
     string Name,
     DateTimeOffset CreatedAt,

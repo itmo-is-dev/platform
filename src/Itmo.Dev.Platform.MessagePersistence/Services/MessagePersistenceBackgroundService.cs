@@ -11,7 +11,7 @@ using System.Data;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
 
-public class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBackgroundService
+internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBackgroundService
 {
     private readonly string _messageName;
     private readonly IServiceScopeFactory _scopeFactory;

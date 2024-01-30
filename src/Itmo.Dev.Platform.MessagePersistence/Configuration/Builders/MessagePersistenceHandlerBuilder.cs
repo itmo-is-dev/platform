@@ -1,7 +1,6 @@
 using Itmo.Dev.Platform.MessagePersistence.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
 

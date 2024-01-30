@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Itmo.Dev.Platform.MessagePersistence.Persistence.Migrations;
 
 [Migration(1706633740, "Init message persistence")]
-public class Initial : SqlMigration
+internal class Initial : SqlMigration
 {
     protected override string GetUpSql(IServiceProvider serviceProvider)
     {

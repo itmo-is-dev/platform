@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
 
-public class MessagePersistenceConfigurationBuilder :
+internal class MessagePersistenceConfigurationBuilder :
     IMessagePersistencePersistenceConfigurator,
     IMessagePersistenceConfigurationBuilder
 {

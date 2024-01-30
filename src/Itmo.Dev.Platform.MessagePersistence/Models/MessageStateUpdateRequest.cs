@@ -1,8 +1,6 @@
-using Itmo.Dev.Platform.MessagePersistence.Models;
+namespace Itmo.Dev.Platform.MessagePersistence.Models;
 
-namespace Itmo.Dev.Platform.MessagePersistence.Persistence;
-
-public class MessageStateUpdateRequest
+internal class MessageStateUpdateRequest
 {
     private readonly IReadOnlyDictionary<long, MessageState> _dictionary;
 

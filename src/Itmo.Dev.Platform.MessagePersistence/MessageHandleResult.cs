@@ -1,4 +1,4 @@
-namespace Itmo.Dev.Platform.MessagePersistence.Models;
+namespace Itmo.Dev.Platform.MessagePersistence;
 
 public enum MessageHandleResult
 {

@@ -66,7 +66,7 @@ public class KafkaConsumerTests : IAsyncLifetime
 
         while (_messages.Count != messages.Length && cts.IsCancellationRequested is false)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(100), default);
+            await Task.Delay(TimeSpan.FromMilliseconds(100), CancellationToken.None);
         }
 
         Log.Information("Expected count = {Count}", messages.Length);

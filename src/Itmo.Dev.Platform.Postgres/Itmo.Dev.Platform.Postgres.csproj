@@ -38,6 +38,8 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.BackgroundTasks"/>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.BackgroundTasks.Tests"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Tests"/>
     </ItemGroup>
     
     <ItemGroup>

@@ -13,11 +13,11 @@ public class UsageScenario
         _runner = runner;
     }
 
-    public async Task StartAsync(Guid operationId, CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         await _runner
             .StartBackgroundTask
-            .WithMetadata(new StateTaskMetadata(operationId))
+            .WithMetadata(new StateTaskMetadata())
             .WithExecutionMetadata(new StateTaskExecutionMetadata())
             .RunWithAsync<StateBackgroundTask>(cancellationToken);
     }
@@ -27,8 +27,7 @@ public class UsageScenario
         var query = BackgroundTaskQuery.Build(builder => builder
             .WithName(StateBackgroundTask.Name)
             .WithState(BackgroundTaskState.Suspended)
-            .WithMetadata(new StateTaskMetadata(operationId))
-            .WithExecutionMetadata(new StateTaskExecutionMetadata { State = new WaitingFirstState() }));
+            .WithExecutionMetadata(new StateTaskExecutionMetadata { State = new WaitingFirstState(operationId) }));
 
         await _runner
             .ProceedBackgroundTask

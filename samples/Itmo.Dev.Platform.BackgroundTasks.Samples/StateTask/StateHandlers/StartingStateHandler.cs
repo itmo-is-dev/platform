@@ -12,7 +12,7 @@ public class StartingStateHandler : IStateHandler<StartingState>
         CancellationToken cancellationToken)
     {
         var result = new StateHandlerResult.FinishedWithResult(
-            new WaitingFirstState(),
+            new WaitingFirstState(Guid.NewGuid()),
             BackgroundTaskExecutionResult.Suspended.ForEmptyResult().ForError<StateTaskError>());
 
         return ValueTask.FromResult<StateHandlerResult>(result);

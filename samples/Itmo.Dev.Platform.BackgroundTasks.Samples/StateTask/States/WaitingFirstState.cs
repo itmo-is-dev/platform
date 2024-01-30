@@ -1,3 +1,3 @@
 namespace Itmo.Dev.Platform.BackgroundTasks.Samples.StateTask.States;
 
-public sealed record WaitingFirstState : TaskState;
+public sealed record WaitingFirstState(Guid OperationId) : TaskState;

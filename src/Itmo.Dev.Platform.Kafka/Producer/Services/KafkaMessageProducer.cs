@@ -1,7 +1,6 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Configuration;
-using Itmo.Dev.Platform.Kafka.Producer.Models;
-using Itmo.Dev.Platform.Kafka.QualifiedServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,30 +9,35 @@ namespace Itmo.Dev.Platform.Kafka.Producer.Services;
 internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>, IDisposable
 {
     private readonly ILogger<KafkaMessageProducer<TKey, TValue>> _logger;
-    private readonly IKafkaProducerConfiguration _configuration;
     private readonly IProducer<TKey, TValue> _producer;
+    private readonly KafkaProducerOptions _options;
 
     public KafkaMessageProducer(
+        string topicName,
         IServiceProvider provider,
-        ILogger<KafkaMessageProducer<TKey, TValue>> logger,
-        IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration> configurationResolver,
-        IOptionsSnapshot<KafkaConfiguration> kafkaConfiguration,
-        ISerializer<TKey>? keySerializer = null,
-        ISerializer<TValue>? valueSerializer = null)
+        ILogger<KafkaMessageProducer<TKey, TValue>> logger)
     {
         _logger = logger;
-        _configuration = configurationResolver.Resolve(provider);
+
+        var consumerOptionsMonitor = provider.GetRequiredService<IOptionsMonitor<KafkaProducerOptions>>();
+        var kafkaOptionsMonitor = provider.GetRequiredService<IOptionsMonitor<PlatformKafkaOptions>>();
+
+        _options = consumerOptionsMonitor.Get(topicName);
+        var kafkaOptions = kafkaOptionsMonitor.CurrentValue;
+
+        var keySerializer = provider.GetRequiredKeyedService<ISerializer<TKey>>(topicName);
+        var valueSerializer = provider.GetRequiredKeyedService<ISerializer<TValue>>(topicName);
 
         var config = new ProducerConfig
         {
-            BootstrapServers = kafkaConfiguration.Value.Host,
-            SecurityProtocol = kafkaConfiguration.Value.SecurityProtocol,
-            SslCaPem = kafkaConfiguration.Value.SslCaPem,
-            SaslMechanism = kafkaConfiguration.Value.SaslMechanism,
-            SaslUsername = kafkaConfiguration.Value.SaslUsername,
-            SaslPassword = kafkaConfiguration.Value.SaslPassword,
+            BootstrapServers = kafkaOptions.Host,
+            SecurityProtocol = kafkaOptions.SecurityProtocol,
+            SslCaPem = kafkaOptions.SslCaPem,
+            SaslMechanism = kafkaOptions.SaslMechanism,
+            SaslUsername = kafkaOptions.SaslUsername,
+            SaslPassword = kafkaOptions.SaslPassword,
 
-            MessageMaxBytes = _configuration.MessageMaxBytes,
+            MessageMaxBytes = _options.MessageMaxBytes,
         };
 
         _producer = new ProducerBuilder<TKey, TValue>(config)
@@ -43,7 +47,7 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
     }
 
     public async Task ProduceAsync(
-        IAsyncEnumerable<ProducerKafkaMessage<TKey, TValue>> messages,
+        IAsyncEnumerable<KafkaProducerMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken)
     {
         try
@@ -56,12 +60,12 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
                     Value = producerKafkaMessage.Value,
                 };
 
-                await _producer.ProduceAsync(_configuration.Topic, message, cancellationToken);
+                await _producer.ProduceAsync(_options.Topic, message, cancellationToken);
             }
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error producing in topic {Topic}", _configuration.Topic);
+            _logger.LogError(e, "Error producing in topic {Topic}", _options.Topic);
             throw;
         }
     }

@@ -64,6 +64,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.MessagePe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.MessagePersistence.Tests.Startup", "tests\Itmo.Dev.Platform.MessagePersistence.Tests.Startup\Itmo.Dev.Platform.MessagePersistence.Tests.Startup.csproj", "{4B7844A6-605C-438D-8B6F-5CD2182DFE62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Kafka.Tests.Startup", "tests\Itmo.Dev.Platform.Kafka.Tests.Startup\Itmo.Dev.Platform.Kafka.Tests.Startup.csproj", "{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -146,6 +148,10 @@ Global
 		{4B7844A6-605C-438D-8B6F-5CD2182DFE62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B7844A6-605C-438D-8B6F-5CD2182DFE62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B7844A6-605C-438D-8B6F-5CD2182DFE62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -168,5 +174,6 @@ Global
 		{99D38A59-B2D8-4686-B092-91DC269C6147} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{18F6313E-9363-462C-9514-53C9CD5628FB} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 		{4B7844A6-605C-438D-8B6F-5CD2182DFE62} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
+		{9F2EF323-9C3D-4656-AB12-ADEB1C2727B2} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 	EndGlobalSection
 EndGlobal

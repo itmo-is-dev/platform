@@ -1,5 +1,5 @@
 using Google.Protobuf;
-using Itmo.Dev.Platform.Kafka.Producer.Builders;
+using Itmo.Dev.Platform.Kafka.Producer;
 using Itmo.Dev.Platform.Kafka.Tools;
 
 namespace Itmo.Dev.Platform.Kafka.Extensions;
@@ -13,7 +13,7 @@ public static class SerializerSelectorExtensions
         return selector.SerializeKeyWith<ProtobufValueSerializer<TKey>>();
     }
 
-    public static IProducerConfigurationSelector<TKey, TValue> SerializeValueWithProto<TKey, TValue>(
+    public static IOutboxProducerBuilder SerializeValueWithProto<TKey, TValue>(
         this IProducerValueSerializerSelector<TKey, TValue> selector)
         where TValue : IMessage<TValue>, new()
     {
@@ -26,7 +26,7 @@ public static class SerializerSelectorExtensions
         return selector.SerializeKeyWith<NewtonsoftJsonValueSerializer<TKey>>();
     }
 
-    public static IProducerConfigurationSelector<TKey, TValue> SerializeValueWithNewtonsoft<TKey, TValue>(
+    public static IOutboxProducerBuilder SerializeValueWithNewtonsoft<TKey, TValue>(
         this IProducerValueSerializerSelector<TKey, TValue> selector)
     {
         return selector.SerializeValueWith<NewtonsoftJsonValueSerializer<TValue>>();

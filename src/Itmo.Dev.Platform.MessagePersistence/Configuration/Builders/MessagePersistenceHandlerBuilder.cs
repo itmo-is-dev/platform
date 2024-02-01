@@ -93,9 +93,21 @@ internal class MessagePersistenceHandlerConfigurator<TKey, TValue> :
         _collection = collection;
     }
 
-    public IMessagePersistenceHandlerBuilder HandleBy<THandler>() where THandler : class, IMessagePersistenceHandler<TKey, TValue>
+    public IMessagePersistenceHandlerBuilder HandleBy<THandler>()
+        where THandler : class, IMessagePersistenceHandler<TKey, TValue>
     {
         _collection.AddKeyedScoped<IMessagePersistenceHandler<TKey, TValue>, THandler>(_name);
+
+        return new MessagePersistenceHandlerBuilder<TKey, TValue, THandler>(_name, _collection);
+    }
+
+    public IMessagePersistenceHandlerBuilder HandleBy<THandler>(
+        Func<IServiceProvider, string, THandler> implementationFactory)
+        where THandler : class, IMessagePersistenceHandler<TKey, TValue>
+    {
+        _collection.AddKeyedScoped<IMessagePersistenceHandler<TKey, TValue>, THandler>(
+            _name,
+            (p, _) => implementationFactory.Invoke(p, _name));
 
         return new MessagePersistenceHandlerBuilder<TKey, TValue, THandler>(_name, _collection);
     }

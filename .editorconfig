@@ -34,7 +34,7 @@ dotnet_diagnostic.ide0010.severity = suggestion
 
 # IDE0011
 dotnet_diagnostic.ide0011.severity = warning
-csharp_prefer_braces = when_multiline:warning
+csharp_prefer_braces = when_multiline:suggestion
 
 # IDE0016
 dotnet_diagnostic.ide0016.severity = warning

@@ -1,5 +1,3 @@
-using Itmo.Dev.Platform.MessagePersistence.Models;
-
 namespace Itmo.Dev.Platform.MessagePersistence;
 
 public interface IMessage<out TKey, out TValue>

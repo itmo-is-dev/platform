@@ -6,9 +6,14 @@ using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Configuration;
+using Itmo.Dev.Platform.MessagePersistence.Extensions;
+using Itmo.Dev.Platform.Postgres.Extensions;
+using Itmo.Dev.Platform.Postgres.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,38 +23,44 @@ namespace Itmo.Dev.Platform.Kafka.Tests;
 #pragma warning disable CA1506
 
 [Collection(nameof(KafkaCollectionFixture))]
-public class KafkaConsumerTests : IAsyncLifetime
+public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixture>
 {
-    private const string TopicName = $"{nameof(KafkaConsumerTests)}_topic";
+    private const string TopicName = $"{nameof(KafkaInboxTests)}_topic";
 
     private readonly KafkaFixture _kafkaFixture;
+    private readonly KafkaDatabaseFixture _databaseFixture;
 
-    public KafkaConsumerTests(KafkaFixture kafkaFixture, ITestOutputHelper output)
+    public KafkaInboxTests(KafkaFixture kafkaFixture, ITestOutputHelper output, KafkaDatabaseFixture databaseFixture)
     {
         Log.Logger = new LoggerConfiguration()
             .WriteTo.TestOutput(output)
             .CreateLogger();
 
         _kafkaFixture = kafkaFixture;
+        _databaseFixture = databaseFixture;
     }
 
     [Theory]
     [MemberData(nameof(GetMessages))]
-    public async Task Consume_ShouldConsume_WhenMessageProduced(int bufferSize, Message<int, string>[] messages)
+    public async Task Consume_ShouldConsume_WhenMessageProducedToInbox(int bufferSize, Message<int, string>[] messages)
     {
         // Arrange
+        await using var fixtureScope = _databaseFixture.Scope;
         var testContext = new TestContext<int, string>();
 
         void ConfigureAppConfiguration(IConfigurationBuilder configuration)
         {
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                [nameof(KafkaConsumerOptions.Topic)] = TopicName,
-                [nameof(KafkaConsumerOptions.Group)] = nameof(KafkaConsumerTests),
-                [nameof(KafkaConsumerOptions.InstanceId)] = nameof(KafkaConsumerTests),
-                [nameof(KafkaConsumerOptions.DisabledConsumerTimeout)] = "00:00:10",
-                [nameof(KafkaConsumerOptions.BufferWaitLimit)] = "00:00:00.200",
-                [nameof(KafkaConsumerOptions.BufferSize)] = bufferSize.ToString(),
+                ["MessagePersistence:SchemaName"] = "message_persistence",
+                [$"Consumer:{nameof(KafkaConsumerOptions.Topic)}"] = TopicName,
+                [$"Consumer:{nameof(KafkaConsumerOptions.Group)}"] = nameof(KafkaInboxTests),
+                [$"Consumer:{nameof(KafkaConsumerOptions.InstanceId)}"] = nameof(KafkaInboxTests),
+                [$"Consumer:{nameof(KafkaConsumerOptions.DisabledConsumerTimeout)}"] = "00:00:10",
+                [$"Consumer:{nameof(KafkaConsumerOptions.BufferWaitLimit)}"] = "00:00:00.200",
+                [$"Consumer:{nameof(KafkaConsumerOptions.BufferSize)}"] = bufferSize.ToString(),
+                [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
+                [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
             });
         }
 
@@ -57,21 +68,30 @@ public class KafkaConsumerTests : IAsyncLifetime
         {
             collection.AddSingleton(testContext);
 
+            collection.AddPlatformMessagePersistence(builder => builder
+                .ConfigurePersistence(configuration.GetSection("MessagePersistence")));
+
             collection.AddKafka(builder => builder
                 .ConfigureTestOptions(_kafkaFixture.Host)
                 .AddConsumer(b => b
                     .WithKey<int>()
                     .WithValue<string>()
-                    .WithConfiguration(configuration)
+                    .WithConfiguration(configuration.GetSection("Consumer"))
                     .DeserializeKeyWithNewtonsoft()
                     .DeserializeValueWithNewtonsoft()
-                    .HandleWith<CollectionConsumerHandler<int, string>>()));
+                    .HandleInboxWith<CollectionInboxHandler<int, string>>()));
+
+            var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+
+            collection.AddPlatformPostgres(_ => { });
+            collection.RemoveAll<PostgresConnectionString>();
+            collection.AddSingleton(connectionString);
 
             collection.AddLogging(x => x.AddSerilog());
             collection.AddOptions();
         }
 
-        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(hostBuilder => hostBuilder
+        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(hb => hb
             .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
             .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
 
@@ -96,7 +116,7 @@ public class KafkaConsumerTests : IAsyncLifetime
         // Act
 
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
+        // cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
 
         while (testContext.Messages.Count != messages.Length && cts.IsCancellationRequested is false)
         {
@@ -123,7 +143,7 @@ public class KafkaConsumerTests : IAsyncLifetime
         yield return
         [
             1,
-            new[]
+            new object[]
             {
                 new Message<int, string>
                 {
@@ -136,7 +156,7 @@ public class KafkaConsumerTests : IAsyncLifetime
         yield return
         [
             10,
-            new[]
+            new object[]
             {
                 new Message<int, string>
                 {

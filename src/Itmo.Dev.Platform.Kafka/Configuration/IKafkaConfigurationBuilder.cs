@@ -5,7 +5,7 @@ namespace Itmo.Dev.Platform.Kafka.Configuration;
 
 public interface IKafkaConfigurationOptionsSelector
 {
-    IKafkaConfigurationBuilder ConfigureOptions(Action<OptionsBuilder<KafkaConfiguration>> configuration);
+    IKafkaConfigurationBuilder ConfigureOptions(Action<OptionsBuilder<PlatformKafkaOptions>> configuration);
 }
 
 public interface IKafkaConfigurationBuilder

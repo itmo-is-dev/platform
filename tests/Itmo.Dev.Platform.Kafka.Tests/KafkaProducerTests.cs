@@ -2,16 +2,18 @@ using Confluent.Kafka;
 using FluentAssertions;
 using Itmo.Dev.Platform.Kafka.Extensions;
 using Itmo.Dev.Platform.Kafka.Producer;
-using Itmo.Dev.Platform.Kafka.Producer.Models;
 using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Kafka.Tests;
+
+#pragma warning disable CA1506
 
 [Collection(nameof(KafkaCollectionFixture))]
 public class KafkaProducerTests : IAsyncLifetime
@@ -31,19 +33,26 @@ public class KafkaProducerTests : IAsyncLifetime
 
     [Theory]
     [MemberData(nameof(GetMessages))]
-    public async Task ProduceAsync_ShouldWriteMessage(ProducerKafkaMessage<int, string>[] messages)
+    public async Task ProduceAsync_ShouldWriteMessage(KafkaProducerMessage<int, string>[] messages)
     {
         // Arrange
         var collection = new ServiceCollection();
 
-        collection.AddObjectAsOptions(new Configuration());
+        var configuration = new ConfigurationManager();
+
+        configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            [nameof(KafkaProducerOptions.Topic)] = TopicName,
+        });
 
         collection.AddKafka(builder => builder
             .ConfigureTestOptions(_kafkaFixture.Host)
-            .AddProducer<int, string>(b => b
+            .AddProducer(b => b
+                .WithKey<int>()
+                .WithValue<string>()
+                .WithConfiguration(configuration)
                 .SerializeKeyWithNewtonsoft()
-                .SerializeValueWithNewtonsoft()
-                .UseConfiguration<Configuration>()));
+                .SerializeValueWithNewtonsoft()));
 
         collection.AddLogging();
         collection.AddSerilog();
@@ -65,9 +74,10 @@ public class KafkaProducerTests : IAsyncLifetime
             .Build();
 
         consumer.Subscribe(TopicName);
+        
+        await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
 
         // Act
-        await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
 
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
@@ -94,25 +104,28 @@ public class KafkaProducerTests : IAsyncLifetime
                     opt => opt
                         .Including(x => x.Key)
                         .Including(x => x.Value)));
+        
+        // Dispose
+        consumer.Close();
     }
 
     public static IEnumerable<object[]> GetMessages()
     {
-        yield return new object[]
-        {
+        yield return
+        [
             new[]
             {
-                new ProducerKafkaMessage<int, string>(1, "aboba"),
+                new KafkaProducerMessage<int, string>(1, "aboba"),
             },
-        };
+        ];
 
-        yield return new object[]
-        {
+        yield return
+        [
             Enumerable
                 .Range(0, 10)
-                .Select(i => new ProducerKafkaMessage<int, string>(i, i.ToString()))
+                .Select(i => new KafkaProducerMessage<int, string>(i, i.ToString()))
                 .ToArray(),
-        };
+        ];
     }
 
     public async Task InitializeAsync()
@@ -123,10 +136,5 @@ public class KafkaProducerTests : IAsyncLifetime
     public Task DisposeAsync()
     {
         return Task.CompletedTask;
-    }
-
-    public class Configuration : IKafkaProducerConfiguration
-    {
-        public string Topic => TopicName;
     }
 }

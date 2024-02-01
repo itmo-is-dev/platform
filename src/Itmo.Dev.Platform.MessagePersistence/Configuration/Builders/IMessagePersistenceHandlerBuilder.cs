@@ -26,7 +26,11 @@ public interface IMessagePersistenceValueConfigurator<out TKey>
 
 public interface IMessagePersistenceHandlerConfigurator<out TKey, out TValue>
 {
-    IMessagePersistenceHandlerBuilder HandleBy<THandler>() where THandler : class, IMessagePersistenceHandler<TKey, TValue>;
+    IMessagePersistenceHandlerBuilder HandleBy<THandler>()
+        where THandler : class, IMessagePersistenceHandler<TKey, TValue>;
+
+    IMessagePersistenceHandlerBuilder HandleBy<THandler>(Func<IServiceProvider, string, THandler> implementationFactory)
+        where THandler : class, IMessagePersistenceHandler<TKey, TValue>;
 }
 
 public interface IMessagePersistenceHandlerBuilder

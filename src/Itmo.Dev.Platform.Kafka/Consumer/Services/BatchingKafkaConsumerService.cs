@@ -1,133 +1,111 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Common.BackgroundServices;
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Tools;
 using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
-using Itmo.Dev.Platform.Kafka.QualifiedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Serilog;
 using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
 
-internal sealed class BatchingKafkaConsumerService<TKey, TValue> : KafkaConsumerServiceBase<TKey, TValue>
+internal sealed class BatchingKafkaConsumerService<TKey, TValue> : RestartableBackgroundService
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    private readonly ILogger<BatchingKafkaConsumerService<TKey, TValue>> _logger;
+    private readonly IDeserializer<TKey>? _keyDeserializer;
+    private readonly IDeserializer<TValue>? _valueDeserializer;
+
+    private readonly string _topicName;
+
     public BatchingKafkaConsumerService(
-        IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration> optionsResolver,
-        IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>> handlerResolver,
+        string topicName,
         IServiceProvider serviceProvider,
         IServiceScopeFactory scopeFactory,
-        ILogger<BatchingKafkaConsumerService<TKey, TValue>> logger,
-        IDeserializer<TKey> keyDeserializer,
-        IDeserializer<TValue> valueDeserializer)
-        : base(
-            optionsResolver,
-            handlerResolver,
-            serviceProvider,
-            scopeFactory,
-            logger,
-            keyDeserializer,
-            valueDeserializer) { }
+        ILogger<BatchingKafkaConsumerService<TKey, TValue>> logger)
+    {
+        _topicName = topicName;
+        _serviceProvider = serviceProvider;
+        _scopeFactory = scopeFactory;
+        _logger = logger;
+        _keyDeserializer = serviceProvider.GetKeyedService<IDeserializer<TKey>>(_topicName);
+        _valueDeserializer = serviceProvider.GetKeyedService<IDeserializer<TValue>>(_topicName);
+    }
 
-    protected override async Task ExecuteSingleAsync(
-        KafkaConfiguration kafkaConfiguration,
-        IKafkaConsumerConfiguration configuration,
-        IServiceScopeFactory scopeFactory,
+    protected override async Task ExecuteAsync(CancellationTokenSource cts)
+    {
+        var consumerOptionsMonitor = _serviceProvider.GetRequiredService<IOptionsMonitor<KafkaConsumerOptions>>();
+        var kafkaOptionsMonitor = _serviceProvider.GetRequiredService<IOptionsMonitor<PlatformKafkaOptions>>();
+
+        using var _1 = consumerOptionsMonitor.OnNamedChange(_topicName, _ => cts.Cancel());
+        using var _2 = kafkaOptionsMonitor.OnNamedChange(_topicName, _ => cts.Cancel());
+
+        var consumerOptions = consumerOptionsMonitor.Get(_topicName);
+        var kafkaOptions = kafkaOptionsMonitor.CurrentValue;
+
+        while (cts.IsCancellationRequested is false)
+        {
+            if (await CheckDisabledAsync(consumerOptions, cts.Token))
+                continue;
+
+            try
+            {
+                await ExecuteSingleAsync(kafkaOptions, consumerOptions, cts.Token);
+            }
+            catch (Exception e) when
+                (e is not OperationCanceledException or TaskCanceledException && cts.IsCancellationRequested is false)
+            {
+                _logger.LogError(e, "Failed to consume messages");
+            }
+        }
+    }
+
+    private async Task ExecuteSingleAsync(
+        PlatformKafkaOptions kafkaOptions,
+        KafkaConsumerOptions consumerOptions,
         CancellationToken cancellationToken)
     {
-        var channelOptions = new BoundedChannelOptions(configuration.BufferSize * 2)
+        var channelOptions = new BoundedChannelOptions(consumerOptions.BufferSize * 2)
         {
-            SingleReader = configuration.ParallelismDegree is 1,
+            SingleReader = consumerOptions.ParallelismDegree is 1,
             SingleWriter = true,
             FullMode = BoundedChannelFullMode.Wait,
         };
 
-        var channel = Channel.CreateBounded<InternalConsumerMessage<TKey, TValue>>(channelOptions);
+        var channel = Channel.CreateBounded<KafkaConsumerMessage<TKey, TValue>>(channelOptions);
+
+        var messageReader = new ConsumerMessageReader<TKey, TValue>(
+            kafkaOptions,
+            consumerOptions,
+            _keyDeserializer,
+            _valueDeserializer);
+
+        var messageHandler = new ConsumerMessageHandler<TKey, TValue>(
+            consumerOptions,
+            _scopeFactory);
 
         await ParallelAction.ExecuteAsync(
             cancellationToken,
-            new ParallelAction(
-                1,
-                c => WriteMessagesAsync(kafkaConfiguration, configuration, channel.Writer, c)),
-            new ParallelAction(configuration.ParallelismDegree, HandleMessagesSingleAsync));
-
-        return;
-
-        async Task HandleMessagesSingleAsync(CancellationToken c)
-        {
-            await using var scope = scopeFactory.CreateAsyncScope();
-
-            var options = OptionsResolver.Resolve(scope.ServiceProvider);
-            var handler = HandlerResolver.Resolve(scope.ServiceProvider);
-
-            await HandleMessagesAsync(options, channel.Reader, handler, c);
-        }
+            new ParallelAction(1, c => messageReader.ReadAsync(channel.Writer, c)),
+            new ParallelAction(consumerOptions.ParallelismDegree, c => messageHandler.HandleAsync(channel.Reader, c)));
     }
 
-    private async Task WriteMessagesAsync(
-        KafkaConfiguration kafkaConfiguration,
-        IKafkaConsumerConfiguration configuration,
-        ChannelWriter<InternalConsumerMessage<TKey, TValue>> writer,
-        CancellationToken cancellationToken)
+    private async Task<bool> CheckDisabledAsync(KafkaConsumerOptions options, CancellationToken stoppingToken)
     {
-        await Task.Yield();
+        if (options.IsDisabled is false)
+            return false;
 
-        var consumerConfiguration = new ConsumerConfig
-        {
-            BootstrapServers = kafkaConfiguration.Host,
-            SecurityProtocol = kafkaConfiguration.SecurityProtocol,
-            SslCaPem = kafkaConfiguration.SslCaPem,
-            SaslMechanism = kafkaConfiguration.SaslMechanism,
-            SaslUsername = kafkaConfiguration.SaslUsername,
-            SaslPassword = kafkaConfiguration.SaslPassword,
+        _logger.LogInformation(
+            "Consumer for topic {Topic} is disabled, waiting for {Span}s",
+            options.Topic,
+            options.DisabledConsumerTimeout);
 
-            GroupId = configuration.Group,
-            GroupInstanceId = configuration.InstanceId,
-            AutoOffsetReset = configuration.ReadLatest ? AutoOffsetReset.Latest : AutoOffsetReset.Earliest,
-            EnableAutoCommit = false,
-        };
-
-        using IConsumer<TKey, TValue> consumer = new ConsumerBuilder<TKey, TValue>(consumerConfiguration)
-            .SetKeyDeserializer(KeyDeserializer)
-            .SetValueDeserializer(ValueDeserializer)
-            .Build();
-
-        consumer.Subscribe(configuration.Topic);
-
-        while (cancellationToken.IsCancellationRequested is false)
-        {
-            ConsumeResult<TKey, TValue> result = consumer.Consume(cancellationToken);
-            var message = new InternalConsumerMessage<TKey, TValue>(result, consumer);
-
-            await writer.WriteAsync(message, cancellationToken);
-        }
-    }
-
-    private static async Task HandleMessagesAsync(
-        IKafkaConsumerConfiguration configuration,
-        ChannelReader<InternalConsumerMessage<TKey, TValue>> reader,
-        IKafkaMessageHandler<TKey, TValue> handler,
-        CancellationToken cancellationToken)
-    {
-        await Task.Yield();
-
-        var enumerable = reader
-            .ReadAllAsync(cancellationToken)
-            .ChunkAsync(configuration.BufferSize, configuration.BufferWaitLimit);
-
-        await foreach (var chunk in enumerable)
-        {
-            var consumerMessages = chunk
-                .Where(x => x.Message.Value is not null)
-                .ToArray();
-
-            var messages = consumerMessages.Select(x => x.Message);
-            await handler.HandleAsync(messages, cancellationToken);
-
-            foreach (var consumerMessage in consumerMessages)
-            {
-                consumerMessage.Commit();
-            }
-        }
+        await Task.Delay(options.DisabledConsumerTimeout, stoppingToken);
+        return true;
     }
 }

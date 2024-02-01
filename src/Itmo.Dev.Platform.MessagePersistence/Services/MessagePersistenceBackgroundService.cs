@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Common.BackgroundServices;
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
@@ -32,12 +33,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
         await using var scope = _scopeFactory.CreateAsyncScope();
 
         var monitor = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<MessagePersistenceHandlerOptions>>();
-
-        using var monitorSubscription = monitor.OnChange((_, name) =>
-        {
-            if (string.Equals(name, _messageName, StringComparison.OrdinalIgnoreCase))
-                cts.Cancel();
-        });
+        using var monitorSubscription = monitor.OnNamedChange(_messageName, _ => cts.Cancel());
 
         var handlerOptions = monitor.Get(_messageName);
 
@@ -80,7 +76,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             if (serializedMessages is [])
             {
                 await transaction.CommitAsync(cancellationToken);
-                
+
                 await Task.Delay(options.PollingDelay, cancellationToken);
                 continue;
             }
@@ -89,7 +85,9 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             var messages = MapMessages(serializedMessages, messageStates, options, provider).ToArray();
 
             await using var scope = _scopeFactory.CreateAsyncScope();
-            var handler = scope.ServiceProvider.GetRequiredKeyedService<IMessagePersistenceHandler<TKey, TValue>>(_messageName);
+
+            var handler = scope.ServiceProvider
+                .GetRequiredKeyedService<IMessagePersistenceHandler<TKey, TValue>>(_messageName);
 
             await handler.HandleAsync(messages, cancellationToken);
 
@@ -103,6 +101,9 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
                     _ => throw new ArgumentOutOfRangeException(),
                 };
             }
+
+            var request = new MessageStateUpdateRequest(messageStates);
+            await repository.UpdateStatesAsync(request, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 

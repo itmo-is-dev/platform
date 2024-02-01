@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Kafka.Configuration;
 
-public class KafkaConfiguration : IValidatableObject
+public class PlatformKafkaOptions : IValidatableObject
 {
     public string Host { get; set; } = null!;
 

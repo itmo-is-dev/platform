@@ -1,12 +1,12 @@
-using Itmo.Dev.Platform.Kafka.Consumer.Models;
+using Itmo.Dev.Platform.Kafka.Consumer;
 
 namespace Itmo.Dev.Platform.Kafka.Extensions;
 
 public static class ConsumerMessageExtensions
 {
-    public static IEnumerable<ConsumerKafkaMessage<TKey, TValue>> GetLatestBy<TKey, TValue, TSelector>(
-        this IEnumerable<ConsumerKafkaMessage<TKey, TValue>> messages,
-        Func<ConsumerKafkaMessage<TKey, TValue>, TSelector> selector)
+    public static IEnumerable<IKafkaConsumerMessage<TKey, TValue>> GetLatestBy<TKey, TValue, TSelector>(
+        this IEnumerable<IKafkaConsumerMessage<TKey, TValue>> messages,
+        Func<IKafkaConsumerMessage<TKey, TValue>, TSelector> selector)
     {
         return messages.GroupBy(
             selector,
@@ -16,8 +16,8 @@ public static class ConsumerMessageExtensions
                 .First());
     }
 
-    public static IEnumerable<ConsumerKafkaMessage<TKey, TValue>> GetLatestByKey<TKey, TValue>(
-        this IEnumerable<ConsumerKafkaMessage<TKey, TValue>> messages)
+    public static IEnumerable<IKafkaConsumerMessage<TKey, TValue>> GetLatestByKey<TKey, TValue>(
+        this IEnumerable<IKafkaConsumerMessage<TKey, TValue>> messages)
     {
         return messages.GetLatestBy(x => x.Key);
     }

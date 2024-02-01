@@ -1,4 +1,3 @@
-using Itmo.Dev.Platform.MessagePersistence.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration;

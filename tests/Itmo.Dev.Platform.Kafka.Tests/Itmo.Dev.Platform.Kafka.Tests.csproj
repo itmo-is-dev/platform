@@ -12,6 +12,7 @@
     <ItemGroup>
         <PackageReference Include="FluentAssertions"/>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="Moq"/>
         <PackageReference Include="Serilog.AspNetCore"/>
@@ -31,6 +32,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj"/>
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Platform.Kafka.Tests.Startup\Itmo.Dev.Platform.Kafka.Tests.Startup.csproj" />
     </ItemGroup>
 
 </Project>

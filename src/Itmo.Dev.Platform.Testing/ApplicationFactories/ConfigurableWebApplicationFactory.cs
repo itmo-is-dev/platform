@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -16,9 +17,12 @@ public abstract class ConfigurableWebApplicationFactory<TStartup> : WebApplicati
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseContentRoot(Environment.CurrentDirectory)
-            .ConfigureServices(ConfigureServices)
+            .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration))
+            .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .UseStartup<TStartup>();
     }
 
-    protected virtual void ConfigureServices(IServiceCollection collection) { }
+    protected virtual void ConfigureServices(IServiceCollection collection, IConfiguration configuration) { }
+
+    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configuration) { }
 }

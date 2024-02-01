@@ -1,166 +1,150 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Common.Models;
+using Itmo.Dev.Platform.Kafka.Consumer.Inbox;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.Consumer.Services;
-using Itmo.Dev.Platform.Kafka.QualifiedServices;
+using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Builders;
+
+internal class ConsumerKeySelector : IConsumerKeySelector
+{
+    private readonly IServiceCollection _collection;
+
+    public ConsumerKeySelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IConsumerValueSelector<TKey> WithKey<TKey>()
+        => new ConsumerValueSelector<TKey>(_collection);
+}
+
+internal class ConsumerValueSelector<TKey> : IConsumerValueSelector<TKey>
+{
+    private readonly IServiceCollection _collection;
+
+    public ConsumerValueSelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IConsumerConfigurationSelector<TKey, TValue> WithValue<TValue>()
+        => new ConsumerConfigurationSelector<TKey, TValue>(_collection);
+}
+
+internal class ConsumerConfigurationSelector<TKey, TValue> : IConsumerConfigurationSelector<TKey, TValue>
+{
+    private readonly IServiceCollection _collection;
+
+    public ConsumerConfigurationSelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IConsumerKeyDeserializerSelector<TKey, TValue> WithConfiguration(
+        IConfiguration configuration,
+        Action<KafkaConsumerOptions>? action = null)
+    {
+        var topicSection = configuration.GetSection("Topic");
+        var topicName = topicSection.Value;
+
+        if (string.IsNullOrEmpty(topicName))
+            throw new InvalidOperationException("Topic name is not specified");
+
+        var builder = _collection
+            .AddOptions<KafkaConsumerOptions>(topicName)
+            .Bind(configuration)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        if (action is not null)
+            builder.Configure(action);
+
+        return new ConsumerBuilder<TKey, TValue>(_collection, topicName, configuration);
+    }
+}
 
 internal class ConsumerBuilder<TKey, TValue> :
     IConsumerHandlerSelector<TKey, TValue>,
     IConsumerKeyDeserializerSelector<TKey, TValue>,
     IConsumerValueDeserializerSelector<TKey, TValue>,
-    IConsumerConfigurationSelector<TKey, TValue>,
     IConsumerBuilder
 {
-    private Func<IServiceCollection, IServiceCollection> _action;
+    private readonly IServiceCollection _collection;
+    private readonly string _topicName;
+    private readonly IConfiguration _configuration;
 
-    public ConsumerBuilder()
+    public ConsumerBuilder(IServiceCollection collection, string topicName, IConfiguration configuration)
     {
-        _action = x => x;
-    }
-
-    public IConsumerKeyDeserializerSelector<TKey, TValue> HandleWith<T>()
-        where T : class, IKafkaMessageHandler<TKey, TValue>
-    {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-
-            collection.TryAddScoped<T>();
-
-            collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>>>(
-                new TypeKeyValueQualifiedService<TKey, TValue, IKafkaMessageHandler<TKey, TValue>>(typeof(T)));
-
-            return collection;
-        };
-
-        return this;
+        _collection = collection;
+        _topicName = topicName;
+        _configuration = configuration;
     }
 
     public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith<T>() where T : class, IDeserializer<TKey>
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton<IDeserializer<TKey>, T>();
-        };
-
+        _collection.AddKeyedSingleton<IDeserializer<TKey>, T>(_topicName);
         return this;
     }
 
     public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith(IDeserializer<TKey> deserializer)
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton(deserializer);
-        };
-
+        _collection.AddKeyedSingleton(_topicName, deserializer);
         return this;
     }
 
     public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyByDefault()
+        => this;
+
+    public IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith<T>() where T : class, IDeserializer<TValue>
     {
+        _collection.AddKeyedSingleton<IDeserializer<TValue>, T>(_topicName);
         return this;
     }
 
-    public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueWith<T>() where T : class, IDeserializer<TValue>
+    public IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith(IDeserializer<TValue> deserializer)
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton<IDeserializer<TValue>, T>();
-        };
-
+        _collection.AddKeyedSingleton(_topicName, deserializer);
         return this;
     }
 
-    public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueWith(IDeserializer<TValue> deserializer)
+    public IConsumerHandlerSelector<TKey, TValue> DeserializeValueByDefault()
+        => this;
+
+    public IConsumerBuilder HandleWith<T>()
+        where T : class, IKafkaConsumerHandler<TKey, TValue>
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-
-            return collection.AddSingleton(deserializer);
-        };
-
+        _collection.AddKeyedScoped<IKafkaConsumerHandler<TKey, TValue>, T>(_topicName);
         return this;
     }
 
-    public IConsumerConfigurationSelector<TKey, TValue> DeserializeValueByDefault()
+    public IConsumerBuilder HandleInboxWith<T>() where T : class, IKafkaInboxHandler<TKey, TValue>
     {
-        return this;
-    }
+        var messageName = $"_platform_kafka_inbox_{_topicName}";
 
-    public IConsumerBuilder UseConfiguration<T>() where T : class, IKafkaConsumerConfiguration
-    {
-        var action = _action;
+        _collection.AddKeyedScoped<IKafkaConsumerHandler<TKey, TValue>>(
+            _topicName,
+            (p, _) => ActivatorUtilities.CreateInstance<InboxConsumerHandler<TKey, TValue>>(p, messageName));
 
-        _action = collection =>
-        {
-            action(collection);
+        _collection.AddKeyedScoped<IKafkaInboxHandler<TKey, TValue>, T>(_topicName);
 
-            var s = new OptionsQualifiedService<TKey, TValue, T>();
-            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>(s);
-        };
+        _collection.AddPlatformMessagePersistenceHandler(builder => builder
+            .Called(messageName)
+            .WithConfiguration(_configuration.GetSection("Inbox"))
+            .WithKey<Unit>()
+            .WithValue<KafkaConsumerMessage<TKey, TValue>>()
+            .HandleBy<InboxMessagePersistenceHandler<TKey, TValue>>((p, _) =>
+                ActivatorUtilities.CreateInstance<InboxMessagePersistenceHandler<TKey, TValue>>(p, _topicName)));
 
         return this;
     }
 
-    public IConsumerBuilder UseNamedOptionsConfiguration(
-        string name,
-        IConfiguration configuration,
-        Action<IKafkaConsumerConfiguration>? postConfigure)
+    public void Build()
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-
-            collection.Configure<KafkaConsumerConfiguration>(name, configuration);
-
-            if (postConfigure is not null)
-            {
-                collection.PostConfigure<KafkaConsumerConfiguration>(name, postConfigure);
-            }
-
-            var s = new NamedOptionsQualifiedService<TKey, TValue, KafkaConsumerConfiguration>(name);
-            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>(s);
-        };
-
-        return this;
-    }
-
-    public void Add(IServiceCollection collection)
-    {
-        _action.Invoke(collection);
-
-        collection.AddHostedService(p =>
-        {
-            var optionsResolver = p
-                .GetRequiredService<IKeyValueQualifiedService<TKey, TValue, IKafkaConsumerConfiguration>>();
-
-            var options = optionsResolver.Resolve(p);
-
-            KafkaConsumerServiceBase<TKey, TValue> service = options.BufferSize <= 1
-                ? ActivatorUtilities.CreateInstance<KafkaConsumerService<TKey, TValue>>(p)
-                : ActivatorUtilities.CreateInstance<BatchingKafkaConsumerService<TKey, TValue>>(p);
-
-            return service;
-        });
+        _collection.AddHostedService(p
+            => ActivatorUtilities.CreateInstance<BatchingKafkaConsumerService<TKey, TValue>>(p, _topicName));
     }
 }

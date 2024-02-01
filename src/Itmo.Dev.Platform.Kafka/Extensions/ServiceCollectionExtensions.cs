@@ -1,5 +1,8 @@
 using Itmo.Dev.Platform.Kafka.Configuration;
+using Itmo.Dev.Platform.Kafka.Configuration.Builders;
+using Itmo.Dev.Platform.Kafka.Consumer;
 using Itmo.Dev.Platform.Kafka.Consumer.Builders;
+using Itmo.Dev.Platform.Kafka.Producer;
 using Itmo.Dev.Platform.Kafka.Producer.Builders;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,26 +19,25 @@ public static class ServiceCollectionExtensions
 
         return collection;
     }
-    
-    public static IKafkaConfigurationBuilder AddConsumer<TKey, TValue>(
-        this IKafkaConfigurationBuilder builder,
-        Func<IConsumerHandlerSelector<TKey, TValue>, IConsumerBuilder> configuration)
-    {
-        IConsumerHandlerSelector<TKey, TValue> consumerHandlerSelector = new ConsumerBuilder<TKey, TValue>();
-        IConsumerBuilder consumerBuilder = configuration.Invoke(consumerHandlerSelector);
 
-        consumerBuilder.Add(builder.Services);
+    public static IKafkaConfigurationBuilder AddConsumer(
+        this IKafkaConfigurationBuilder builder,
+        Func<IConsumerKeySelector, IConsumerBuilder> configuration)
+    {
+        var selector = new ConsumerKeySelector(builder.Services);
+        IConsumerBuilder consumerBuilder = configuration.Invoke(selector);
+
+        consumerBuilder.Build();
         return builder;
     }
 
-    public static IKafkaConfigurationBuilder AddProducer<TKey, TValue>(
+    public static IKafkaConfigurationBuilder AddProducer(
         this IKafkaConfigurationBuilder builder,
-        Func<IProducerKeySerializerSelector<TKey, TValue>, IProducerBuilder> configuration)
+        Func<IProducerKeySelector, IProducerBuilder> configuration)
     {
-        IProducerKeySerializerSelector<TKey, TValue> serializerSelector = new ProducerBuilder<TKey, TValue>();
-        IProducerBuilder producerBuilder = configuration.Invoke(serializerSelector);
+        var selector = new ProducerKeySelector(builder.Services);
+        configuration.Invoke(selector).Build();
 
-        producerBuilder.Add(builder.Services);
         return builder;
     }
 }

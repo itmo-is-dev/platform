@@ -6,6 +6,8 @@ public abstract class RestartableBackgroundService : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Yield();
+
         while (stoppingToken.IsCancellationRequested is false)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);

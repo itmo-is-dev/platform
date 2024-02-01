@@ -1,130 +1,141 @@
 using Confluent.Kafka;
-using Itmo.Dev.Platform.Kafka.Producer.Models;
+using Itmo.Dev.Platform.Kafka.Producer.Outbox;
 using Itmo.Dev.Platform.Kafka.Producer.Services;
-using Itmo.Dev.Platform.Kafka.QualifiedServices;
+using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Builders;
 
+internal class ProducerKeySelector : IProducerKeySelector
+{
+    private readonly IServiceCollection _collection;
+
+    public ProducerKeySelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IProducerValueSelector<TKey> WithKey<TKey>()
+    {
+        return new ProducerValueSelector<TKey>(_collection);
+    }
+}
+
+internal class ProducerValueSelector<TKey> : IProducerValueSelector<TKey>
+{
+    private readonly IServiceCollection _collection;
+
+    public ProducerValueSelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IProducerConfigurationSelector<TKey, TValue> WithValue<TValue>()
+    {
+        return new ProducerConfigurationSelector<TKey, TValue>(_collection);
+    }
+}
+
+internal class ProducerConfigurationSelector<TKey, TValue> : IProducerConfigurationSelector<TKey, TValue>
+{
+    private readonly IServiceCollection _collection;
+
+    public ProducerConfigurationSelector(IServiceCollection collection)
+    {
+        _collection = collection;
+    }
+
+    public IProducerKeySerializerSelector<TKey, TValue> WithConfiguration(
+        IConfiguration configuration,
+        Action<KafkaProducerOptions>? action = null)
+    {
+        var topicSection = configuration.GetSection("Topic");
+        var topicName = topicSection.Value;
+
+        if (string.IsNullOrEmpty(topicName))
+            throw new InvalidOperationException("Topic name is not specified");
+
+        var builder = _collection
+            .AddOptions<KafkaProducerOptions>(topicName)
+            .Bind(configuration)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        if (action is not null)
+            builder.Configure(action);
+
+        return new ProducerBuilder<TKey, TValue>(topicName, _collection, configuration);
+    }
+}
+
 internal class ProducerBuilder<TKey, TValue> :
     IProducerKeySerializerSelector<TKey, TValue>,
     IProducerValueSerializerSelector<TKey, TValue>,
-    IProducerConfigurationSelector<TKey, TValue>,
-    IProducerBuilder
+    IOutboxProducerBuilder
 {
-    private Func<IServiceCollection, IServiceCollection> _action;
+    private readonly string _topicName;
+    private readonly IServiceCollection _collection;
+    private readonly IConfiguration _configuration;
 
-    public ProducerBuilder()
+    public ProducerBuilder(string topicName, IServiceCollection collection, IConfiguration configuration)
     {
-        _action = _ => _;
+        _topicName = topicName;
+        _collection = collection;
+        _configuration = configuration;
     }
 
     public IProducerValueSerializerSelector<TKey, TValue> SerializeKeyWith<T>() where T : class, ISerializer<TKey>
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton<ISerializer<TKey>, T>();
-        };
-
+        _collection.AddKeyedSingleton<ISerializer<TKey>, T>(_topicName);
         return this;
     }
 
     public IProducerValueSerializerSelector<TKey, TValue> SerializeKeyWith(ISerializer<TKey> serializer)
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton(serializer);
-        };
-
+        _collection.AddKeyedSingleton(_topicName, serializer);
         return this;
     }
 
     public IProducerValueSerializerSelector<TKey, TValue> SerializeByDefault()
+        => this;
+
+    public IOutboxProducerBuilder SerializeValueWith<T>() where T : class, ISerializer<TValue>
     {
+        _collection.AddKeyedSingleton<ISerializer<TValue>, T>(_topicName);
         return this;
     }
 
-    public IProducerConfigurationSelector<TKey, TValue> SerializeValueWith<T>() where T : class, ISerializer<TValue>
+    public IOutboxProducerBuilder SerializeValueWith(ISerializer<TValue> serializer)
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton<ISerializer<TValue>, T>();
-        };
-
+        _collection.AddKeyedSingleton(_topicName, serializer);
         return this;
     }
 
-    public IProducerConfigurationSelector<TKey, TValue> SerializeValueWith(ISerializer<TValue> serializer)
+    public IOutboxProducerBuilder SerializeValueByDefault()
+        => this;
+
+    public IProducerBuilder WithOutbox()
     {
-        var action = _action;
+        var messageName = $"_platform_kafka_outbox_{_topicName}";
 
-        _action = collection =>
-        {
-            action(collection);
-            return collection.AddSingleton(serializer);
-        };
+        _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(
+            p => ActivatorUtilities.CreateInstance<OutboxMessageProducer<TKey, TValue>>(p, messageName));
 
-        return this;
-    }
-
-    public IProducerConfigurationSelector<TKey, TValue> SerializeValueByDefault()
-    {
-        return this;
-    }
-
-    public IProducerBuilder UseConfiguration<T>() where T : class, IKafkaProducerConfiguration
-    {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-
-            var s = new OptionsQualifiedService<TKey, TValue, T>();
-            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration>>(s);
-        };
+        _collection.AddPlatformMessagePersistenceHandler(builder => builder
+            .Called(messageName)
+            .WithConfiguration(_configuration.GetSection("Outbox"))
+            .WithKey<TKey>()
+            .WithValue<TValue>()
+            .HandleBy<OutboxMessagePersistenceHandler<TKey, TValue>>(
+                (p, _) => new OutboxMessagePersistenceHandler<TKey, TValue>(_topicName, p)));
 
         return this;
     }
 
-    public IProducerBuilder UseNamedOptionsConfiguration(
-        string name,
-        IConfiguration configuration,
-        Action<IKafkaProducerConfiguration>? postConfigure = null)
+    public void Build()
     {
-        var action = _action;
-
-        _action = collection =>
-        {
-            action(collection);
-
-            collection.Configure<KafkaProducerConfiguration>(name, configuration);
-
-            if (postConfigure is not null)
-            {
-                collection.PostConfigure<KafkaProducerConfiguration>(name, postConfigure);
-            }
-
-            var s = new NamedOptionsQualifiedService<TKey, TValue, KafkaProducerConfiguration>(name);
-            return collection.AddSingleton<IKeyValueQualifiedService<TKey, TValue, IKafkaProducerConfiguration>>(s);
-        };
-
-        return this;
-    }
-
-    public void Add(IServiceCollection collection)
-    {
-        _action(collection);
-        collection.AddScoped<IKafkaMessageProducer<TKey, TValue>, KafkaMessageProducer<TKey, TValue>>();
+        _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(
+            p => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
     }
 }

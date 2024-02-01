@@ -25,7 +25,11 @@ internal class MessagePersistenceConfigurationBuilder :
         IConfiguration configuration,
         Action<MessagePersistencePersistenceOptions>? action = null)
     {
-        var builder = _collection.AddOptions<MessagePersistencePersistenceOptions>();
+        var builder = _collection
+            .AddOptions<MessagePersistencePersistenceOptions>()
+            .Bind(configuration)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         if (action is not null)
             builder.Configure(action);

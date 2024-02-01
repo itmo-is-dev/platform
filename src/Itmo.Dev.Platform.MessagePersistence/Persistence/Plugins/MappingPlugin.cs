@@ -1,4 +1,3 @@
-using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.Postgres.Plugins;
 using Npgsql;
 

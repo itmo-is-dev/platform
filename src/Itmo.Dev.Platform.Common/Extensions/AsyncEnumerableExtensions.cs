@@ -25,6 +25,9 @@ public static class AsyncEnumerableExtensions
         int count,
         TimeSpan timeout)
     {
+        if (count is 1)
+            return enumerable.Select(x => new[] { x });
+
         return enumerable.ChunkAsync(count, timeout, timeoutChunkSpan: timeout);
     }
 
@@ -40,8 +43,11 @@ public static class AsyncEnumerableExtensions
         TimeSpan timeout,
         TimeSpan timeoutChunkSpan)
     {
-        if (count <= 1)
+        if (count < 1)
             throw new ArgumentOutOfRangeException(nameof(count));
+
+        if (count is 1)
+            return enumerable.Select(x => new[] { x });
 
         if (timeout < timeoutChunkSpan)
         {

@@ -117,6 +117,12 @@ internal class ProducerBuilder<TKey, TValue> :
 
     public IProducerBuilder WithOutbox()
     {
+        if (_configuration.GetSection("Outbox").Exists() is false)
+        {
+            string message = $"Outbox for topic {_topicName} is configured, but Outbox sub-section is not specified";
+            throw new InvalidOperationException(message);
+        }
+        
         var messageName = $"_platform_kafka_outbox_{_topicName}";
 
         _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(

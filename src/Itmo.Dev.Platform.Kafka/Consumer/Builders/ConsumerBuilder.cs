@@ -123,6 +123,12 @@ internal class ConsumerBuilder<TKey, TValue> :
 
     public IConsumerBuilder HandleInboxWith<T>() where T : class, IKafkaInboxHandler<TKey, TValue>
     {
+        if (_configuration.GetSection("Inbox").Exists() is false)
+        {
+            string message = $"Inbox for topic {_topicName} is configured, but Inbox sub-section is not specified";
+            throw new InvalidOperationException(message);
+        }
+
         var messageName = $"_platform_kafka_inbox_{_topicName}";
 
         _collection.AddKeyedScoped<IKafkaConsumerHandler<TKey, TValue>>(

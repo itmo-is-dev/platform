@@ -47,7 +47,6 @@ public class KafkaConsumerTests : IAsyncLifetime
                 [nameof(KafkaConsumerOptions.Topic)] = TopicName,
                 [nameof(KafkaConsumerOptions.Group)] = nameof(KafkaConsumerTests),
                 [nameof(KafkaConsumerOptions.InstanceId)] = nameof(KafkaConsumerTests),
-                [nameof(KafkaConsumerOptions.DisabledConsumerTimeout)] = "00:00:10",
                 [nameof(KafkaConsumerOptions.BufferWaitLimit)] = "00:00:00.200",
                 [nameof(KafkaConsumerOptions.BufferSize)] = bufferSize.ToString(),
             });
@@ -57,7 +56,7 @@ public class KafkaConsumerTests : IAsyncLifetime
         {
             collection.AddSingleton(testContext);
 
-            collection.AddKafka(builder => builder
+            collection.AddPlatformKafka(builder => builder
                 .ConfigureTestOptions(_kafkaFixture.Host)
                 .AddConsumer(b => b
                     .WithKey<int>()

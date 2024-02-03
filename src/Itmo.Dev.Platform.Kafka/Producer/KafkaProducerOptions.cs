@@ -12,5 +12,11 @@ public class KafkaProducerOptions : IValidatableObject
     {
         if (string.IsNullOrEmpty(Topic))
             yield return new ValidationResult("Topic name must be specified");
+
+        if (MessageMaxBytes < 1)
+        {
+            string message = $"Invalid max message size = {MessageMaxBytes} bytes (must be >= 1) for topic = {Topic}";
+            yield return new ValidationResult(message);
+        }
     }
 }

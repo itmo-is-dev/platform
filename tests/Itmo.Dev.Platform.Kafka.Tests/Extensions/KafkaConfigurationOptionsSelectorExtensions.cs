@@ -9,10 +9,10 @@ public static class KafkaConfigurationOptionsSelectorExtensions
         this IKafkaConfigurationOptionsSelector selector,
         string host)
     {
-        return selector.ConfigureOptions(builder => builder.Configure(options =>
+        return selector.ConfigureOptions(options =>
         {
             options.Host = host;
             options.SecurityProtocol = SecurityProtocol.Plaintext;
-        }));
+        });
     }
 }

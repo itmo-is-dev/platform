@@ -10,7 +10,7 @@ namespace Itmo.Dev.Platform.Kafka.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddKafka(
+    public static IServiceCollection AddPlatformKafka(
         this IServiceCollection collection,
         Func<IKafkaConfigurationOptionsSelector, IKafkaConfigurationBuilder> configuration)
     {

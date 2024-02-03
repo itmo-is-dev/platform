@@ -6,8 +6,6 @@ public class KafkaConsumerOptions : IValidatableObject
 {
     public bool IsDisabled { get; set; }
 
-    public TimeSpan DisabledConsumerTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
     public string Topic { get; set; } = string.Empty;
 
     public string Group { get; set; } = string.Empty;
@@ -18,7 +16,7 @@ public class KafkaConsumerOptions : IValidatableObject
 
     public int BufferSize { get; set; } = 1;
 
-    public TimeSpan BufferWaitLimit { get; set; }
+    public TimeSpan BufferWaitLimit { get; set; } = TimeSpan.Zero;
 
     public bool ReadLatest { get; set; }
 
@@ -44,7 +42,8 @@ public class KafkaConsumerOptions : IValidatableObject
 
         if (ParallelismDegree < 1)
         {
-            string message = $"Invalid parallelism degree = {ParallelismDegree} (must be >= 1) for topic = {Topic} consumer";
+            string message =
+                $"Invalid parallelism degree = {ParallelismDegree} (must be >= 1) for topic = {Topic} consumer";
             yield return new ValidationResult(message);
         }
 
@@ -52,6 +51,12 @@ public class KafkaConsumerOptions : IValidatableObject
         {
             string message = $"Invalid buffer size = {BufferSize} (must be >= 1) for topic = {Topic} consumer";
             yield return new ValidationResult(message);
+        }
+
+        if (BufferSize > 1 && BufferWaitLimit <= TimeSpan.Zero)
+        {
+            yield return new ValidationResult(
+                $"Invalid buffer wait limit = {BufferWaitLimit} (must be > TimeSpan.Zero) for topic = {Topic} consumer");
         }
     }
 }

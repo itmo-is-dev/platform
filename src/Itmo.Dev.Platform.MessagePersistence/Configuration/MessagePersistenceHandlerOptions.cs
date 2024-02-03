@@ -15,7 +15,7 @@ public class MessagePersistenceHandlerOptions : IValidatableObject
         if (BatchSize < 1)
             yield return new ValidationResult("Batch size must be greater or equal to 1");
 
-        if (PollingDelay.Equals(default))
+        if (PollingDelay <= TimeSpan.Zero)
             yield return new ValidationResult("Polling delay must be specified in polling configuration");
     }
 }

@@ -7,7 +7,6 @@ using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Serilog;
 using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
@@ -48,11 +47,17 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : RestartableBa
         var consumerOptions = consumerOptionsMonitor.Get(_topicName);
         var kafkaOptions = kafkaOptionsMonitor.CurrentValue;
 
+        if (consumerOptions.IsDisabled)
+        {
+            _logger.LogInformation(
+                "Consumer for topic {Topic} is disabled",
+                consumerOptions.Topic);
+
+            await Task.Delay(-1, cts.Token);
+        }
+
         while (cts.IsCancellationRequested is false)
         {
-            if (await CheckDisabledAsync(consumerOptions, cts.Token))
-                continue;
-
             try
             {
                 await ExecuteSingleAsync(kafkaOptions, consumerOptions, cts.Token);
@@ -93,19 +98,5 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : RestartableBa
             cancellationToken,
             new ParallelAction(1, c => messageReader.ReadAsync(channel.Writer, c)),
             new ParallelAction(consumerOptions.ParallelismDegree, c => messageHandler.HandleAsync(channel.Reader, c)));
-    }
-
-    private async Task<bool> CheckDisabledAsync(KafkaConsumerOptions options, CancellationToken stoppingToken)
-    {
-        if (options.IsDisabled is false)
-            return false;
-
-        _logger.LogInformation(
-            "Consumer for topic {Topic} is disabled, waiting for {Span}s",
-            options.Topic,
-            options.DisabledConsumerTimeout);
-
-        await Task.Delay(options.DisabledConsumerTimeout, stoppingToken);
-        return true;
     }
 }

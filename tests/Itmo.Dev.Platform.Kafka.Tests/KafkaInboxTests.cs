@@ -56,7 +56,6 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
                 [$"Consumer:{nameof(KafkaConsumerOptions.Topic)}"] = TopicName,
                 [$"Consumer:{nameof(KafkaConsumerOptions.Group)}"] = nameof(KafkaInboxTests),
                 [$"Consumer:{nameof(KafkaConsumerOptions.InstanceId)}"] = nameof(KafkaInboxTests),
-                [$"Consumer:{nameof(KafkaConsumerOptions.DisabledConsumerTimeout)}"] = "00:00:10",
                 [$"Consumer:{nameof(KafkaConsumerOptions.BufferWaitLimit)}"] = "00:00:00.200",
                 [$"Consumer:{nameof(KafkaConsumerOptions.BufferSize)}"] = bufferSize.ToString(),
                 [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
@@ -71,7 +70,7 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
             collection.AddPlatformMessagePersistence(builder => builder
                 .ConfigurePersistence(configuration.GetSection("MessagePersistence")));
 
-            collection.AddKafka(builder => builder
+            collection.AddPlatformKafka(builder => builder
                 .ConfigureTestOptions(_kafkaFixture.Host)
                 .AddConsumer(b => b
                     .WithKey<int>()

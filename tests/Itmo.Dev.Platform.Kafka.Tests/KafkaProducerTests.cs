@@ -45,7 +45,7 @@ public class KafkaProducerTests : IAsyncLifetime
             [nameof(KafkaProducerOptions.Topic)] = TopicName,
         });
 
-        collection.AddKafka(builder => builder
+        collection.AddPlatformKafka(builder => builder
             .ConfigureTestOptions(_kafkaFixture.Host)
             .AddProducer(b => b
                 .WithKey<int>()

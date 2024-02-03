@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj"/>
+    </ItemGroup>
+
+</Project>

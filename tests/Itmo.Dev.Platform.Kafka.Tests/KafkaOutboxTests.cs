@@ -62,7 +62,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
             collection.AddPlatformMessagePersistence(builder => builder
                 .ConfigurePersistence(configuration.GetSection("MessagePersistence")));
 
-            collection.AddKafka(builder => builder
+            collection.AddPlatformKafka(builder => builder
                 .ConfigureTestOptions(_kafkaFixture.Host)
                 .AddProducer(b => b
                     .WithKey<int>()

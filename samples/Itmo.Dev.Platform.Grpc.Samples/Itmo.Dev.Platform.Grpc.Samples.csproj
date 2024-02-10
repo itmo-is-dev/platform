@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <Protobuf ProtoRoot="protos" Include="protos\**\*.proto" GrpcServices="Both"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Grpc.Tools"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Grpc\Itmo.Dev.Platform.Grpc.csproj"/>
+    </ItemGroup>
+
+</Project>

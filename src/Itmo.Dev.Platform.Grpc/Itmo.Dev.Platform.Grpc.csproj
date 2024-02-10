@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Title>Itmo.Dev.Platform.Grpc</Title>
+        <Authors>itmo-is-dev</Authors>
+        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PatchVersion>0</PatchVersion>
+        <Version>1.0.$(PatchVersion)</Version>
+        <PackageReleaseNotes>
+            Added gRPC extensions
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grpc.AspNetCore"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
+        <PackageReference Include="Grpc.Core.Api"/>
+        <PackageReference Include="Grpc.Net.ClientFactory"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
+    </ItemGroup>
+
+</Project>

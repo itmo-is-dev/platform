@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package itmo.dev.platform;
+
+option csharp_namespace = "Itmo.Dev.Platform.Grpc.Samples";
+
+import "google/protobuf/empty.proto";
+
+service SampleService {
+  rpc ExecuteSome(google.protobuf.Empty) returns (google.protobuf.Empty);
+}

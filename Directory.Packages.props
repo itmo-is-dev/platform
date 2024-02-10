@@ -14,6 +14,11 @@
     <PackageVersion Include="FluentMigrator.Runner.Postgres" Version="5.0.0" />
     <PackageVersion Include="FluentScanning.DependencyInjection" Version="2.0.1" />
     <PackageVersion Include="Google.Protobuf" Version="3.25.2" />
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.60.0" />
+    <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.60.0" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.60.0" />
+    <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.60.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.61.0" />
     <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.9" />
     <PackageVersion Include="Hangfire.PostgreSql" Version="1.20.5" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
@@ -26,15 +31,15 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql" Version="8.0.1" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="ronimizy.FluentSerialization.Extensions.NewtonsoftJson" Version="1.3.0" />
-    <PackageVersion Include="Sentry.AspNetCore" Version="3.41.4" />
-    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="3.41.4" />
-    <PackageVersion Include="Sentry.Serilog" Version="3.41.4" />
+    <PackageVersion Include="Sentry.AspNetCore" Version="4.1.0" />
+    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="4.1.0" />
+    <PackageVersion Include="Sentry.Serilog" Version="4.1.0" />
     <PackageVersion Include="Serilog" Version="3.1.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />

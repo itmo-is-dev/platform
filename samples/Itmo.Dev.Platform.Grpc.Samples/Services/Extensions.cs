@@ -9,6 +9,7 @@ public static class Extensions
     public static IServiceCollection AddGrpcServices(this IServiceCollection collection)
     {
         return collection.AddPlatformGrpcServices(services => services
+            .AddInterceptor<SampleServiceInterceptor>()
             .AddHeaderHandler<HeaderHandler>());
     }
 }

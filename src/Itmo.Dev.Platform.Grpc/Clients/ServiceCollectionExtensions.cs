@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPlatformGrpcClients(
         this IServiceCollection collection,
-        Func<IPlatformGrpcClientsBuilder, IPlatformGrpcClientsBuilder> action)
+        Func<IPlatformGrpcClientsConfigurator, IPlatformGrpcClientsBuilder> action)
     {
         collection.AddScoped<PlatformHeaderClientInterceptor>();
 

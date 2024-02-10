@@ -12,7 +12,9 @@ public static class Extensions
             .AddService(service => service
                 .Called("sample")
                 .WithConfiguration(configuration.GetSection("Sample:Grpc"))
-                .WithClient<SampleService.SampleServiceClient>())
-            .AddHeaderProvider<HeaderProvider>());
+                .WithClient<SampleService.SampleServiceClient>(c => c.WithInterceptor<SampleClientInterceptor>())
+                .WithInterceptor<SampleServiceInterceptor>())
+            .AddHeaderProvider<HeaderProvider>()
+            .AddInterceptor<SampleGlobalInterceptor>());
     }
 }

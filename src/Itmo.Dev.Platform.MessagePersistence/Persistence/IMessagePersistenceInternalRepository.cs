@@ -8,5 +8,5 @@ internal interface IMessagePersistenceInternalRepository
 
     Task AddAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken);
 
-    Task UpdateStatesAsync(MessageStateUpdateRequest request, CancellationToken cancellationToken);
+    Task UpdateAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken);
 }

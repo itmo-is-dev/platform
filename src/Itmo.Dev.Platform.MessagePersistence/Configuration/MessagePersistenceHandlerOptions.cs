@@ -7,8 +7,10 @@ public class MessagePersistenceHandlerOptions : IValidatableObject
     public int BatchSize { get; set; }
 
     public TimeSpan PollingDelay { get; set; }
-    
+
     public MessageHandleResult DefaultHandleResult { get; set; }
+
+    public int? RetryCount { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -17,5 +19,8 @@ public class MessagePersistenceHandlerOptions : IValidatableObject
 
         if (PollingDelay <= TimeSpan.Zero)
             yield return new ValidationResult("Polling delay must be specified in polling configuration");
+
+        if (RetryCount is < 0)
+            yield return new ValidationResult("Retry count must not be negative");
     }
 }

@@ -8,7 +8,8 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
             persisted_message_created_at,
             persisted_message_state,
             persisted_message_key,
-            persisted_message_value
+            persisted_message_value,
+            persisted_message_retry_count
     from {o.SchemaName}.persisted_messages
     where 
         (persisted_message_name = :message_name)
@@ -31,8 +32,9 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
 
     public MessagePersistenceQuery UpdateStates { get; } = factory.Create(o => $"""
     update {o.SchemaName}.persisted_messages
-    set persisted_message_state = source.state
-    from (select * from unnest(:ids, :states)) as source(id, state)
+    set persisted_message_state = source.state,
+        persisted_message_retry_count = source.retry_count
+    from (select * from unnest(:ids, :states, :retry_counts)) as source(id, state, retry_count)
     where persisted_message_id = source.id
     """);
 

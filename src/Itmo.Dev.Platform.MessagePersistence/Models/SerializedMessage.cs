@@ -6,4 +6,5 @@ internal record SerializedMessage(
     DateTimeOffset CreatedAt,
     MessageState State,
     string Key,
-    string Value);
+    string Value,
+    int RetryCount);

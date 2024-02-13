@@ -43,6 +43,7 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
         int state = reader.GetOrdinal("persisted_message_state");
         int key = reader.GetOrdinal("persisted_message_key");
         int value = reader.GetOrdinal("persisted_message_value");
+        int retryCount = reader.GetOrdinal("persisted_message_retry_count");
 
         while (await reader.ReadAsync(cancellationToken))
         {
@@ -52,7 +53,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
                 CreatedAt: reader.GetFieldValue<DateTimeOffset>(createdAt),
                 State: reader.GetFieldValue<MessageState>(state),
                 Key: reader.GetString(key),
-                Value: reader.GetString(value));
+                Value: reader.GetString(value),
+                RetryCount: reader.GetInt32(retryCount));
         }
     }
 
@@ -72,14 +74,15 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public async Task UpdateStatesAsync(MessageStateUpdateRequest request, CancellationToken cancellationToken)
+    public async Task UpdateAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken)
     {
         var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
 #pragma warning disable CA2100
         await using var command = new NpgsqlCommand(_queryStorage.UpdateStates.Value, connection)
-            .AddParameter("ids", request.Ids)
-            .AddParameter("states", request.States);
+            .AddParameter("ids", messages.Select(x => x.Id))
+            .AddParameter("states", messages.Select(x => x.State))
+            .AddParameter("retry_counts", messages.Select(x => x.RetryCount));
 #pragma warning restore CA2100
 
         await command.ExecuteNonQueryAsync(cancellationToken);

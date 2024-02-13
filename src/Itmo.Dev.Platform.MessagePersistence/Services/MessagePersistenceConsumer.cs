@@ -43,7 +43,8 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
                 CreatedAt: createdAt,
                 State: MessageState.Pending,
                 Key: JsonConvert.SerializeObject(message.Key, _serializerSettings),
-                Value: JsonConvert.SerializeObject(message.Value, _serializerSettings)))
+                Value: JsonConvert.SerializeObject(message.Value, _serializerSettings),
+                RetryCount: 0))
             .ToArray();
 
         await using var transaction = await _transactionProvider

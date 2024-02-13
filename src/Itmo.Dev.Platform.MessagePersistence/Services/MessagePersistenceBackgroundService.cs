@@ -81,7 +81,9 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
                 continue;
             }
 
-            var messageStates = new Dictionary<long, MessageState>();
+            var messageStates = serializedMessages.ToDictionary(x => x.Id, x => x.State);
+            var messageRetryCounts = serializedMessages.ToDictionary(x => x.Id, x => x.RetryCount);
+
             var messages = MapMessages(serializedMessages, messageStates, options, provider).ToArray();
 
             await using var scope = _scopeFactory.CreateAsyncScope();
@@ -100,10 +102,30 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
                     MessageHandleResult.Ignored => MessageState.Pending,
                     _ => throw new ArgumentOutOfRangeException(),
                 };
+
+                if (message.Result is MessageHandleResult.Failure)
+                {
+                    var retryCount = ++messageRetryCounts[message.Id];
+
+                    if (retryCount < options.RetryCount)
+                    {
+                        messageStates[message.Id] = MessageState.Pending;
+                    }
+                }
             }
 
-            var request = new MessageStateUpdateRequest(messageStates);
-            await repository.UpdateStatesAsync(request, cancellationToken);
+            for (var i = 0; i < serializedMessages.Length; i++)
+            {
+                SerializedMessage message = serializedMessages[i];
+
+                serializedMessages[i] = serializedMessages[i] with
+                {
+                    State = messageStates[message.Id],
+                    RetryCount = messageRetryCounts[message.Id],
+                };
+            }
+
+            await repository.UpdateAsync(serializedMessages, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 

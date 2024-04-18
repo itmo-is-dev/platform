@@ -11,7 +11,7 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseUrl>LICENSE</PackageLicenseUrl>
+        <PackageLicenseUrl>https://github.com/itmo-is-dev/platform/blob/master/LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <PropertyGroup>

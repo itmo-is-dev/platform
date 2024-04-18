@@ -12,6 +12,7 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseUrl>LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -24,6 +25,7 @@
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>

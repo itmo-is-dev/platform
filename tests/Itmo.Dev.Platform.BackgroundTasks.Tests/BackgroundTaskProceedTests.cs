@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.ProceedAsync_ShouldProceedTaskExecution;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
+using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Models;
 using Itmo.Dev.Platform.Testing;
@@ -76,6 +77,9 @@ public class BackgroundTaskProceedTests : TestBase
             }));
 
         application.CreateClient();
+
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
 
         await using var scope = application.Services.CreateAsyncScope();
         var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();

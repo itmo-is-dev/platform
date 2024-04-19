@@ -8,5 +8,6 @@ internal class MigrationSourceItem : IMigrationSourceItem
     {
         typeof(Initial),
         typeof(AddedRetryCount),
+        typeof(AddedPartitioning),
     };
 }

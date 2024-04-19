@@ -1,4 +1,4 @@
-using Itmo.Dev.Platform.Postgres.Connection;
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Testing.Fixtures;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +28,8 @@ public class BackgroundTasksDatabaseFixture : DatabaseFixture
             .Build();
 
         collection.AddSingleton<IConfiguration>(configuration);
+
+        collection.AddPlatform();
         collection.AddPlatformPostgres(builder => builder.BindConfiguration("PostgresConfiguration"));
     }
 
@@ -37,10 +39,7 @@ public class BackgroundTasksDatabaseFixture : DatabaseFixture
         create table if not exists placeholder();
         """;
 
-        var connectionProvider = provider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(default);
-
-        await using var command = new NpgsqlCommand(sql, connection);
+        await using var command = new NpgsqlCommand(sql, Connection);
         await command.ExecuteNonQueryAsync();
     }
 }

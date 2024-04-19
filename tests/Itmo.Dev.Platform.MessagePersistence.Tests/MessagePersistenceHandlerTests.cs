@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence.Repositories;
@@ -69,6 +70,9 @@ public class MessagePersistenceHandlerTests
 
         application.CreateClient();
 
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
+
         await using var scope = application.Services.CreateAsyncScope();
         var consumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceConsumer>();
 
@@ -125,6 +129,9 @@ public class MessagePersistenceHandlerTests
             }));
 
         application.CreateClient();
+
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
 
         await using var scope = application.Services.CreateAsyncScope();
         var consumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceConsumer>();

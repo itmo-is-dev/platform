@@ -5,9 +5,11 @@ using Itmo.Dev.Platform.BackgroundTasks.Configuration.Builders;
 using Itmo.Dev.Platform.BackgroundTasks.Execution;
 using Itmo.Dev.Platform.BackgroundTasks.Managing;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
+using Itmo.Dev.Platform.BackgroundTasks.Persistence.Migrations;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence.Plugins;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence.Repositories;
 using Itmo.Dev.Platform.BackgroundTasks.Scheduling;
+using Itmo.Dev.Platform.Common.Lifetime.Extensions;
 using Itmo.Dev.Platform.Postgres.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,6 +23,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection collection,
         Func<IBackgroundTaskPersistenceConfigurator, IBackgroundTaskConfigurationBuilder> action)
     {
+        collection.AddPlatformLifetimeInitializer<BackgroundTasksMigrationPlatformInitializer>();
+
         var builder = new BackgroundTaskConfigurationBuilder(collection);
         action.Invoke(builder);
 
@@ -45,7 +49,6 @@ public static class ServiceCollectionExtensions
         {
             var connectionFactory = sp.GetRequiredService<PlatformPostgresConnectionFactory>();
             var configuration = sp.GetRequiredService<IOptions<BackgroundTaskSchedulingOptions>>();
-
 
             hangfire.UseSerializerSettings(sp.GetRequiredService<JsonSerializerSettings>());
             hangfire.UsePostgreSqlStorage(x => x.UseConnectionFactory(connectionFactory));

@@ -2,6 +2,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.Common.BackgroundServices;
+using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.Postgres.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,20 +16,23 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
     private readonly IOptionsMonitor<BackgroundTaskSchedulingOptions> _options;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<BackgroundTaskSchedulingService> _logger;
+    private readonly IPlatformLifetime _platformLifetime;
 
     public BackgroundTaskSchedulingService(
         IOptionsMonitor<BackgroundTaskSchedulingOptions> options,
         IServiceScopeFactory scopeFactory,
-        ILogger<BackgroundTaskSchedulingService> logger)
+        ILogger<BackgroundTaskSchedulingService> logger,
+        IPlatformLifetime platformLifetime)
     {
         _options = options;
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _platformLifetime = platformLifetime;
     }
 
     protected override async Task ExecuteAsync(CancellationTokenSource cts)
     {
-        await Task.Yield();
+        await _platformLifetime.WaitOnInitializedAsync(cts.Token);
 
         using var _ = _options.OnChange(_ => cts.Cancel());
         var options = _options.CurrentValue;

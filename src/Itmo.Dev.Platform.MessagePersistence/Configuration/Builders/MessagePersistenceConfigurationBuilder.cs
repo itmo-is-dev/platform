@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Common.Lifetime.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Persistence.Migrations;
 using Itmo.Dev.Platform.MessagePersistence.Persistence.Plugins;
@@ -38,7 +39,7 @@ internal class MessagePersistenceConfigurationBuilder :
         _collection.AddSingleton<MessagePersistenceQueryStorage>();
 
         _collection.AddSingleton<IDataSourcePlugin, MappingPlugin>();
-        _collection.AddHostedService<MigrationRunnerService>();
+        _collection.AddPlatformLifetimeInitializer<MessagePersistenceMigrationPlatformInitializer>();
 
         _collection.AddScoped<MessagePersistenceRepository>();
         _collection.AddScoped<IMessagePersistenceInternalRepository>(p

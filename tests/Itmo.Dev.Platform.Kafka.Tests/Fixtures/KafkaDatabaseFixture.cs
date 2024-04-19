@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Testing.Fixtures;
@@ -28,6 +29,8 @@ public class KafkaDatabaseFixture : DatabaseFixture
             .Build();
 
         collection.AddSingleton<IConfiguration>(configuration);
+
+        collection.AddPlatform();
         collection.AddPlatformPostgres(builder => builder.BindConfiguration("PostgresConfiguration"));
     }
 

@@ -1,17 +1,27 @@
 using FluentMigrator.Runner.Initialization;
 using Itmo.Dev.Platform.BackgroundTasks.Configuration;
-using Itmo.Dev.Platform.BackgroundTasks.Persistence.Migrations;
+using Itmo.Dev.Platform.Common.Lifetime.Initializers;
+using Itmo.Dev.Platform.Common.Lifetime.Services;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Itmo.Dev.Platform.BackgroundTasks.Extensions;
+namespace Itmo.Dev.Platform.BackgroundTasks.Persistence.Migrations;
 
-public static class ServiceScopeExtensions
+public class BackgroundTasksMigrationPlatformInitializer : PlatformLifetimeInitializerBase
 {
-    public static async Task UsePlatformBackgroundTasksAsync(this IServiceScope scope, CancellationToken cancellationToken)
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public BackgroundTasksMigrationPlatformInitializer(IServiceScopeFactory scopeFactory)
     {
+        _scopeFactory = scopeFactory;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+
         var collection = new ServiceCollection();
 
         var connectionString = scope.ServiceProvider.GetRequiredService<PostgresConnectionString>();

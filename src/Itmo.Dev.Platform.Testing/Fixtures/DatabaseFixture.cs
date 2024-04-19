@@ -63,24 +63,21 @@ public abstract class DatabaseFixture : IAsyncLifetime
         ConfigureServices(collection);
 
         Provider = collection.BuildServiceProvider();
-        await UseProviderAsync(Provider);
-
         Connection = CreateConnection();
+
         RespawnerOptions options = GetRespawnOptions();
 
         var oldState = Connection.State;
 
         if (oldState is not ConnectionState.Open)
-        {
             await Connection.OpenAsync();
-        }
+
+        await UseProviderAsync(Provider);
 
         _respawn = await Respawner.CreateAsync(Connection, options);
 
         if (oldState is not ConnectionState.Open)
-        {
             await Connection.CloseAsync();
-        }
     }
 
     public virtual async Task DisposeAsync()
@@ -101,7 +98,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
     {
         return new RespawnerOptions
         {
-            SchemasToInclude = new[] { "public" },
+            SchemasToInclude = ["public"],
             DbAdapter = DbAdapter.Postgres,
         };
     }

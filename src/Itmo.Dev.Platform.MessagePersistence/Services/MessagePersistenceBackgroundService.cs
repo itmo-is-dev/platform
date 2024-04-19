@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Common.BackgroundServices;
 using Itmo.Dev.Platform.Common.Extensions;
+using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
@@ -17,19 +18,25 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
     private readonly string _messageName;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MessagePersistenceBackgroundService<TKey, TValue>> _logger;
+    private readonly IPlatformLifetime _platformLifetime;
 
     public MessagePersistenceBackgroundService(
         string messageName,
         IServiceScopeFactory scopeFactory,
-        ILogger<MessagePersistenceBackgroundService<TKey, TValue>> logger)
+        ILogger<MessagePersistenceBackgroundService<TKey, TValue>> logger,
+        IPlatformLifetime platformLifetime)
     {
         _messageName = messageName;
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _platformLifetime = platformLifetime;
     }
 
     protected override async Task ExecuteAsync(CancellationTokenSource cts)
     {
+        await Task.Yield();
+        await _platformLifetime.WaitOnInitializedAsync(cts.Token);
+
         await using var scope = _scopeFactory.CreateAsyncScope();
 
         var monitor = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<MessagePersistenceHandlerOptions>>();
@@ -43,7 +50,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             {
                 await ExecuteSingleAsync(scope.ServiceProvider, handlerOptions, cts.Token);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not TaskCanceledException and not OperationCanceledException)
             {
                 _logger.LogError(e, "Error during processing persisted messages = {MessageName}", _messageName);
             }

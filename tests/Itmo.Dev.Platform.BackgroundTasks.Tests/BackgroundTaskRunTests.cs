@@ -12,6 +12,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFai
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
+using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.Models;
 using Itmo.Dev.Platform.Testing;
@@ -82,6 +83,9 @@ public class BackgroundTaskRunTests : TestBase
             }));
 
         application.CreateClient();
+
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
 
         await using var scope = application.Services.CreateAsyncScope();
         var manager = scope.ServiceProvider.GetRequiredService<IBackgroundTaskRunner>();
@@ -155,6 +159,9 @@ public class BackgroundTaskRunTests : TestBase
             }));
 
         application.CreateClient();
+
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
 
         await using var scope = application.Services.CreateAsyncScope();
 
@@ -237,6 +244,9 @@ public class BackgroundTaskRunTests : TestBase
             }));
 
         application.CreateClient();
+
+        var platformLifetime = application.Services.GetRequiredService<IPlatformLifetime>();
+        await platformLifetime.WaitOnInitializedAsync(default);
 
         await using var scope = application.Services.CreateAsyncScope();
 

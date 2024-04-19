@@ -1,5 +1,7 @@
 using FluentMigrator.Runner;
+using Itmo.Dev.Platform.Common.Lifetime.Extensions;
 using Itmo.Dev.Platform.Postgres.Connection;
+using Itmo.Dev.Platform.Postgres.Migrations;
 using Itmo.Dev.Platform.Postgres.Models;
 using Itmo.Dev.Platform.Postgres.Plugins;
 using Itmo.Dev.Platform.Postgres.Transactions;
@@ -18,6 +20,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection collection,
         Action<OptionsBuilder<PostgresConnectionConfiguration>> configuration)
     {
+        collection.AddPlatformLifetimePostInitializer<MigrationPlatformLifetimePostInitializer>();
+
         collection.AddSingleton<PostgresConnectionString>();
 
         collection.AddSingleton(p =>

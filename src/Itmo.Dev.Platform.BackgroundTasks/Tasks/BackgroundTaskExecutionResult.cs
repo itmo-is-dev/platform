@@ -21,11 +21,11 @@ public abstract record BackgroundTaskExecutionResult<TResult, TError>
 
 public static class BackgroundTaskExecutionResult
 {
-    public static SuccessBuilder Success => new SuccessBuilder();
+    public static SuccessBuilder.ResultBuilder Success => new();
 
-    public static SuspendedBuilder Suspended => new SuspendedBuilder();
+    public static SuspendedBuilder.ResultBuilder Suspended => new();
 
-    public static FailureBuilder Failure => new FailureBuilder();
+    public static FailureBuilder.ResultBuilder Failure => new();
 
-    public static CancellationBuilder Cancellation => new CancellationBuilder();
+    public static CancellationBuilder.ResultBuilder Cancellation => new();
 }

@@ -5,27 +5,33 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionResults;
 
 public readonly record struct SuspendedBuilder
 {
-    public ResultBuilder<TResult> ForResult<TResult>() where TResult : IBackgroundTaskResult
-        => new ResultBuilder<TResult>();
-
-    public ResultBuilder<EmptyExecutionResult> ForEmptyResult()
-        => new ResultBuilder<EmptyExecutionResult>();
-
-    public readonly record struct ResultBuilder<TResult> where TResult : IBackgroundTaskResult
+    public readonly record struct ResultBuilder
     {
-        public ErrorBuilder<TResult, TError> ForError<TError>() where TError : IBackgroundTaskError
-            => new ErrorBuilder<TResult, TError>();
+        public ErrorBuilder<TResult> ForResult<TResult>()
+            where TResult : IBackgroundTaskResult
+            => new ErrorBuilder<TResult>();
 
-        public ErrorBuilder<TResult, EmptyError> ForEmptyError()
-            => new ErrorBuilder<TResult, EmptyError>();
+        public ErrorBuilder<EmptyExecutionResult> ForEmptyResult()
+            => new ErrorBuilder<EmptyExecutionResult>();
     }
 
-    public readonly record struct ErrorBuilder<TResult, TError>
+    public readonly record struct ErrorBuilder<TResult>
+        where TResult : IBackgroundTaskResult
+    {
+        public CastHandle<TResult, TError> ForError<TError>()
+            where TError : IBackgroundTaskError
+            => new CastHandle<TResult, TError>();
+
+        public CastHandle<TResult, EmptyError> ForEmptyError()
+            => new CastHandle<TResult, EmptyError>();
+    }
+
+    public readonly record struct CastHandle<TResult, TError>
         where TResult : IBackgroundTaskResult
         where TError : IBackgroundTaskError
     {
         public static implicit operator BackgroundTaskExecutionResult<TResult, TError>(
-            ErrorBuilder<TResult, TError> builder)
+            CastHandle<TResult, TError> builder)
         {
             return new BackgroundTaskExecutionResult<TResult, TError>.Suspended();
         }

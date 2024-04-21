@@ -8,15 +8,18 @@ public readonly struct FinishedWithResultBuilder
 {
     public readonly struct StateBaseBuilder
     {
-        public StateValueBuilder<TStateBase> ForState<TStateBase>() where TStateBase : IState => new();
+        public StateValueBuilder<TStateBase> ForState<TStateBase>()
+            where TStateBase : IState => new();
     }
 
-    public readonly struct StateValueBuilder<TStateBase> where TStateBase : IState
+    public readonly struct StateValueBuilder<TStateBase>
+        where TStateBase : IState
     {
         public ResultBuilder<TStateBase> WithValue(TStateBase state) => new(state);
     }
 
-    public readonly struct ResultBuilder<TStateBase> where TStateBase : IState
+    public readonly struct ResultBuilder<TStateBase>
+        where TStateBase : IState
     {
         private readonly TStateBase _state;
 
@@ -25,7 +28,8 @@ public readonly struct FinishedWithResultBuilder
             _state = state;
         }
 
-        public ErrorBuilder<TStateBase, TResult> ForResult<TResult>() where TResult : IBackgroundTaskResult
+        public ErrorBuilder<TStateBase, TResult> ForResult<TResult>()
+            where TResult : IBackgroundTaskResult
             => new(_state);
 
         public ErrorBuilder<TStateBase, EmptyExecutionResult> ForEmptyResult() => ForResult<EmptyExecutionResult>();
@@ -67,6 +71,34 @@ public readonly struct FinishedWithResultBuilder
             BackgroundTaskExecutionResult<TResult, TError> result)
         {
             return new CastHandle<TStateBase, TResult, TError>(_state, result);
+        }
+
+        public CastHandle<TStateBase, TResult, TError> WithSuccessResult(TResult result)
+        {
+            return new CastHandle<TStateBase, TResult, TError>(
+                _state,
+                new BackgroundTaskExecutionResult<TResult, TError>.Success(result));
+        }
+
+        public CastHandle<TStateBase, TResult, TError> WithSuspendedResult()
+        {
+            return new CastHandle<TStateBase, TResult, TError>(
+                _state,
+                new BackgroundTaskExecutionResult<TResult, TError>.Suspended());
+        }
+
+        public CastHandle<TStateBase, TResult, TError> WithFailureResult(TError? error = default)
+        {
+            return new CastHandle<TStateBase, TResult, TError>(
+                _state,
+                new BackgroundTaskExecutionResult<TResult, TError>.Failure(error));
+        }
+
+        public CastHandle<TStateBase, TResult, TError> WithCancellationResult(TError? error = default)
+        {
+            return new CastHandle<TStateBase, TResult, TError>(
+                _state,
+                new BackgroundTaskExecutionResult<TResult, TError>.Cancellation(error));
         }
     }
 

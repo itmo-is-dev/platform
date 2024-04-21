@@ -32,6 +32,6 @@ public class ProceededSuspendedTaskStateHandler : ISuspendedTaskStateHandler<Pro
                 .WithValue(new CompletedSuspendedTaskState())
                 .ForEmptyResult()
                 .ForEmptyError()
-                .WithExecutionResult(BackgroundTaskExecutionResult.Success.WithEmptyResult().ForEmptyError()));
+                .WithSuccessResult(EmptyExecutionResult.Value));
     }
 }

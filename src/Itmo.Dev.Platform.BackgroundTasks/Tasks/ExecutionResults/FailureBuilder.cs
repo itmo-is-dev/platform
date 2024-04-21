@@ -5,30 +5,35 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionResults;
 
 public readonly record struct FailureBuilder
 {
-    public ResultBuilder<TResult> ForResult<TResult>() where TResult : IBackgroundTaskResult
-        => new ResultBuilder<TResult>();
-
-    public ResultBuilder<EmptyExecutionResult> ForEmptyResult()
-        => new ResultBuilder<EmptyExecutionResult>();
-
-    public readonly record struct ResultBuilder<TResult> where TResult : IBackgroundTaskResult
+    public readonly record struct ResultBuilder
     {
-        public ErrorBuilder<TResult, TError> WithError<TError>(TError? error = default)
-            where TError : IBackgroundTaskError
+        public ErrorBuilder<TResult> ForResult<TResult>()
+            where TResult : IBackgroundTaskResult
         {
-            return new ErrorBuilder<TResult, TError>(error);
+            return new ErrorBuilder<TResult>();
         }
 
-        public ErrorBuilder<TResult, EmptyError> WithEmptyError()
-            => new ErrorBuilder<TResult, EmptyError>(EmptyError.Value);
+        public ErrorBuilder<EmptyExecutionResult> ForEmptyResult() => ForResult<EmptyExecutionResult>();
     }
 
-    public readonly record struct ErrorBuilder<TResult, TError>(TError? Error)
+    public readonly record struct ErrorBuilder<TResult>
+        where TResult : IBackgroundTaskResult
+    {
+        public CastHandle<TResult, TError> WithError<TError>(TError? error = default)
+            where TError : IBackgroundTaskError
+        {
+            return new CastHandle<TResult, TError>(error);
+        }
+
+        public CastHandle<TResult, EmptyError> WithEmptyError() => WithError(EmptyError.Value);
+    }
+
+    public readonly record struct CastHandle<TResult, TError>(TError? Error)
         where TResult : IBackgroundTaskResult
         where TError : IBackgroundTaskError
     {
         public static implicit operator BackgroundTaskExecutionResult<TResult, TError>(
-            ErrorBuilder<TResult, TError> builder)
+            CastHandle<TResult, TError> builder)
         {
             return new BackgroundTaskExecutionResult<TResult, TError>.Failure(builder.Error);
         }

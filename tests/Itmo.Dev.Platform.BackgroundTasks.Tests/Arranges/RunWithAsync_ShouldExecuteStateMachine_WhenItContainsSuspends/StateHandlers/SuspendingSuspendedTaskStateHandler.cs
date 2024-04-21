@@ -32,6 +32,6 @@ public class SuspendingSuspendedTaskStateHandler : ISuspendedTaskStateHandler<Su
                 .WithValue(new WaitingSuspendedTaskState())
                 .ForEmptyResult()
                 .ForEmptyError()
-                .WithExecutionResult(BackgroundTaskExecutionResult.Suspended.ForEmptyResult().ForEmptyError()));
+                .WithSuspendedResult());
     }
 }

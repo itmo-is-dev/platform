@@ -1,4 +1,6 @@
 using Itmo.Dev.Platform.BackgroundTasks.Registry;
+using Itmo.Dev.Platform.BackgroundTasks.StateMachine;
+using Itmo.Dev.Platform.BackgroundTasks.StateMachine.Implementation;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
@@ -13,7 +15,8 @@ internal class BackgroundTaskConfigurationBuilder :
     IBackgroundTaskPersistenceConfigurator,
     IBackgroundTaskSchedulingConfigurator,
     IBackgroundTaskExecutionConfigurator,
-    IBackgroundTaskConfigurationBuilder
+    IBackgroundTaskConfigurationBuilder,
+    IBackgroundTaskStateMachineConfigurator
 {
     private readonly IServiceCollection _collection;
     private readonly BackgroundTaskRegistry _registry;
@@ -50,7 +53,7 @@ internal class BackgroundTaskConfigurationBuilder :
         return this;
     }
 
-    public IBackgroundTaskConfigurationBuilder ConfigureExecution(
+    public IBackgroundTaskStateMachineConfigurator ConfigureExecution(
         IConfiguration configuration,
         Action<BackgroundTaskExecutionOptions>? action = null)
     {
@@ -76,6 +79,12 @@ internal class BackgroundTaskConfigurationBuilder :
 
         _collection.AddScoped<TTask>();
 
+        return this;
+    }
+
+    public IBackgroundTaskConfigurationBuilder AddStateMachine()
+    {
+        _collection.AddScoped<IStateMachineFactory, StateMachineFactory>();
         return this;
     }
 }

@@ -6,7 +6,9 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 namespace Itmo.Dev.Platform.BackgroundTasks.StateMachine;
 
 public abstract record StateHandleResult<TStateBase, TResult, TError>
-    where TStateBase : IState where TResult : IBackgroundTaskResult where TError : IBackgroundTaskError
+    where TStateBase : IState
+    where TResult : IBackgroundTaskResult
+    where TError : IBackgroundTaskError
 {
     private StateHandleResult() { }
 

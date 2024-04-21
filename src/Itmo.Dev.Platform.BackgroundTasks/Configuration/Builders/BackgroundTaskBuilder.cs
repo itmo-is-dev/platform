@@ -13,7 +13,7 @@ internal class BackgroundTaskMetadataConfigurator : IBackgroundTaskMetadataConfi
         => new BackgroundTaskExecutionMetadataConfigurator<T>();
 }
 
-internal class BackgroundTaskExecutionMetadataConfigurator<TMetadata> :
+file class BackgroundTaskExecutionMetadataConfigurator<TMetadata> :
     IBackgroundTaskExecutionMetadataConfigurator<TMetadata>
     where TMetadata : IBackgroundTaskMetadata
 {
@@ -24,7 +24,7 @@ internal class BackgroundTaskExecutionMetadataConfigurator<TMetadata> :
     }
 }
 
-internal class BackgroundTaskResultConfigurator<TMetadata, TExecutionMetadata> :
+file class BackgroundTaskResultConfigurator<TMetadata, TExecutionMetadata> :
     IBackgroundTaskResultConfigurator<TMetadata, TExecutionMetadata>
     where TMetadata : IBackgroundTaskMetadata
     where TExecutionMetadata : IBackgroundTaskExecutionMetadata
@@ -34,7 +34,7 @@ internal class BackgroundTaskResultConfigurator<TMetadata, TExecutionMetadata> :
         => new BackgroundTaskErrorConfigurator<TMetadata, TExecutionMetadata, T>();
 }
 
-internal class BackgroundTaskErrorConfigurator<TMetadata, TExecutionMetadata, TResult> :
+file class BackgroundTaskErrorConfigurator<TMetadata, TExecutionMetadata, TResult> :
     IBackgroundTaskErrorConfigurator<TMetadata, TExecutionMetadata, TResult>
     where TMetadata : IBackgroundTaskMetadata
     where TExecutionMetadata : IBackgroundTaskExecutionMetadata
@@ -45,7 +45,7 @@ internal class BackgroundTaskErrorConfigurator<TMetadata, TExecutionMetadata, TR
         => new BackgroundTaskConfigurator<TMetadata, TExecutionMetadata, TResult, T>();
 }
 
-internal class BackgroundTaskConfigurator<TMetadata, TExecutionMetadata, TResult, TError>
+file class BackgroundTaskConfigurator<TMetadata, TExecutionMetadata, TResult, TError>
     : IBackgroundTaskConfigurator<TMetadata, TExecutionMetadata, TResult, TError>
     where TMetadata : IBackgroundTaskMetadata
     where TExecutionMetadata : IBackgroundTaskExecutionMetadata
@@ -59,7 +59,7 @@ internal class BackgroundTaskConfigurator<TMetadata, TExecutionMetadata, TResult
     }
 }
 
-internal class BackgroundTaskBuilder<TTask, TMetadata, TExecutionMetadata, TResult, TError>
+file class BackgroundTaskBuilder<TTask, TMetadata, TExecutionMetadata, TResult, TError>
     : IBackgroundTaskBuilder<TTask, TMetadata, TExecutionMetadata, TResult, TError>
     where TTask : class, IBackgroundTask<TMetadata, TExecutionMetadata, TResult, TError>
     where TMetadata : IBackgroundTaskMetadata

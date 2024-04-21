@@ -1,4 +1,5 @@
 using FluentAssertions;
+using FluentSerialization.Extensions.NewtonsoftJson;
 using Itmo.Dev.Platform.BackgroundTasks.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Managing;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
@@ -7,6 +8,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteSimpleStateMachine.States;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
@@ -20,11 +22,14 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using Xunit;
 using Xunit.Abstractions;
 using BackgroundTaskQuery = Itmo.Dev.Platform.BackgroundTasks.Models.BackgroundTaskQuery;
+using ConfigurationBuilder = FluentSerialization.ConfigurationBuilder;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests;
 

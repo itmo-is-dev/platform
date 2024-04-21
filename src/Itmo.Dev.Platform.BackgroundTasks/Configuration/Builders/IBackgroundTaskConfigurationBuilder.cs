@@ -23,9 +23,14 @@ public interface IBackgroundTaskSchedulingConfigurator
 
 public interface IBackgroundTaskExecutionConfigurator
 {
-    IBackgroundTaskConfigurationBuilder ConfigureExecution(
+    IBackgroundTaskStateMachineConfigurator ConfigureExecution(
         IConfiguration configuration,
         Action<BackgroundTaskExecutionOptions>? action = null);
+}
+
+public interface IBackgroundTaskStateMachineConfigurator : IBackgroundTaskConfigurationBuilder
+{
+    IBackgroundTaskConfigurationBuilder AddStateMachine();
 }
 
 public interface IBackgroundTaskConfigurationBuilder

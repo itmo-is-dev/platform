@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Common.Extensions;
 
@@ -135,5 +136,31 @@ public static class AsyncEnumerableExtensions
                 await enumerator.DisposeAsync();
             }
         }
+    }
+
+    public static async IAsyncEnumerable<T2> SelectAwaitParallel<T1, T2>(
+        this IAsyncEnumerable<T1> enumerable,
+        ParallelOptions options,
+        Func<T1, CancellationToken, ValueTask<T2>> selector)
+    {
+        var channel = Channel.CreateUnbounded<T2>();
+
+        var parallelTask = Parallel.ForEachAsync(
+            enumerable,
+            options,
+            async (element, cancellationToken) =>
+            {
+                var selected = await selector.Invoke(element, cancellationToken);
+                await channel.Writer.WriteAsync(selected, cancellationToken);
+            });
+
+        parallelTask = parallelTask.ContinueWith(_ => channel.Writer.Complete(), options.CancellationToken);
+
+        await foreach (var element in channel.Reader.ReadAllAsync(options.CancellationToken))
+        {
+            yield return element;
+        }
+
+        await parallelTask;
     }
 }

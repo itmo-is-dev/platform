@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         where TInitializer : class, IPlatformLifetimeInitializer
     {
         collection.CheckPlatformFeature<PlatformLifetimeFeature>();
-        collection.TryAddSingleton<IPlatformLifetimeInitializer, TInitializer>();
+        collection.TryAddEnumerable(ServiceDescriptor.Singleton<IPlatformLifetimeInitializer, TInitializer>());
 
         return collection;
     }
@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         where TInitializer : class, IPlatformLifetimePostInitializer
     {
         collection.CheckPlatformFeature<PlatformLifetimeFeature>();
-        collection.TryAddSingleton<IPlatformLifetimePostInitializer, TInitializer>();
+        collection.TryAddEnumerable(ServiceDescriptor.Singleton<IPlatformLifetimePostInitializer, TInitializer>());
 
         return collection;
     }

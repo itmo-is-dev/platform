@@ -74,6 +74,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Grpc.Samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Common.Tests", "tests\Itmo.Dev.Platform.Common.Tests\Itmo.Dev.Platform.Common.Tests.csproj", "{5D02816B-0986-4096-B30B-5CD3C1F8952D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Enrichment", "src\Itmo.Dev.Platform.Enrichment\Itmo.Dev.Platform.Enrichment.csproj", "{2E8BB6BB-9507-4CFE-9346-04F43959864B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Enrichment.Tests", "tests\Itmo.Dev.Platform.Enrichment.Tests\Itmo.Dev.Platform.Enrichment.Tests.csproj", "{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -176,6 +180,14 @@ Global
 		{5D02816B-0986-4096-B30B-5CD3C1F8952D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D02816B-0986-4096-B30B-5CD3C1F8952D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D02816B-0986-4096-B30B-5CD3C1F8952D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E8BB6BB-9507-4CFE-9346-04F43959864B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8BB6BB-9507-4CFE-9346-04F43959864B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8BB6BB-9507-4CFE-9346-04F43959864B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8BB6BB-9507-4CFE-9346-04F43959864B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -203,5 +215,7 @@ Global
 		{116CCD48-CA35-43A6-BC85-3C1D04BAB06C} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{9EF432B5-33D7-40D1-A603-06A442926CB5} = {F90D3EA4-0AB5-4AB6-9035-0DD72576A1C2}
 		{5D02816B-0986-4096-B30B-5CD3C1F8952D} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
+		{2E8BB6BB-9507-4CFE-9346-04F43959864B} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
+		{2F3CA0A1-FE32-4C21-A733-CC64D76FC1CA} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 	EndGlobalSection
 EndGlobal

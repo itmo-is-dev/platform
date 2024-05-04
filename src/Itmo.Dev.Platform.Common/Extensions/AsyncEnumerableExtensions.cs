@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Common.Extensions;
@@ -154,13 +155,19 @@ public static class AsyncEnumerableExtensions
                 await channel.Writer.WriteAsync(selected, cancellationToken);
             });
 
-        parallelTask = parallelTask.ContinueWith(_ => channel.Writer.Complete(), options.CancellationToken);
+        var completionTask = parallelTask.ContinueWith(_ => channel.Writer.Complete(), options.CancellationToken);
 
         await foreach (var element in channel.Reader.ReadAllAsync(options.CancellationToken))
         {
             yield return element;
         }
 
+        if (parallelTask.Exception is not null)
+        {
+            ExceptionDispatchInfo.Throw(parallelTask.Exception);
+        }
+
         await parallelTask;
+        await completionTask;
     }
 }

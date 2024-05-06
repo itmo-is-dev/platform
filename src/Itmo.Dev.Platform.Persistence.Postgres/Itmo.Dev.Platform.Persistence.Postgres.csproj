@@ -19,7 +19,7 @@
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added persistence abstractions
+            Added migration runner service
         </PackageReleaseNotes>
     </PropertyGroup>
 

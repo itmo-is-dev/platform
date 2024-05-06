@@ -7,6 +7,10 @@ on:
     paths:
       - 'src/Itmo.Dev.Platform.Common/**'
       - 'src/Itmo.Dev.Platform.BackgroundTasks/**'
+      - 'src/Itmo.Dev.Platform.BackgroundTasks.Postgres/**'
+      - 'src/Itmo.Dev.Platform.BackgroundTasks.Hangfire/**'
+      - 'src/Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres/**'
+      - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
       - 'tests/Itmo.Dev.Platform.BackgroundTasks.Tests/**'
       - 'tests/Itmo.Dev.Platform.BackgroundTasks.Tests.Startup/**'
       - '.github/workflows/build-test-background-tasks.yaml'

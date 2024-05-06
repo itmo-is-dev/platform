@@ -75,6 +75,8 @@ jobs:
           mv src/Itmo.Dev.Platform.MessagePersistence/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Grpc/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Enrichment/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Persistence.Abstractions/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Persistence.Postgres/bin/Release/*.nupkg .packages/
   
   
   publish-github:

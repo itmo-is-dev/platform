@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 8.0.100
-          
+
       - name: Create cache keys
         id: create-cache-keys
         run: |
@@ -55,26 +55,31 @@ jobs:
       - name: build
         if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
-        
+
       - name: move packages
         if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
         run: |
           rm -rf .packages
           mkdir .packages
+          
           mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Testing/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Logging/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Grpc/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Enrichment/bin/Release/*.nupkg .packages/
+          
           mv src/Itmo.Dev.Platform.BackgroundTasks/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.BackgroundTasks.Postgres/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.BackgroundTasks.Hangfire/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
+          
           mv src/Itmo.Dev.Platform.MessagePersistence/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.Grpc/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.Enrichment/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.MessagePersistence.Postgres/bin/Release/*.nupkg .packages/
+          
           mv src/Itmo.Dev.Platform.Persistence.Abstractions/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Persistence.Postgres/bin/Release/*.nupkg .packages/
   
@@ -103,7 +108,7 @@ jobs:
           do
             dotnet nuget push "${file#/}" --source "github"
           done
-          
+  
   publish-nuget:
     name: publish (NuGet)
     runs-on: ubuntu-latest

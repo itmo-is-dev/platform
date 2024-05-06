@@ -5,7 +5,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 
-namespace Itmo.Dev.Platform.BackgroundTasks.Configuration.Builders;
+namespace Itmo.Dev.Platform.BackgroundTasks.Configuration;
 
 public interface IBackgroundTaskMetadataConfigurator
 {

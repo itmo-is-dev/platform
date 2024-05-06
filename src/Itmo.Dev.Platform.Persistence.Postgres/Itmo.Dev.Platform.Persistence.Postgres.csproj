@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Npgsql"/>
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
+        <PackageReference Include="FluentMigrator.Runner.Postgres"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj"/>
+    </ItemGroup>
+
+</Project>

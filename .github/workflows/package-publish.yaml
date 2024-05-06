@@ -64,10 +64,12 @@ jobs:
           mv src/Itmo.Dev.Platform.Common/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.YandexCloud/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
-          mv src/Itmo.Dev.Platform.Postgres/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Testing/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Logging/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.BackgroundTasks/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.BackgroundTasks.Postgres/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.BackgroundTasks.Hangfire/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.MessagePersistence/bin/Release/*.nupkg .packages/

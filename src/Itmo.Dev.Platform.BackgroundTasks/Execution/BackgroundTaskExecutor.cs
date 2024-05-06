@@ -7,6 +7,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Execution;
@@ -22,15 +23,18 @@ internal class BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TRes
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundTaskExecutionOptions _options;
     private readonly IBackgroundTaskInfrastructureRepository _repository;
+    private readonly ILogger<BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TResult, TError>> _logger;
 
     public BackgroundTaskExecutor(
         IServiceProvider serviceProvider,
         IOptions<BackgroundTaskExecutionOptions> options,
-        IBackgroundTaskInfrastructureRepository repository)
+        IBackgroundTaskInfrastructureRepository repository,
+        ILogger<BackgroundTaskExecutor<TTask, TMetadata, TExecutionMetadata, TResult, TError>> logger)
     {
         _serviceProvider = serviceProvider;
         _options = options.Value;
         _repository = repository;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(

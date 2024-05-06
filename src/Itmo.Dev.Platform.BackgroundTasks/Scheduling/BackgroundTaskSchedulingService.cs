@@ -3,7 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.Common.BackgroundServices;
 using Itmo.Dev.Platform.Common.Lifetime;
-using Itmo.Dev.Platform.Postgres.Transactions;
+using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -57,28 +57,30 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
         await using var scope = _scopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<IBackgroundTaskInfrastructureRepository>();
         var scheduler = scope.ServiceProvider.GetRequiredService<IBackgroundTaskScheduler>();
-        var transactionProvider = scope.ServiceProvider.GetRequiredService<IPostgresTransactionProvider>();
+        var transactionProvider = scope.ServiceProvider.GetRequiredService<IPersistenceTransactionProvider>();
 
         while (cancellationToken.IsCancellationRequested is false)
         {
             await Task.Delay(options.PollingDelay, cancellationToken);
 
-            await using var transaction = await transactionProvider
-                .CreateTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+            await using var transaction = await transactionProvider.BeginTransactionAsync(
+                IsolationLevel.ReadCommitted,
+                cancellationToken);
 
-            var query = BackgroundTaskQuery.Build(builder => builder
-                .WithState(BackgroundTaskState.Pending)
-                .WithState(BackgroundTaskState.Retrying)
-                .WithState(BackgroundTaskState.Proceeded)
-                .WithCursor(DateTimeOffset.UnixEpoch)
-                .WithPageSize(options.BatchSize));
+            var query = BackgroundTaskQuery.Build(
+                builder => builder
+                    .WithState(BackgroundTaskState.Pending)
+                    .WithState(BackgroundTaskState.Retrying)
+                    .WithState(BackgroundTaskState.Proceeded)
+                    .WithCursor(DateTimeOffset.UnixEpoch)
+                    .WithPageSize(options.BatchSize));
 
             var backgroundTaskIds = await repository
                 .SearchIdsAsync(query, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
-            await scheduler.ScheduleAsync(backgroundTaskIds, cancellationToken);
             await repository.UpdateStateAsync(backgroundTaskIds, BackgroundTaskState.Enqueued, cancellationToken);
+            await scheduler.ScheduleAsync(backgroundTaskIds, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }

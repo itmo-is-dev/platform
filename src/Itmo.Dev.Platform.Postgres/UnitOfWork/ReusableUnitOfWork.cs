@@ -44,7 +44,7 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
 
         using var subscription = await _semaphore.UseAsync(cancellationToken);
 
-        var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
+        await using var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         IDbTransaction transaction = await connection
             .BeginTransactionAsync(isolationLevel, cancellationToken);

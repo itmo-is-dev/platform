@@ -25,7 +25,7 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         await using var scope = _fixture.Scope;
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(default);
+        await using var connection = await connectionProvider.GetConnectionAsync(default);
 
         const string migrateSql = """
         create table test

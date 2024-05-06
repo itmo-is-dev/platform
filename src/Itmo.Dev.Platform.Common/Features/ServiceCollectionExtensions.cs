@@ -7,6 +7,9 @@ internal static class ServiceCollectionExtensions
     public static IServiceCollection AddPlatformFeature<TFeature>(this IServiceCollection collection)
         where TFeature : class, IPlatformFeature
     {
+        if (collection.HasPlatformFeature<TFeature>())
+            throw PlatformFeatureAlreadyRegisteredException.Create<TFeature>();
+
         return collection.AddSingleton<TFeature>();
     }
 

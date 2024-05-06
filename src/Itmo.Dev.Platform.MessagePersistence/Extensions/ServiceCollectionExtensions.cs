@@ -1,4 +1,6 @@
 using Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
+using Itmo.Dev.Platform.MessagePersistence.Configuration.General;
+using Itmo.Dev.Platform.MessagePersistence.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Extensions;
@@ -7,10 +9,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPlatformMessagePersistence(
         this IServiceCollection collection,
-        Func<IMessagePersistencePersistenceConfigurator, IMessagePersistenceConfigurationBuilder> configuration)
+        Func<IMessagePersistencePersistenceConfigurationSelector, IMessagePersistenceConfigurationBuilder> config)
     {
         var builder = new MessagePersistenceConfigurationBuilder(collection);
-        configuration.Invoke(builder);
+        config.Invoke(builder);
+
+        collection.AddScoped<IMessagePersistenceConsumer, MessagePersistenceConsumer>();
 
         return collection;
     }

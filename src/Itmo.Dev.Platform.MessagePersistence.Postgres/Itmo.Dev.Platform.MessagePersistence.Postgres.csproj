@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence\Itmo.Dev.Platform.MessagePersistence.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Postgres\Itmo.Dev.Platform.Persistence.Postgres.csproj"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Tests"/>
+    </ItemGroup>
+    
+</Project>

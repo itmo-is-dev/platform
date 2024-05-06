@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres.csproj" />
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Postgres\Itmo.Dev.Platform.BackgroundTasks.Postgres.csproj" />
       <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj" />
     </ItemGroup>
 

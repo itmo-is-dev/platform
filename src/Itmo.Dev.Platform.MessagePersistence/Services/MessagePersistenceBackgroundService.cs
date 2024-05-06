@@ -4,7 +4,7 @@ using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
-using Itmo.Dev.Platform.Postgres.Transactions;
+using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -63,7 +63,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
         CancellationToken cancellationToken)
     {
         var repository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
-        var transactionProvider = provider.GetRequiredService<IPostgresTransactionProvider>();
+        var transactionProvider = provider.GetRequiredService<IPersistenceTransactionProvider>();
 
         var query = SerializedMessageQuery.Build(builder => builder
             .WithName(_messageName)
@@ -74,7 +74,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
         while (cancellationToken.IsCancellationRequested is false)
         {
             await using var transaction = await transactionProvider
-                .CreateTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+                .BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
             var serializedMessages = await repository
                 .QueryAsync(query, cancellationToken)

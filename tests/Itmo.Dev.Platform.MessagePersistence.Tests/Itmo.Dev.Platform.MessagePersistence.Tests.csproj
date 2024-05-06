@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.MessagePersistence.Postgres\Itmo.Dev.Platform.MessagePersistence.Postgres.csproj" />
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj"/>
         <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence.Tests.Startup\Itmo.Dev.Platform.MessagePersistence.Tests.Startup.csproj"/>
     </ItemGroup>

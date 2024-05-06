@@ -12,14 +12,14 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseUrl>https://github.com/itmo-is-dev/platform/blob/master/LICENSE</PackageLicenseUrl>
+        <License>LICENSE.md</License>
     </PropertyGroup>
 
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
-        <Version>1.2.$(PatchVersion)</Version>
+        <Version>2.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added state machine
+            Refactored persistence configuration
         </PackageReleaseNotes>
     </PropertyGroup>
 
@@ -30,18 +30,19 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hangfire.AspNetCore"/>
-        <PackageReference Include="Hangfire.PostgreSql"/>
         <PackageReference Include="Microsoft.Extensions.Hosting"/>
         <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="SourceKit.Generators.Builder"/>
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="$(AssemblyName).Postgres"/>
+        <InternalsVisibleTo Include="$(AssemblyName).Hangfire"/>
         <InternalsVisibleTo Include="$(AssemblyName).Tests"/>
     </ItemGroup>
 

@@ -2,12 +2,11 @@ using FluentAssertions;
 using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Models;
-using Itmo.Dev.Platform.MessagePersistence.Persistence.Repositories;
+using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
+using Itmo.Dev.Platform.MessagePersistence.Postgres.Repositories;
 using Itmo.Dev.Platform.MessagePersistence.Tests.Fixtures;
 using Itmo.Dev.Platform.MessagePersistence.Tests.Handlers;
 using Itmo.Dev.Platform.MessagePersistence.Tests.Models;
-using Itmo.Dev.Platform.Postgres.Extensions;
-using Itmo.Dev.Platform.Postgres.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,36 +36,38 @@ public class MessagePersistenceHandlerTests
         var context = new TestContext<int, string>();
 
         await using var application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
-            {
-                var configuration = new ConfigurationManager();
+            .WithWebHostBuilder(
+                builder => builder.ConfigureServices(
+                    collection =>
+                    {
+                        var configuration = new ConfigurationManager();
 
-                configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["Handler:BatchSize"] = "10",
-                    ["Handler:PollingDelay"] = "00:00:01",
-                });
+                        configuration.AddInMemoryCollection(
+                            new Dictionary<string, string?>
+                            {
+                                ["Handler:BatchSize"] = "10",
+                                ["Handler:PollingDelay"] = "00:00:01",
+                            });
 
-                collection.AddPlatformMessagePersistence(b => b
-                    .ConfigurePersistence(configuration, o => o.SchemaName = "message_persistence")
-                    .AddMessage(m => m
-                        .Called(nameof(MessagePersistenceHandlerTests))
-                        .WithConfiguration(configuration.GetSection("Handler"))
-                        .WithKey<int>()
-                        .WithValue<string>()
-                        .HandleBy<TestPersistenceHandler<int, string>>()));
+                        collection.AddPlatformMessagePersistence(
+                            b => b
+                                .UsePostgresPersistence(
+                                    configurator => configurator.ConfigureOptions(
+                                        options => options.Configure(o => o.SchemaName = "message_persistence")))
+                                .AddMessage(
+                                    m => m
+                                        .Called(nameof(MessagePersistenceHandlerTests))
+                                        .WithConfiguration(configuration.GetSection("Handler"))
+                                        .WithKey<int>()
+                                        .WithValue<string>()
+                                        .HandleBy<TestPersistenceHandler<int, string>>()));
 
-                // ReSharper disable once AccessToDisposedClosure
-                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+                        _database.AddPlatformPersistence(collection);
 
-                collection.AddPlatformPostgres(_ => { });
-                collection.RemoveAll<PostgresConnectionString>();
-                collection.AddSingleton(connectionString);
+                        collection.AddSingleton(context);
 
-                collection.AddSingleton(context);
-
-                collection.AddLogging(b => b.AddSerilog());
-            }));
+                        collection.AddLogging(b => b.AddSerilog());
+                    }));
 
         application.CreateClient();
 
@@ -96,37 +97,39 @@ public class MessagePersistenceHandlerTests
         var context = new TestCollectionContext<int, string>();
 
         await using var application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
-            {
-                var configuration = new ConfigurationManager();
+            .WithWebHostBuilder(
+                builder => builder.ConfigureServices(
+                    collection =>
+                    {
+                        var configuration = new ConfigurationManager();
 
-                configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["Handler:BatchSize"] = "10",
-                    ["Handler:PollingDelay"] = "00:00:01",
-                    ["Handler:RetryCount"] = "2",
-                });
+                        configuration.AddInMemoryCollection(
+                            new Dictionary<string, string?>
+                            {
+                                ["Handler:BatchSize"] = "10",
+                                ["Handler:PollingDelay"] = "00:00:01",
+                                ["Handler:RetryCount"] = "2",
+                            });
 
-                collection.AddPlatformMessagePersistence(b => b
-                    .ConfigurePersistence(configuration, o => o.SchemaName = "message_persistence")
-                    .AddMessage(m => m
-                        .Called(nameof(MessagePersistenceHandlerTests))
-                        .WithConfiguration(configuration.GetSection("Handler"))
-                        .WithKey<int>()
-                        .WithValue<string>()
-                        .HandleBy<FailingHandler<int, string>>()));
+                        collection.AddPlatformMessagePersistence(
+                            b => b
+                                .UsePostgresPersistence(
+                                    configurator => configurator.ConfigureOptions(
+                                        options => options.Configure(o => o.SchemaName = "message_persistence")))
+                                .AddMessage(
+                                    m => m
+                                        .Called(nameof(MessagePersistenceHandlerTests))
+                                        .WithConfiguration(configuration.GetSection("Handler"))
+                                        .WithKey<int>()
+                                        .WithValue<string>()
+                                        .HandleBy<FailingHandler<int, string>>()));
 
-                // ReSharper disable once AccessToDisposedClosure
-                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+                        _database.AddPlatformPersistence(collection);
 
-                collection.AddPlatformPostgres(_ => { });
-                collection.RemoveAll<PostgresConnectionString>();
-                collection.AddSingleton(connectionString);
+                        collection.AddSingleton(context);
 
-                collection.AddSingleton(context);
-
-                collection.AddLogging(b => b.AddSerilog());
-            }));
+                        collection.AddLogging(b => b.AddSerilog());
+                    }));
 
         application.CreateClient();
 
@@ -150,13 +153,15 @@ public class MessagePersistenceHandlerTests
 
         // Assert
         context.Messages.Count.Should().Be(2);
+        await Task.Delay(TimeSpan.FromSeconds(1));
 
         var repository = scope.ServiceProvider.GetRequiredService<MessagePersistenceRepository>();
 
-        var query = SerializedMessageQuery.Build(x => x
-            .WithName(nameof(MessagePersistenceHandlerTests))
-            .WithState(MessageState.Failed)
-            .WithPageSize(1));
+        var query = SerializedMessageQuery.Build(
+            x => x
+                .WithName(nameof(MessagePersistenceHandlerTests))
+                .WithState(MessageState.Failed)
+                .WithPageSize(1));
 
         var failedMessage = await repository
             .QueryAsync(query, default)

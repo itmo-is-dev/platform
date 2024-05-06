@@ -1,35 +1,30 @@
 using FluentAssertions;
-using FluentSerialization.Extensions.NewtonsoftJson;
 using Itmo.Dev.Platform.BackgroundTasks.Extensions;
+using Itmo.Dev.Platform.BackgroundTasks.Hangfire.Extensions;
+using Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Managing;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
+using Itmo.Dev.Platform.BackgroundTasks.Postgres.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
-using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteSimpleStateMachine.States;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
 using Itmo.Dev.Platform.Common.Lifetime;
-using Itmo.Dev.Platform.Postgres.Extensions;
-using Itmo.Dev.Platform.Postgres.Models;
 using Itmo.Dev.Platform.Testing;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using Xunit;
 using Xunit.Abstractions;
 using BackgroundTaskQuery = Itmo.Dev.Platform.BackgroundTasks.Models.BackgroundTaskQuery;
-using ConfigurationBuilder = FluentSerialization.ConfigurationBuilder;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests;
 
@@ -55,37 +50,40 @@ public class BackgroundTaskRunTests : TestBase
         await using var fixtureScope = _backgroundTasksFixture.Scope;
 
         await using var application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
-            {
-                var configuration = new ConfigurationManager();
+            .WithWebHostBuilder(
+                builder => builder.ConfigureServices(
+                    collection =>
+                    {
+                        var configuration = new ConfigurationManager();
 
-                collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBuilder
-                    .ConfigurePersistence(configuration, options => options.SchemaName = "background_tasks")
-                    .ConfigureScheduling(configuration,
-                        options =>
-                        {
-                            options.BatchSize = 100;
-                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
-                        })
-                    .ConfigureExecution(configuration, options => options.MaxRetryCount = 10)
-                    .AddBackgroundTask(task => task
-                        .WithMetadata<TestBackgroundTaskMetadata>()
-                        .WithExecutionMetadata<EmptyExecutionMetadata>()
-                        .WithResult<TestBackgroundTaskResult>()
-                        .WithError<EmptyError>()
-                        .HandleBy<TestBackgroundTask>()));
+                        collection.AddPlatformBackgroundTasks(
+                            backgroundTaskBuilder => backgroundTaskBuilder
+                                .UsePostgresPersistence(
+                                    b => b.Configure(o => o.SchemaName = "background_tasks"))
+                                .ConfigureScheduling(
+                                    b => b.Configure(
+                                        options =>
+                                        {
+                                            options.BatchSize = 100;
+                                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
+                                        }))
+                                .UseHangfireScheduling(
+                                    x => x
+                                        .ConfigureOptions(_ => { })
+                                        .UsePostgresJobStorage())
+                                .ConfigureExecution(configuration, options => options.MaxRetryCount = 10)
+                                .AddBackgroundTask(
+                                    task => task
+                                        .WithMetadata<TestBackgroundTaskMetadata>()
+                                        .WithExecutionMetadata<EmptyExecutionMetadata>()
+                                        .WithResult<TestBackgroundTaskResult>()
+                                        .WithError<EmptyError>()
+                                        .HandleBy<TestBackgroundTask>()));
 
-                // ReSharper disable once AccessToDisposedClosure
-                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
-
-                collection.AddPlatformPostgres(_ => { });
-                collection.RemoveAll<PostgresConnectionString>();
-                collection.AddSingleton(connectionString);
-
-                collection.AddSingleton(_completionManager);
-
-                collection.AddLogging(b => b.AddSerilog());
-            }));
+                        _backgroundTasksFixture.AddPlatformPersistence(collection);
+                        collection.AddSingleton(_completionManager);
+                        collection.AddLogging(b => b.AddSerilog());
+                    }));
 
         application.CreateClient();
 
@@ -130,38 +128,42 @@ public class BackgroundTaskRunTests : TestBase
         await using var fixtureScope = _backgroundTasksFixture.Scope;
 
         await using var application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
-            {
-                var configuration = new ConfigurationManager();
+            .WithWebHostBuilder(
+                builder => builder.ConfigureServices(
+                    collection =>
+                    {
+                        var configuration = new ConfigurationManager();
 
-                collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBuilder
-                    .ConfigurePersistence(configuration, options => options.SchemaName = "background_tasks")
-                    .ConfigureScheduling(configuration,
-                        options =>
-                        {
-                            options.BatchSize = 100;
-                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
-                            options.SchedulerRetryCount = 0;
-                        })
-                    .ConfigureExecution(configuration, options => options.MaxRetryCount = 2)
-                    .AddBackgroundTask(task => task
-                        .WithMetadata<EmptyMetadata>()
-                        .WithExecutionMetadata<EmptyExecutionMetadata>()
-                        .WithResult<EmptyExecutionResult>()
-                        .WithError<EmptyError>()
-                        .HandleBy<FailingBackgroundTask>()));
+                        collection.AddPlatformBackgroundTasks(
+                            backgroundTaskBuilder => backgroundTaskBuilder
+                                .UsePostgresPersistence(
+                                    b => b.Configure(o => o.SchemaName = "background_tasks"))
+                                .ConfigureScheduling(
+                                    b => b.Configure(
+                                        options =>
+                                        {
+                                            options.BatchSize = 100;
+                                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
+                                        }))
+                                .UseHangfireScheduling(
+                                    hangfire => hangfire
+                                        .ConfigureOptions(
+                                            b => b.Configure(o => o.SchedulerRetryCount = 0))
+                                        .UsePostgresJobStorage())
+                                .ConfigureExecution(configuration, options => options.MaxRetryCount = 2)
+                                .AddBackgroundTask(
+                                    task => task
+                                        .WithMetadata<EmptyMetadata>()
+                                        .WithExecutionMetadata<EmptyExecutionMetadata>()
+                                        .WithResult<EmptyExecutionResult>()
+                                        .WithError<EmptyError>()
+                                        .HandleBy<FailingBackgroundTask>()));
 
-                // ReSharper disable once AccessToDisposedClosure
-                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+                        _backgroundTasksFixture.AddPlatformPersistence(collection);
+                        collection.AddSingleton(_completionManager);
 
-                collection.AddPlatformPostgres(_ => { });
-                collection.RemoveAll<PostgresConnectionString>();
-                collection.AddSingleton(connectionString);
-
-                collection.AddSingleton(_completionManager);
-
-                collection.AddLogging(b => b.AddSerilog());
-            }));
+                        collection.AddLogging(b => b.AddSerilog());
+                    }));
 
         application.CreateClient();
 
@@ -181,23 +183,24 @@ public class BackgroundTaskRunTests : TestBase
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(10));
 
-        var checker = Task.Run(async () =>
-        {
-            // ReSharper disable once AccessToDisposedClosure
-            await using var checkerScope = application.Services.CreateAsyncScope();
-            var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
-
-            BackgroundTask task;
-
-            do
+        var checker = Task.Run(
+            async () =>
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-                task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
-            }
-            while (task.State is not BackgroundTaskState.Failed);
+                // ReSharper disable once AccessToDisposedClosure
+                await using var checkerScope = application.Services.CreateAsyncScope();
+                var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
-            return task;
-        });
+                BackgroundTask task;
+
+                do
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100));
+                    task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
+                }
+                while (task.State is not BackgroundTaskState.Failed);
+
+                return task;
+            });
 
         await Task.WhenAny(checker, timeout);
 
@@ -213,40 +216,47 @@ public class BackgroundTaskRunTests : TestBase
         await using var fixtureScope = _backgroundTasksFixture.Scope;
 
         await using var application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.ConfigureServices(collection =>
-            {
-                var configuration = new ConfigurationManager();
+            .WithWebHostBuilder(
+                builder => builder.ConfigureServices(
+                    collection =>
+                    {
+                        var configuration = new ConfigurationManager();
 
-                collection.AddPlatformBackgroundTasks(backgroundTaskBuilder => backgroundTaskBuilder
-                    .ConfigurePersistence(configuration, options => options.SchemaName = "background_tasks")
-                    .ConfigureScheduling(
-                        configuration,
-                        options =>
-                        {
-                            options.BatchSize = 100;
-                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
-                            options.SchedulerRetryCount = 1;
-                            options.SchedulerRetryDelays = new[] { 0, 0, 0 };
-                        })
-                    .ConfigureExecution(configuration, options => options.MaxRetryCount = 0)
-                    .AddBackgroundTask(task => task
-                        .WithMetadata<EmptyMetadata>()
-                        .WithExecutionMetadata<EmptyExecutionMetadata>()
-                        .WithResult<EmptyExecutionResult>()
-                        .WithError<EmptyError>()
-                        .HandleBy<ThrowingBackgroundTask>()));
+                        collection.AddPlatformBackgroundTasks(
+                            backgroundTaskBuilder => backgroundTaskBuilder
+                                .UsePostgresPersistence(
+                                    b => b.Configure(o => o.SchemaName = "background_tasks"))
+                                .ConfigureScheduling(
+                                    b => b.Configure(
+                                        options =>
+                                        {
+                                            options.BatchSize = 100;
+                                            options.PollingDelay = TimeSpan.FromMilliseconds(500);
+                                        }))
+                                .UseHangfireScheduling(
+                                    hangfire => hangfire
+                                        .ConfigureOptions(
+                                            b => b.Configure(
+                                                options =>
+                                                {
+                                                    options.SchedulerRetryCount = 1;
+                                                    options.SchedulerRetryDelays = [0, 0, 0];
+                                                }))
+                                        .UsePostgresJobStorage())
+                                .ConfigureExecution(configuration, options => options.MaxRetryCount = 0)
+                                .AddBackgroundTask(
+                                    task => task
+                                        .WithMetadata<EmptyMetadata>()
+                                        .WithExecutionMetadata<EmptyExecutionMetadata>()
+                                        .WithResult<EmptyExecutionResult>()
+                                        .WithError<EmptyError>()
+                                        .HandleBy<ThrowingBackgroundTask>()));
 
-                // ReSharper disable once AccessToDisposedClosure
-                var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
+                        _backgroundTasksFixture.AddPlatformPersistence(collection);
+                        collection.AddSingleton(_completionManager);
 
-                collection.AddPlatformPostgres(_ => { });
-                collection.RemoveAll<PostgresConnectionString>();
-                collection.AddSingleton(connectionString);
-
-                collection.AddSingleton(_completionManager);
-
-                collection.AddLogging(b => b.AddSerilog());
-            }));
+                        collection.AddLogging(b => b.AddSerilog());
+                    }));
 
         application.CreateClient();
 
@@ -266,23 +276,24 @@ public class BackgroundTaskRunTests : TestBase
 
         var timeout = Task.Delay(TimeSpan.FromSeconds(10));
 
-        var checker = Task.Run(async () =>
-        {
-            // ReSharper disable once AccessToDisposedClosure
-            await using var checkerScope = application.Services.CreateAsyncScope();
-            var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
-
-            BackgroundTask task;
-
-            do
+        var checker = Task.Run(
+            async () =>
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-                task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
-            }
-            while (task.State is not BackgroundTaskState.Failed);
+                // ReSharper disable once AccessToDisposedClosure
+                await using var checkerScope = application.Services.CreateAsyncScope();
+                var repository = checkerScope.ServiceProvider.GetRequiredService<IBackgroundTaskRepository>();
 
-            return task;
-        });
+                BackgroundTask task;
+
+                do
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100));
+                    task = await repository.GetBackgroundTaskAsync(backgroundTaskId);
+                }
+                while (task.State is not BackgroundTaskState.Failed);
+
+                return task;
+            });
 
         await Task.WhenAny(checker, timeout);
 

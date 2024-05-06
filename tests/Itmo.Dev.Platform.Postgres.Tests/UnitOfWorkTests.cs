@@ -32,7 +32,7 @@ public class UnitOfWorkTests : TestBase, IAsyncDisposeLifetime
         await using var scope = _fixture.Scope;
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(default);
+        await using var connection = await connectionProvider.GetConnectionAsync(default);
 
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
@@ -102,7 +102,7 @@ public class UnitOfWorkTests : TestBase, IAsyncDisposeLifetime
         await using var scope = _fixture.Scope;
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(default);
+        await using var connection = await connectionProvider.GetConnectionAsync(default);
 
         var unitOfWork = (ReusableUnitOfWork)scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 

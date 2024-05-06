@@ -36,11 +36,12 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Postgres"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

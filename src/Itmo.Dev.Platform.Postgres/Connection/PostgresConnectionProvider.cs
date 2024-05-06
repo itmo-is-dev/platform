@@ -7,11 +7,13 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
 {
     private readonly Lazy<Task<NpgsqlConnection>> _connection;
     private readonly ILogger<PostgresConnectionProvider> _logger;
+    private readonly IPostgresConnectionFactory _connectionFactory;
 
     public PostgresConnectionProvider(
         IPostgresConnectionFactory connectionFactory,
         ILogger<PostgresConnectionProvider> logger)
     {
+        _connectionFactory = connectionFactory;
         _logger = logger;
 
         _connection = new Lazy<Task<NpgsqlConnection>>(async () =>
@@ -25,9 +27,9 @@ internal class PostgresConnectionProvider : IPostgresConnectionProvider, IAsyncD
         });
     }
 
-    public async ValueTask<NpgsqlConnection> GetConnectionAsync(CancellationToken cancellationToken)
+    public ValueTask<NpgsqlConnection> GetConnectionAsync(CancellationToken cancellationToken)
     {
-        return await _connection.Value;
+        return _connectionFactory.OpenConnectionAsync(cancellationToken);
     }
 
     public async ValueTask DisposeAsync()

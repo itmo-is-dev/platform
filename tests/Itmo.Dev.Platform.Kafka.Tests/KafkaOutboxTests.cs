@@ -7,8 +7,7 @@ using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
-using Itmo.Dev.Platform.Postgres.Extensions;
-using Itmo.Dev.Platform.Postgres.Models;
+using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,43 +47,46 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         void ConfigureAppConfiguration(IConfigurationBuilder configuration)
         {
-            configuration.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["MessagePersistence:SchemaName"] = "message_persistence",
-                [$"Producer:{nameof(KafkaProducerOptions.Topic)}"] = TopicName,
-                [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
-                [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
-            });
+            configuration.AddInMemoryCollection(
+                new Dictionary<string, string?>
+                {
+                    ["MessagePersistence:SchemaName"] = "message_persistence",
+                    [$"Producer:{nameof(KafkaProducerOptions.Topic)}"] = TopicName,
+                    [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
+                    [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
+                });
         }
 
         void ConfigureServices(IServiceCollection collection, IConfiguration configuration)
         {
-            collection.AddPlatformMessagePersistence(builder => builder
-                .ConfigurePersistence(configuration.GetSection("MessagePersistence")));
+            collection.AddPlatformMessagePersistence(
+                builder => builder
+                    .UsePostgresPersistence(
+                        configurator => configurator.ConfigureOptions(
+                            b => b.Bind(configuration.GetSection("MessagePersistence")))));
 
-            collection.AddPlatformKafka(builder => builder
-                .ConfigureTestOptions(_kafkaFixture.Host)
-                .AddProducer(b => b
-                    .WithKey<int>()
-                    .WithValue<string>()
-                    .WithConfiguration(configuration.GetSection("Producer"))
-                    .SerializeKeyWithNewtonsoft()
-                    .SerializeValueWithNewtonsoft()
-                    .WithOutbox()));
+            collection.AddPlatformKafka(
+                builder => builder
+                    .ConfigureTestOptions(_kafkaFixture.Host)
+                    .AddProducer(
+                        b => b
+                            .WithKey<int>()
+                            .WithValue<string>()
+                            .WithConfiguration(configuration.GetSection("Producer"))
+                            .SerializeKeyWithNewtonsoft()
+                            .SerializeValueWithNewtonsoft()
+                            .WithOutbox()));
 
-            var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
-
-            collection.AddPlatformPostgres(_ => { });
-            collection.RemoveAll<PostgresConnectionString>();
-            collection.AddSingleton(connectionString);
+            _databaseFixture.AddPlatformPersistence(collection);
 
             collection.AddLogging(x => x.AddSerilog());
             collection.AddOptions();
         }
 
-        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(hb => hb
-            .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
-            .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
+        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(
+            hb => hb
+                .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
+                .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
 
         application.CreateClient();
 
@@ -116,26 +118,28 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         // Assert
         var consumedMessages = messages
-            .Select(_ =>
-            {
-                var result = consumer.Consume(cts.Token);
-                consumer.Commit(result);
+            .Select(
+                _ =>
+                {
+                    var result = consumer.Consume(cts.Token);
+                    consumer.Commit(result);
 
-                return result;
-            })
+                    return result;
+                })
             .OrderBy(x => x.Offset.Value)
             .Select(x => x.Message)
             .ToArray();
 
         consumedMessages.Zip(messages)
             .Should()
-            .AllSatisfy(tuple => tuple.First
-                .Should()
-                .BeEquivalentTo(
-                    tuple.Second,
-                    opt => opt
-                        .Including(x => x.Key)
-                        .Including(x => x.Value)));
+            .AllSatisfy(
+                tuple => tuple.First
+                    .Should()
+                    .BeEquivalentTo(
+                        tuple.Second,
+                        opt => opt
+                            .Including(x => x.Key)
+                            .Including(x => x.Value)));
 
         // Dispose
         consumer.Close();

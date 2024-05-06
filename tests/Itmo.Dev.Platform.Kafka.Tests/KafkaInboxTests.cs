@@ -8,12 +8,10 @@ using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
-using Itmo.Dev.Platform.Postgres.Extensions;
-using Itmo.Dev.Platform.Postgres.Models;
+using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;
@@ -50,49 +48,52 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
 
         void ConfigureAppConfiguration(IConfigurationBuilder configuration)
         {
-            configuration.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["MessagePersistence:SchemaName"] = "message_persistence",
-                [$"Consumer:{nameof(KafkaConsumerOptions.Topic)}"] = TopicName,
-                [$"Consumer:{nameof(KafkaConsumerOptions.Group)}"] = nameof(KafkaInboxTests),
-                [$"Consumer:{nameof(KafkaConsumerOptions.InstanceId)}"] = nameof(KafkaInboxTests),
-                [$"Consumer:{nameof(KafkaConsumerOptions.BufferWaitLimit)}"] = "00:00:00.200",
-                [$"Consumer:{nameof(KafkaConsumerOptions.BufferSize)}"] = bufferSize.ToString(),
-                [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
-                [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
-            });
+            configuration.AddInMemoryCollection(
+                new Dictionary<string, string?>
+                {
+                    ["MessagePersistence:SchemaName"] = "message_persistence",
+                    [$"Consumer:{nameof(KafkaConsumerOptions.Topic)}"] = TopicName,
+                    [$"Consumer:{nameof(KafkaConsumerOptions.Group)}"] = nameof(KafkaInboxTests),
+                    [$"Consumer:{nameof(KafkaConsumerOptions.InstanceId)}"] = nameof(KafkaInboxTests),
+                    [$"Consumer:{nameof(KafkaConsumerOptions.BufferWaitLimit)}"] = "00:00:00.200",
+                    [$"Consumer:{nameof(KafkaConsumerOptions.BufferSize)}"] = bufferSize.ToString(),
+                    [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
+                    [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
+                });
         }
 
         void ConfigureServices(IServiceCollection collection, IConfiguration configuration)
         {
             collection.AddSingleton(testContext);
 
-            collection.AddPlatformMessagePersistence(builder => builder
-                .ConfigurePersistence(configuration.GetSection("MessagePersistence")));
+            collection.AddPlatformMessagePersistence(
+                builder => builder
+                    .UsePostgresPersistence(
+                        configurator => configurator.ConfigureOptions(
+                            b => b.Bind(configuration.GetSection("MessagePersistence")))));
 
-            collection.AddPlatformKafka(builder => builder
-                .ConfigureTestOptions(_kafkaFixture.Host)
-                .AddConsumer(b => b
-                    .WithKey<int>()
-                    .WithValue<string>()
-                    .WithConfiguration(configuration.GetSection("Consumer"))
-                    .DeserializeKeyWithNewtonsoft()
-                    .DeserializeValueWithNewtonsoft()
-                    .HandleInboxWith<CollectionInboxHandler<int, string>>()));
+            collection.AddPlatformKafka(
+                builder => builder
+                    .ConfigureTestOptions(_kafkaFixture.Host)
+                    .AddConsumer(
+                        b => b
+                            .WithKey<int>()
+                            .WithValue<string>()
+                            .WithConfiguration(configuration.GetSection("Consumer"))
+                            .DeserializeKeyWithNewtonsoft()
+                            .DeserializeValueWithNewtonsoft()
+                            .HandleInboxWith<CollectionInboxHandler<int, string>>()));
 
-            var connectionString = fixtureScope.ServiceProvider.GetRequiredService<PostgresConnectionString>();
-
-            collection.AddPlatformPostgres(_ => { });
-            collection.RemoveAll<PostgresConnectionString>();
-            collection.AddSingleton(connectionString);
+            _databaseFixture.AddPlatformPersistence(collection);
 
             collection.AddLogging(x => x.AddSerilog());
             collection.AddOptions();
         }
 
-        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(hb => hb
-            .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
-            .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
+        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(
+            hb => hb
+                .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
+                .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
 
         application.CreateClient();
 
@@ -128,13 +129,14 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
         // Assert
         testContext.Messages.Zip(messages)
             .Should()
-            .AllSatisfy(tuple => tuple.First
-                .Should()
-                .BeEquivalentTo(
-                    tuple.Second,
-                    opt => opt
-                        .Including(x => x.Key)
-                        .Including(x => x.Value)));
+            .AllSatisfy(
+                tuple => tuple.First
+                    .Should()
+                    .BeEquivalentTo(
+                        tuple.Second,
+                        opt => opt
+                            .Including(x => x.Key)
+                            .Including(x => x.Value)));
     }
 
     public static IEnumerable<object[]> GetMessages()

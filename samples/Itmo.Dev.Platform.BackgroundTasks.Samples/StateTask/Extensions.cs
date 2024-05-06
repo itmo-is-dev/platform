@@ -1,6 +1,6 @@
 using FluentSerialization;
 using FluentSerialization.Extensions.NewtonsoftJson;
-using Itmo.Dev.Platform.BackgroundTasks.Configuration.Builders;
+using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;

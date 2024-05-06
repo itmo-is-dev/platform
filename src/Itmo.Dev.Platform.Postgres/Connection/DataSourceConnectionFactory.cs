@@ -37,4 +37,9 @@ internal class DataSourceConnectionFactory : IPostgresConnectionFactory
 
         return _dataSource.CreateConnection();
     }
+
+    public ValueTask<NpgsqlConnection> OpenConnectionAsync(CancellationToken cancellationToken)
+    {
+        return _dataSource.OpenConnectionAsync(cancellationToken);
+    }
 }

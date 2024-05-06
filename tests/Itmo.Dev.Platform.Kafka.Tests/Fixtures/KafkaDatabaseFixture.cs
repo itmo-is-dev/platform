@@ -1,16 +1,35 @@
 using Itmo.Dev.Platform.Common.Extensions;
-using Itmo.Dev.Platform.Postgres.Connection;
-using Itmo.Dev.Platform.Postgres.Extensions;
+using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
+using Itmo.Dev.Platform.Persistence.Abstractions.Extensions;
+using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Testing.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 
 public class KafkaDatabaseFixture : DatabaseFixture
 {
     public AsyncServiceScope Scope => Provider.CreateAsyncScope();
+    
+    public void AddPlatformPersistence(IServiceCollection collection)
+    {
+        collection.AddPlatformPersistence(
+            persistence => persistence.UsePostgres(
+                postgres => postgres
+                    .WithConnectionOptions(
+                        b => b.Configure(
+                            options =>
+                            {
+                                options.Host = Container.Hostname;
+                                options.Port = Container.GetMappedPublicPort(5432);
+                                options.Database = "postgres";
+                                options.Username = "postgres";
+                                options.Password = "postgres";
+                                options.SslMode = "Prefer";
+                            }))
+                    .WithMigrationsFrom()));
+    }
 
     protected override void ConfigureServices(IServiceCollection collection)
     {
@@ -31,7 +50,12 @@ public class KafkaDatabaseFixture : DatabaseFixture
         collection.AddSingleton<IConfiguration>(configuration);
 
         collection.AddPlatform();
-        collection.AddPlatformPostgres(builder => builder.BindConfiguration("PostgresConfiguration"));
+
+        collection.AddPlatformPersistence(
+            persistence => persistence.UsePostgres(
+                postgres => postgres
+                    .WithConnectionOptions(b => b.BindConfiguration("PostgresConfiguration"))
+                    .WithMigrationsFrom()));
     }
 
     protected override async ValueTask UseProviderAsync(IServiceProvider provider)
@@ -40,10 +64,10 @@ public class KafkaDatabaseFixture : DatabaseFixture
         create table if not exists placeholder();
         """;
 
-        var connectionProvider = provider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(default);
+        var connectionProvider = provider.GetRequiredService<IPersistenceConnectionProvider>();
+        await using var connection = await connectionProvider.GetConnectionAsync(default);
 
-        await using var command = new NpgsqlCommand(sql, connection);
-        await command.ExecuteNonQueryAsync();
+        await using var command = connection.CreateCommand(sql);
+        await command.ExecuteNonQueryAsync(default);
     }
 }

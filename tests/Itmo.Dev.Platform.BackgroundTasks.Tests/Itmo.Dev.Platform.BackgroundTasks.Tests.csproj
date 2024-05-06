@@ -31,6 +31,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres.csproj" />
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Postgres\Itmo.Dev.Platform.BackgroundTasks.Postgres.csproj" />
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj"/>
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj"/>
         <ProjectReference Include="..\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup.csproj" />

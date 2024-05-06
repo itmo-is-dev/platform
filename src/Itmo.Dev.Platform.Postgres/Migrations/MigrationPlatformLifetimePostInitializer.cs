@@ -18,7 +18,7 @@ internal class MigrationPlatformLifetimePostInitializer : PlatformLifetimePostIn
         await using var scope = _scopeFactory.CreateAsyncScope();
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
-        var connection = await connectionProvider.GetConnectionAsync(cancellationToken);
+        await using var connection = await connectionProvider.GetConnectionAsync(cancellationToken);
 
         await connection.ReloadTypesAsync();
     }

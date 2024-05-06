@@ -1,0 +1,40 @@
+name: platform-persistence-postgres
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
+      - 'tests/Itmo.Dev.Platform.Persistence.Postgres.Tests/**'
+      - '.github/workflows/build-test-postgres.yaml'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.100
+
+      - name: Cache nuget packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/*.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build tests/Itmo.Dev.Platform.Persistence.Postgres.Tests/Itmo.Dev.Platform.Persistence.Postgres.Tests.csproj -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/Itmo.Dev.Platform.Persistence.Postgres.Tests/Itmo.Dev.Platform.Persistence.Postgres.Tests.csproj -c Release --no-restore --no-build

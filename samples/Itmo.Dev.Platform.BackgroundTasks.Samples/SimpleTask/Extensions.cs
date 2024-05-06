@@ -1,4 +1,4 @@
-using Itmo.Dev.Platform.BackgroundTasks.Configuration.Builders;
+using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 

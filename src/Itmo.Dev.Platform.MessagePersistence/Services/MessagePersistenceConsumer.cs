@@ -1,7 +1,7 @@
 using Itmo.Dev.Platform.Common.DateTime;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
-using Itmo.Dev.Platform.Postgres.Transactions;
+using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Newtonsoft.Json;
 using System.Data;
 
@@ -11,13 +11,13 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
 {
     private readonly JsonSerializerSettings _serializerSettings;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IPostgresTransactionProvider _transactionProvider;
+    private readonly IPersistenceTransactionProvider _transactionProvider;
     private readonly IMessagePersistenceInternalRepository _messagePersistenceRepository;
 
     public MessagePersistenceConsumer(
         JsonSerializerSettings serializerSettings,
         IDateTimeProvider dateTimeProvider,
-        IPostgresTransactionProvider transactionProvider,
+        IPersistenceTransactionProvider transactionProvider,
         IMessagePersistenceInternalRepository messagePersistenceRepository)
     {
         _serializerSettings = serializerSettings;
@@ -48,7 +48,7 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
             .ToArray();
 
         await using var transaction = await _transactionProvider
-            .CreateTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+            .BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
         await _messagePersistenceRepository.AddAsync(serializedMessages, cancellationToken);
 

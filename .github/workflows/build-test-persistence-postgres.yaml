@@ -1,4 +1,4 @@
-name: platform-postgres
+name: platform-persistence-postgres
 
 on:
   pull_request:

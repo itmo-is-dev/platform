@@ -1,8 +1,8 @@
 namespace Itmo.Dev.Platform.Enrichment;
 
-public interface IEnrichmentProcessor<TKey, TModel>
+public interface IEnrichmentProcessor<TKey, TModel, in TState>
     where TKey : notnull
     where TModel : IEnrichedModel<TKey>
 {
-    IAsyncEnumerable<TModel> EnrichAsync(IEnumerable<TModel> models, CancellationToken cancellationToken);
+    IAsyncEnumerable<TModel> EnrichAsync(TState state, IEnumerable<TModel> models, CancellationToken cancellationToken);
 }

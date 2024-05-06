@@ -13,24 +13,24 @@ internal class EnrichmentConfigurator : IEnrichmentConfigurator
         _collection = collection;
     }
 
-    public IEnrichmentConfigurator Enrich<TKey, TModel>(
-        Action<IEnrichmentTypeConfigurator<TKey, TModel>>? configuration)
+    public IEnrichmentConfigurator Enrich<TKey, TModel, TState>(
+        Action<IEnrichmentTypeConfigurator<TKey, TModel, TState>>? configuration)
         where TKey : notnull
         where TModel : IEnrichedModel<TKey>
     {
-        _collection.AddScoped<IEnrichmentProcessor<TKey, TModel>, EnrichmentProcessor<TKey, TModel>>();
+        _collection.AddScoped<IEnrichmentProcessor<TKey, TModel, TState>, EnrichmentProcessor<TKey, TModel, TState>>();
 
         if (configuration is null)
             return this;
 
-        var configurator = new EnrichmentTypeConfigurator<TKey, TModel>(_collection);
+        var configurator = new EnrichmentTypeConfigurator<TKey, TModel, TState>(_collection);
         configuration.Invoke(configurator);
 
         return this;
     }
 }
 
-file class EnrichmentTypeConfigurator<TKey, TModel> : IEnrichmentTypeConfigurator<TKey, TModel>
+file class EnrichmentTypeConfigurator<TKey, TModel, TState> : IEnrichmentTypeConfigurator<TKey, TModel, TState>
     where TKey : notnull
     where TModel : IEnrichedModel<TKey>
 {
@@ -41,11 +41,11 @@ file class EnrichmentTypeConfigurator<TKey, TModel> : IEnrichmentTypeConfigurato
         _collection = collection;
     }
 
-    public IEnrichmentTypeConfigurator<TKey, TModel> WithHandler<THandler>()
-        where THandler : class, IEnrichmentHandler<TKey, TModel>
+    public IEnrichmentTypeConfigurator<TKey, TModel, TState> WithHandler<THandler>()
+        where THandler : class, IEnrichmentHandler<TKey, TModel, TState>
     {
         _collection.TryAddEnumerable(
-            ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel>, THandler>());
+            ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel, TState>, THandler>());
 
         return this;
     }

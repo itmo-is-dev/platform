@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Common.Features;
 using Itmo.Dev.Platform.Enrichment.Configuration;
+using Itmo.Dev.Platform.Enrichment.Factories;
 using Itmo.Dev.Platform.Enrichment.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,8 @@ public static class ServiceCollectionExtensions
 
         var configurator = new EnrichmentConfigurator(collection);
         configuration.Invoke(configurator);
+
+        collection.AddScoped<IEnrichmentProcessorFactory, EnrichmentProcessorFactory>();
 
         return collection;
     }

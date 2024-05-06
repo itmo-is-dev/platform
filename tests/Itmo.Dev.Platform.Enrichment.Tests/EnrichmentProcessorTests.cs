@@ -22,12 +22,15 @@ public class EnrichmentProcessorTests
         collection.AddLogging();
 
         var provider = collection.BuildServiceProvider();
-        var processor = provider.GetRequiredService<IEnrichmentProcessor<int, EnrichedModel>>();
+        var factory = provider.GetRequiredService<IEnrichmentProcessorFactory>();
 
         EnrichedModel[] models = [new EnrichedModel(1)];
 
         // Act
-        models = await processor.EnrichAsync(models, default).ToArrayAsync();
+        models = await factory
+            .Create<int, EnrichedModel>()
+            .EnrichAsync(models, default)
+            .ToArrayAsync();
 
         // Assert
         models.Should().ContainSingle().Which.Value.Should().Be(AbobaModelHandler.Value);
@@ -43,13 +46,16 @@ public class EnrichmentProcessorTests
         collection.AddLogging();
 
         var provider = collection.BuildServiceProvider();
-        var processor = provider.GetRequiredService<IEnrichmentProcessor<int, EnrichedModel>>();
+        var factory = provider.GetRequiredService<IEnrichmentProcessorFactory>();
 
         EnrichedModel[] models = [new EnrichedModel(1)];
 
         // Act
-        models = await processor.EnrichAsync(models, default).ToArrayAsync();
-        
+        models = await factory
+            .Create<int, EnrichedModel>()
+            .EnrichAsync(models, default)
+            .ToArrayAsync();
+
         // Assert
         models.Should().ContainSingle().Which.Value.Should().BeNull();
     }

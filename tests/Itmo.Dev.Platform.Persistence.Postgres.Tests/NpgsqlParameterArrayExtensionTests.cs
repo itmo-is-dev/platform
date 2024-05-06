@@ -1,12 +1,10 @@
-using Itmo.Dev.Platform.Postgres.Connection;
-using Itmo.Dev.Platform.Postgres.Extensions;
-using Itmo.Dev.Platform.Postgres.Tests.Fixtures;
+using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
+using Itmo.Dev.Platform.Persistence.Postgres.Tests.Fixtures;
 using Itmo.Dev.Platform.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using Xunit;
 
-namespace Itmo.Dev.Platform.Postgres.Tests;
+namespace Itmo.Dev.Platform.Persistence.Postgres.Tests;
 
 [Collection(nameof(PostgresCollectionFixture))]
 public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
@@ -24,7 +22,7 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         // Arrange
         await using var scope = _fixture.Scope;
 
-        var connectionProvider = scope.ServiceProvider.GetRequiredService<IPostgresConnectionProvider>();
+        var connectionProvider = scope.ServiceProvider.GetRequiredService<IPersistenceConnectionProvider>();
         await using var connection = await connectionProvider.GetConnectionAsync(default);
 
         const string migrateSql = """
@@ -34,9 +32,9 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         )
         """;
 
-        await using (var migrateCommand = new NpgsqlCommand(migrateSql, connection))
+        await using (var migrateCommand = connection.CreateCommand(migrateSql))
         {
-            await migrateCommand.ExecuteNonQueryAsync();
+            await migrateCommand.ExecuteNonQueryAsync(default);
         }
 
         int[][] values =
@@ -51,10 +49,10 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         select s.value::int[] from unnest(:values) as s(value);
         """;
 
-        await using (var insertCommand = new NpgsqlCommand(insertSql, connection))
+        await using (var insertCommand = connection.CreateCommand(insertSql))
         {
             insertCommand.AddMultiArrayStringParameter("values", values);
-            await insertCommand.ExecuteNonQueryAsync();
+            await insertCommand.ExecuteNonQueryAsync(default);
         }
 
         // Cleanup
@@ -62,9 +60,9 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         drop table test;
         """;
 
-        await using (var cleanupCommand = new NpgsqlCommand(cleanupSql, connection))
+        await using (var cleanupCommand = connection.CreateCommand(cleanupSql))
         {
-            await cleanupCommand.ExecuteNonQueryAsync();
+            await cleanupCommand.ExecuteNonQueryAsync(default);
         }
     }
 

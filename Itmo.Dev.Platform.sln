@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\package-publish.yaml = .github\workflows\package-publish.yaml
 		.github\workflows\dotnet.yaml = .github\workflows\dotnet.yaml
 		.github\workflows\build-test-kafka.yaml = .github\workflows\build-test-kafka.yaml
-		.github\workflows\build-test-postgres.yaml = .github\workflows\build-test-postgres.yaml
+		.github\workflows\build-test-persistence-postgres.yaml = .github\workflows\build-test-persistence-postgres.yaml
 		.github\workflows\build-test-background-tasks.yaml = .github\workflows\build-test-background-tasks.yaml
 		.github\workflows\build-test-message-persistence.yaml = .github\workflows\build-test-message-persistence.yaml
 	EndProjectSection
@@ -30,11 +30,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B24A2836
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Kafka.Tests", "tests\Itmo.Dev.Platform.Kafka.Tests\Itmo.Dev.Platform.Kafka.Tests.csproj", "{713610E9-F866-4C7E-96ED-4B486509E3A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres", "src\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj", "{FF785BFD-FCB1-465E-9728-B15C7DF314FF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Testing", "src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj", "{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres.Tests", "tests\Itmo.Dev.Platform.Postgres.Tests\Itmo.Dev.Platform.Postgres.Tests.csproj", "{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Persistence.Postgres.Tests", "tests\Itmo.Dev.Platform.Persistence.Postgres.Tests\Itmo.Dev.Platform.Persistence.Postgres.Tests.csproj", "{F8B0E1C9-E21C-419B-9239-1EF95FDA126C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Logging", "src\Itmo.Dev.Platform.Logging\Itmo.Dev.Platform.Logging.csproj", "{5038B14B-967D-4AD9-87AF-F15DFAB22A8B}"
 EndProject
@@ -45,8 +43,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.BackgroundTasks.Tests.Startup", "tests\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup\Itmo.Dev.Platform.BackgroundTasks.Tests.Startup.csproj", "{C1167004-5A6C-4420-A784-7186F427A458}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{EBA4A79B-F695-4E03-AACD-147E981335FD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres.Benchmarks", "benchmarks\Itmo.Dev.Platform.Postgres.Benchmarks\Itmo.Dev.Platform.Postgres.Benchmarks.csproj", "{352E1FB1-84E6-4852-8059-CCC223D50317}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Locking", "src\Itmo.Dev.Platform.Locking\Itmo.Dev.Platform.Locking.csproj", "{D936C0C2-FCA9-4C53-83B4-25CC52A748DF}"
 EndProject
@@ -116,10 +112,6 @@ Global
 		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{713610E9-F866-4C7E-96ED-4B486509E3A3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF785BFD-FCB1-465E-9728-B15C7DF314FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF785BFD-FCB1-465E-9728-B15C7DF314FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF785BFD-FCB1-465E-9728-B15C7DF314FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF785BFD-FCB1-465E-9728-B15C7DF314FF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -144,10 +136,6 @@ Global
 		{C1167004-5A6C-4420-A784-7186F427A458}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1167004-5A6C-4420-A784-7186F427A458}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1167004-5A6C-4420-A784-7186F427A458}.Release|Any CPU.Build.0 = Release|Any CPU
-		{352E1FB1-84E6-4852-8059-CCC223D50317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{352E1FB1-84E6-4852-8059-CCC223D50317}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{352E1FB1-84E6-4852-8059-CCC223D50317}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{352E1FB1-84E6-4852-8059-CCC223D50317}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D936C0C2-FCA9-4C53-83B4-25CC52A748DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D936C0C2-FCA9-4C53-83B4-25CC52A748DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D936C0C2-FCA9-4C53-83B4-25CC52A748DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -235,13 +223,11 @@ Global
 		{360CAAF7-7E52-4537-9BDC-1C6FC24EA437} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{BC3D9F6A-9511-4978-BE97-C777EF22121E} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{713610E9-F866-4C7E-96ED-4B486509E3A3} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
-		{FF785BFD-FCB1-465E-9728-B15C7DF314FF} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{F8B0E1C9-E21C-419B-9239-1EF95FDA126C} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 		{5038B14B-967D-4AD9-87AF-F15DFAB22A8B} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{5DD567D1-35DE-4B65-98AC-14FB652BF6C7} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
 		{C1167004-5A6C-4420-A784-7186F427A458} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}
-		{352E1FB1-84E6-4852-8059-CCC223D50317} = {EBA4A79B-F695-4E03-AACD-147E981335FD}
 		{D936C0C2-FCA9-4C53-83B4-25CC52A748DF} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{6421E7C1-BB5B-4E01-AFF3-5EFD05EF3DB3} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 		{51A094C3-3791-4A58-9869-D6854185E4EB} = {B24A2836-A847-40AB-85A2-6590ABA8ACB2}

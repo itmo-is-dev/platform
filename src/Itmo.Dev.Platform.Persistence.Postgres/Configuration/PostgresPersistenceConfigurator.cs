@@ -1,6 +1,7 @@
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using Itmo.Dev.Platform.Persistence.Postgres.Connections;
+using Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Itmo.Dev.Platform.Persistence.Postgres.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,8 @@ internal class PostgresPersistenceConfigurator :
                         provider => provider.GetRequiredService<IPostgresConnectionStringProvider>()
                             .GetConnectionString()));
 
+        _collection.AddHostedService<MigrationRunnerBackgroundService>();
+
         return this;
     }
 
@@ -71,6 +74,8 @@ internal class PostgresPersistenceConfigurator :
         {
             _collection.TryAddEnumerable(ServiceDescriptor.Singleton(item));
         }
+
+        _collection.AddHostedService<MigrationRunnerBackgroundService>();
 
         return this;
     }

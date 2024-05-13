@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
                         .ConfigureOptions(
                             builder => builder.BindConfiguration("Infrastructure:BackgroundTasks:Scheduling:Hangfire"))
                         .UsePostgresJobStorage())
-                .ConfigureExecution(configuration)
+                .ConfigureExecution(configuration.GetSection("Infrastructure:BackgroundTasks:Execution"))
                 .AddStateMachine());
     }
 }

@@ -12,7 +12,7 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <License>LICENSE.md</License>
+        <License>LICENSE</License>
     </PropertyGroup>
 
     <PropertyGroup>

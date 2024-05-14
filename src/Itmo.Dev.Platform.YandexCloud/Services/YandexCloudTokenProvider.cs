@@ -73,7 +73,7 @@ internal class YandexCloudTokenProvider : IDisposable
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("Unable to receive IAM service account token from Yandex Compute Cloud.");
-            stringBuilder.AppendLine($"HTTP Status code: {resp.StatusCode:D)}");
+            stringBuilder.AppendLine($"HTTP Status code: {resp.StatusCode:D}");
 
             string body = await resp.Content.ReadAsStringAsync(cancellationToken);
 

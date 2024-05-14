@@ -16,14 +16,14 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseUrl>https://github.com/itmo-is-dev/platform/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
         <Version>1.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Added secrets polling for IOptionsMonitor support
+            Fixed token error formatter
         </PackageReleaseNotes>
     </PropertyGroup>
 

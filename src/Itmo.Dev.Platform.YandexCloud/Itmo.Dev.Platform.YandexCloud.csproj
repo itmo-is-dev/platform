@@ -21,9 +21,9 @@
 
     <PropertyGroup>
         <PatchVersion>0</PatchVersion>
-        <Version>1.0.$(PatchVersion)</Version>
+        <Version>2.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
-            Fixed token error formatter
+            Changed configuration API
         </PackageReleaseNotes>
     </PropertyGroup>
 

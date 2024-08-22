@@ -1,33 +1,29 @@
-using System.Net;
-using System.Text;
+using Itmo.Dev.Platform.YandexCloud.Authorization.Options;
 using Itmo.Dev.Platform.YandexCloud.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Text;
 
-namespace Itmo.Dev.Platform.YandexCloud.Services;
+namespace Itmo.Dev.Platform.YandexCloud.Authorization.TokenProviders;
 
-internal class YandexCloudTokenProvider : IDisposable
+internal class VirtualMachineTokenProvider : IYandexCloudTokenProvider, IDisposable
 {
-    private readonly Uri _baseUri;
-    private readonly TimeSpan _minTokenLifetimeThreshold;
+    private readonly YandexCloudVirtualMachineAuthorizationOptions _options;
     private readonly SemaphoreSlim _semaphore;
 
     private TokenInfo? _tokenInfo;
 
-    public YandexCloudTokenProvider(IConfiguration configuration)
+    public VirtualMachineTokenProvider(YandexCloudVirtualMachineAuthorizationOptions options)
     {
-        var uri = configuration.GetSection("Platform:YandexCloud:ServiceUri");
-        var threshold = configuration.GetSection("Platform:YandexCloud:MinRemainingTokenLifetimeSeconds");
-
-        _baseUri = new Uri(uri.Value ?? string.Empty);
-        _minTokenLifetimeThreshold = TimeSpan.FromSeconds(threshold.Get<int>());
+        _options = options;
         _semaphore = new SemaphoreSlim(1, 1);
     }
 
     public async Task<string> GetTokenAsync(CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var minExpires = now + _minTokenLifetimeThreshold;
+        var minExpires = now + _options.MinRemainingTokenLifetime;
 
         if (_tokenInfo is not null && _tokenInfo.Value.Expires > minExpires)
             return _tokenInfo.Value.AccessToken;
@@ -57,15 +53,11 @@ internal class YandexCloudTokenProvider : IDisposable
     {
         const string requestUri = "computeMetadata/v1/instance/service-accounts/default/token";
 
-        using var httpClient = new HttpClient { BaseAddress = _baseUri };
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = _options.ServiceUri;
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, requestUri)
-        {
-            Headers =
-            {
-                { "Metadata-Flavor", "Google" },
-            },
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        request.Headers.Add("Metadata-Flavor", "Google");
 
         HttpResponseMessage resp = await httpClient.SendAsync(request, cancellationToken);
 

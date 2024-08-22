@@ -1,18 +1,18 @@
 using Itmo.Dev.Platform.Common.BackgroundServices;
-using Itmo.Dev.Platform.YandexCloud.Services;
-using Itmo.Dev.Platform.YandexCloud.Tools;
+using Itmo.Dev.Platform.YandexCloud.Lockbox.Options;
+using Itmo.Dev.Platform.YandexCloud.Lockbox.Services;
 using Microsoft.Extensions.Options;
 
-namespace Itmo.Dev.Platform.YandexCloud.Configuration;
+namespace Itmo.Dev.Platform.YandexCloud.Lockbox.Configuration;
 
 internal class LockBoxUpdateBackgroundService : RestartableBackgroundService
 {
-    private readonly IOptionsMonitor<YandexCloudLockboxConfiguration> _options;
+    private readonly IOptionsMonitor<YandexCloudLockboxOptions> _options;
     private readonly YandexCloudLockBoxService _lockBoxService;
     private readonly LockBoxEntryConfigurationProvider _configurationProvider;
 
     public LockBoxUpdateBackgroundService(
-        IOptionsMonitor<YandexCloudLockboxConfiguration> options,
+        IOptionsMonitor<YandexCloudLockboxOptions> options,
         YandexCloudLockBoxService lockBoxService,
         LockBoxEntryConfigurationProvider configurationProvider)
     {

@@ -1,6 +1,6 @@
-using Itmo.Dev.Platform.YandexCloud.Models;
+using Itmo.Dev.Platform.YandexCloud.Lockbox.Models;
 
-namespace Itmo.Dev.Platform.YandexCloud.Configuration;
+namespace Itmo.Dev.Platform.YandexCloud.Lockbox.Configuration;
 
 internal class LockBoxEntryConfigurationProvider : ConfigurationProvider
 {

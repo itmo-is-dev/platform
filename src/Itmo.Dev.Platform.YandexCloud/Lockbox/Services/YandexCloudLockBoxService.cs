@@ -1,18 +1,19 @@
+using Itmo.Dev.Platform.YandexCloud.Authorization;
 using Itmo.Dev.Platform.YandexCloud.Exceptions;
-using Itmo.Dev.Platform.YandexCloud.Models;
+using Itmo.Dev.Platform.YandexCloud.Lockbox.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace Itmo.Dev.Platform.YandexCloud.Services;
+namespace Itmo.Dev.Platform.YandexCloud.Lockbox.Services;
 
 internal class YandexCloudLockBoxService
 {
-    private readonly YandexCloudTokenProvider _tokenProvider;
+    private readonly IYandexCloudTokenProvider _tokenProvider;
 
-    public YandexCloudLockBoxService(YandexCloudTokenProvider tokenProvider)
+    public YandexCloudLockBoxService(IYandexCloudTokenProvider tokenProvider)
     {
         _tokenProvider = tokenProvider;
     }
@@ -53,8 +54,10 @@ internal class YandexCloudLockBoxService
         try
         {
             LockBoxEntry[]? entries = JsonConvert
-                .DeserializeObject<JObject>(respBody)?
-                .GetValue("entries", StringComparison.Ordinal)?
+                .DeserializeObject<JObject>(respBody)
+                ?
+                .GetValue("entries", StringComparison.Ordinal)
+                ?
                 .ToObject<LockBoxEntry[]>();
 
             if (entries?.Any() is not true)

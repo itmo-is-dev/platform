@@ -1,4 +1,4 @@
-namespace Itmo.Dev.Platform.YandexCloud.Configuration;
+namespace Itmo.Dev.Platform.YandexCloud.Lockbox.Configuration;
 
 internal class ConfigurationSource : IConfigurationSource
 {

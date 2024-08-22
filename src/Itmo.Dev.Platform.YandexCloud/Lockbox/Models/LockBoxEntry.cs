@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace Itmo.Dev.Platform.YandexCloud.Models;
+namespace Itmo.Dev.Platform.YandexCloud.Lockbox.Models;
 
-internal record LockBoxEntry(string Key, string TextValue, string BinaryValue)
+internal sealed record LockBoxEntry(string Key, string TextValue, string BinaryValue)
 {
     public string Value => string.IsNullOrWhiteSpace(TextValue)
         ? Encoding.UTF8.GetString(Convert.FromBase64String(BinaryValue))

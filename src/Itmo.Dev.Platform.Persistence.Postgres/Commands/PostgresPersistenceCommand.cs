@@ -22,9 +22,9 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         return await _command.ExecuteReaderAsync(cancellationToken);
     }
 
-    public async ValueTask ExecuteNonQueryAsync(CancellationToken cancellationToken)
+    public async ValueTask<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
     {
-        await _command.ExecuteNonQueryAsync(cancellationToken);
+        return await _command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public IPersistenceCommand AddParameter(DbParameter parameter)

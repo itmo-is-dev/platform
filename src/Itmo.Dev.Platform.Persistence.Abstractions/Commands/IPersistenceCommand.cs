@@ -8,7 +8,7 @@ public interface IPersistenceCommand : IAsyncDisposable
 {
     ValueTask<DbDataReader> ExecuteReaderAsync(CancellationToken cancellationToken);
     
-    ValueTask ExecuteNonQueryAsync(CancellationToken cancellationToken);
+    ValueTask<int> ExecuteNonQueryAsync(CancellationToken cancellationToken);
     
     IPersistenceCommand AddParameter(DbParameter parameter);
     

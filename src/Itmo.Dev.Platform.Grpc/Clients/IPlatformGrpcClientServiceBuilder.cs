@@ -1,5 +1,5 @@
 using Grpc.Core.Interceptors;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Grpc.Clients;
 
@@ -10,7 +10,7 @@ public interface IPlatformGrpcClientServiceNameConfigurator
 
 public interface IPlatformGrpcClientServiceOptionsConfigurator
 {
-    IPlatformGrpcClientConfigurator WithConfiguration(IConfiguration configuration);
+    IPlatformGrpcClientConfigurator WithConfiguration(Action<OptionsBuilder<PlatformGrpcClientOptions>> action);
 }
 
 public interface IPlatformGrpcClientConfigurator : IPlatformGrpcClientServiceBuilder
@@ -22,5 +22,6 @@ public interface IPlatformGrpcClientConfigurator : IPlatformGrpcClientServiceBui
 
 public interface IPlatformGrpcClientServiceBuilder
 {
-    IPlatformGrpcClientServiceBuilder WithInterceptor<TInterceptor>() where TInterceptor : Interceptor;
+    IPlatformGrpcClientServiceBuilder WithInterceptor<TInterceptor>()
+        where TInterceptor : Interceptor;
 }

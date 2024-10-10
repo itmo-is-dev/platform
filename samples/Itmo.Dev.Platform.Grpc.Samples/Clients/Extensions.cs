@@ -6,12 +6,12 @@ namespace Itmo.Dev.Platform.Grpc.Samples.Clients;
 
 public static class Extensions
 {
-    public static IServiceCollection AddGrpcClients(this IServiceCollection collection, IConfiguration configuration)
+    public static IServiceCollection AddGrpcClients(this IServiceCollection collection)
     {
         return collection.AddPlatformGrpcClients(clients => clients
             .AddService(service => service
                 .Called("sample")
-                .WithConfiguration(configuration.GetSection("Sample:Grpc"))
+                .WithConfiguration(x => x.BindConfiguration("Sample:Grpc"))
                 .WithClient<SampleService.SampleServiceClient>(c => c.WithInterceptor<SampleClientInterceptor>())
                 .WithInterceptor<SampleServiceInterceptor>())
             .AddHeaderProvider<HeaderProvider>()

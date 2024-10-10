@@ -36,6 +36,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.GrpcCore" />
     </ItemGroup>
 
 </Project>

@@ -13,12 +13,12 @@ public static class WebApplicationBuilderExtensions
         }
 
         var environment = builder.Configuration.GetSection("Sentry:Environment").Get<string?>();
-        
+
         if (string.IsNullOrWhiteSpace(environment))
         {
             environment = builder.Environment.EnvironmentName;
         }
-            
+
         builder.WebHost.UseSentry(sentryBuilder =>
         {
             sentryBuilder.AddGrpc();

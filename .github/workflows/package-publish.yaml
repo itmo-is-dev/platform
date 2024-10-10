@@ -67,6 +67,7 @@ jobs:
           mv src/Itmo.Dev.Platform.Kafka/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Testing/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Logging/bin/Release/*.nupkg .packages/
+          mv src/Itmo.Dev.Platform.Observability/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Locking/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Events/bin/Release/*.nupkg .packages/
           mv src/Itmo.Dev.Platform.Grpc/bin/Release/*.nupkg .packages/

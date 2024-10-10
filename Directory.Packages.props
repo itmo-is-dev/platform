@@ -42,10 +42,10 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0-beta.1" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="ronimizy.FluentSerialization.Extensions.NewtonsoftJson" Version="1.3.0" />
-    <PackageVersion Include="Sentry.AspNetCore" Version="4.1.0" />
-    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="4.1.0" />
+    <PackageVersion Include="Sentry.AspNetCore" Version="4.12.1" />
+    <PackageVersion Include="Sentry.AspNetCore.Grpc" Version="4.12.1" />
     <PackageVersion Include="Sentry.OpenTelemetry" Version="4.12.1" />
-    <PackageVersion Include="Sentry.Serilog" Version="4.1.0" />
+    <PackageVersion Include="Sentry.Serilog" Version="4.12.1" />
     <PackageVersion Include="Serilog" Version="3.1.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />

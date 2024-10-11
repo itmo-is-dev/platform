@@ -27,11 +27,12 @@ Call `AddPlatformObservability` extension method on your `WebApplicationBuilder`
   "Platform": {
     "Observability": {
       "Logging": {
-        // Your serilog configuration
+        "Serilog": {
+          // Your serilog configuration}
+        }
       }
     }
   }
-}
 ```
 
 ### Sentry
@@ -41,7 +42,10 @@ Call `AddPlatformObservability` extension method on your `WebApplicationBuilder`
   "Platform": {
     "Observability": {
       "Sentry": {
-        // Your Sentry configuration
+        "IsEnabled": bool
+        "Configuration": {
+          // Your Sentry configuration
+        }
       }
     }
   }

@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.Common.Options;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
+using Sentry.AspNetCore.Grpc;
 using Sentry.OpenTelemetry;
 
 namespace Itmo.Dev.Platform.Observability.Sentry;
@@ -29,15 +30,20 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
             return;
         }
 
-        builder.WebHost.UseSentry((SentryAspNetCoreOptions sentry) =>
+        builder.WebHost.UseSentry(sentry =>
         {
-            _options.Configuration?.Bind(sentry);
+            sentry.AddSentryOptions(options =>
+            {
+                _options.Configuration?.Bind(options);
 
-            sentry.InitializeSdk = true;
-            sentry.TracesSampleRate = 1.0;
-            sentry.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
+                options.InitializeSdk = true;
+                options.TracesSampleRate = 1.0;
+                options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
 
-            sentry.UseOpenTelemetry();
+                options.UseOpenTelemetry();
+            });
+
+            sentry.AddGrpc();
         });
 
         _logger.LogInformation("Sentry initialized");

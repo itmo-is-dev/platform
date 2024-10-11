@@ -10,7 +10,9 @@ public static class WebApplicationBuilderExtensions
     public static void AddPlatformObservability(this WebApplicationBuilder builder)
     {
         var collection = new ServiceCollection();
+
         collection.AddSingleton<IConfiguration>(builder.Configuration);
+        collection.AddSingleton<IConfigurationRoot>(builder.Configuration);
 
         collection.AddPlatform();
         collection.AddLogging(x => x.AddConsole());

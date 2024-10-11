@@ -41,7 +41,11 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
 
             if (_options.WebProxyUri is not null)
             {
-                options.HttpProxy = new WebProxy(_options.WebProxyUri);
+                options.HttpProxy = new WebProxy(_options.WebProxyUri)
+                {
+                    Credentials = new NetworkCredential(_options.WebProxyUsername, _options.WebProxyPassword),
+                };
+
                 _logger.LogInformation("Sentry web proxy initialized = {ProxyUri}", _options.WebProxyUri.Host);
             }
 

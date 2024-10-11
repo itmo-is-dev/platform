@@ -17,9 +17,9 @@ public static class WebApplicationBuilderExtensions
         collection.AddPlatform();
         collection.AddLogging(x => x.AddConsole());
 
+        collection.AddSentryPlugins();
         collection.AddTracingPlugins();
         collection.AddLoggingPlugins();
-        collection.AddSentryPlugins();
 
         using var provider = collection.BuildServiceProvider();
         var plugins = provider.GetRequiredService<IEnumerable<IObservabilityConfigurationPlugin>>();

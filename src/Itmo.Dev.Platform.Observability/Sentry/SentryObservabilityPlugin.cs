@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Grpc;
 using Sentry.OpenTelemetry;
+using System.Net;
 
 namespace Itmo.Dev.Platform.Observability.Sentry;
 
@@ -36,6 +37,8 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
 
             options.TracesSampleRate = 1.0;
             options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
+
+            options.HttpProxy = new WebProxy(_options.WebProxyUri);
 
             options.UseOpenTelemetry();
         });

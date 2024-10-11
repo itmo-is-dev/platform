@@ -17,15 +17,17 @@ internal class SentrySerilogPlugin : ISerilogConfigurationPlugin
         _logger = logger;
     }
 
-    public void Configure(WebApplicationBuilder builder, LoggerConfiguration loggerConfiguration)
+    public LoggerConfiguration Configure(WebApplicationBuilder builder, LoggerConfiguration loggerConfiguration)
     {
         if (_options.IsEnabled is false)
         {
             _logger.LogInformation("Sentry logging is disabled");
-            return;
+            return loggerConfiguration;
         }
 
-        loggerConfiguration.WriteTo.Sentry(sentry => sentry.InitializeSdk = false);
+        loggerConfiguration = loggerConfiguration.WriteTo.Sentry(sentry => sentry.InitializeSdk = false);
         _logger.LogInformation("Sentry logging initialized");
+
+        return loggerConfiguration;
     }
 }

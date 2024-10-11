@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Common.Options;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Itmo.Dev.Platform.Observability.Tracing;
@@ -36,11 +37,16 @@ internal class TracingObservabilityPlugin : IObservabilityConfigurationPlugin
             .WithTracing(tracing =>
             {
                 tracing
-                    .AddSource(_platformOptions.ServiceName)
+                    .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
                     .SetSampler(new AlwaysOnSampler())
-                    .AddAspNetCoreInstrumentation()
+                    .AddAspNetCoreInstrumentation(x => x.RecordException = true)
                     .AddGrpcCoreInstrumentation()
                     .AddGrpcClientInstrumentation();
+
+                foreach (string source in _options.Sources ?? [])
+                {
+                    tracing.AddSource(source);
+                }
 
                 foreach (ITracingConfigurationPlugin plugin in _plugins)
                 {

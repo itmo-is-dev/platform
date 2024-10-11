@@ -31,16 +31,15 @@ internal class SerilogObservabilityPlugin : IObservabilityConfigurationPlugin
         var configuration = new LoggerConfiguration();
         var readerOptions = new ConfigurationReaderOptions { SectionName = "" };
 
-        configuration.ReadFrom.Configuration(_options.Serilog, readerOptions);
+        configuration = configuration.ReadFrom.Configuration(_options.Serilog, readerOptions);
 
-        foreach (ISerilogConfigurationPlugin plugin in _plugins)
-        {
-            plugin.Configure(builder, configuration);
-        }
+        configuration = _plugins.Aggregate(
+            configuration,
+            (conf, plugin) => plugin.Configure(builder, conf));
 
         Log.Logger = configuration.CreateLogger();
         builder.Host.UseSerilog();
-        
+
         _logger.LogInformation("Serilog logging initialized");
     }
 }

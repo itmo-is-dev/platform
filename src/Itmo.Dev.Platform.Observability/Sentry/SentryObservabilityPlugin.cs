@@ -30,19 +30,19 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
             return;
         }
 
+        SentrySdk.Init(options =>
+        {
+            _options.Configuration?.Bind(options);
+
+            options.TracesSampleRate = 1.0;
+            options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
+
+            options.UseOpenTelemetry();
+        });
+
         builder.WebHost.UseSentry(sentry =>
         {
-            sentry.AddSentryOptions(options =>
-            {
-                _options.Configuration?.Bind(options);
-
-                options.InitializeSdk = true;
-                options.TracesSampleRate = 1.0;
-                options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
-
-                options.UseOpenTelemetry();
-            });
-
+            sentry.AddSentryOptions(x => x.InitializeSdk = false);
             sentry.AddGrpc();
         });
 

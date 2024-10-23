@@ -32,31 +32,20 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
             return;
         }
 
-        SentrySdk.Init(options =>
-        {
-            _options.Configuration?.Bind(options);
-
-            options.TracesSampleRate = 1.0;
-            options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
-
-            if (_options.WebProxyUri is not null)
-            {
-                options.HttpProxy = new WebProxy(_options.WebProxyUri)
-                {
-                    Credentials = new NetworkCredential(_options.WebProxyUsername, _options.WebProxyPassword),
-                };
-
-                _logger.LogInformation("Sentry web proxy initialized = {ProxyUri}", _options.WebProxyUri.Host);
-            }
-
-            options.DiagnosticLogger = new ConsoleAndTraceDiagnosticLogger(options.DiagnosticLevel);
-
-            options.UseOpenTelemetry();
-        });
-
         builder.WebHost.UseSentry(sentry =>
         {
-            sentry.AddSentryOptions(x => x.InitializeSdk = false);
+            sentry.AddSentryOptions(options =>
+            {
+                options.TracesSampleRate = 1.0;
+                options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
+
+                options.DiagnosticLogger = new ConsoleAndTraceDiagnosticLogger(options.DiagnosticLevel);
+
+                _options.Configuration?.Bind(options);
+
+                options.UseOpenTelemetry();
+            });
+
             sentry.AddGrpc();
         });
 

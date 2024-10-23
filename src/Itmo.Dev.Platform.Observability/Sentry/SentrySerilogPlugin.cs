@@ -25,11 +25,8 @@ internal class SentrySerilogPlugin : ISerilogConfigurationPlugin
             return loggerConfiguration;
         }
 
-        loggerConfiguration = loggerConfiguration.WriteTo.Sentry(options =>
-        {
-            _options.Configuration?.Bind(options);
-            options.InitializeSdk = false;
-        });
+        loggerConfiguration = loggerConfiguration
+            .WriteTo.Sentry(options => _options.Configuration?.Bind(options));
 
         _logger.LogInformation("Sentry logging initialized");
 

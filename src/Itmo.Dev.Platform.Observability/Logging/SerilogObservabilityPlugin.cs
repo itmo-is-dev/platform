@@ -31,7 +31,9 @@ internal class SerilogObservabilityPlugin : IObservabilityConfigurationPlugin
         var configuration = new LoggerConfiguration();
         var readerOptions = new ConfigurationReaderOptions { SectionName = "" };
 
-        configuration = configuration.ReadFrom.Configuration(_options.Serilog, readerOptions);
+        configuration = configuration
+            .Enrich.FromLogContext()
+            .ReadFrom.Configuration(_options.Serilog, readerOptions);
 
         configuration = _plugins.Aggregate(
             configuration,

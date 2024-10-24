@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Observability.Tracing;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
 
@@ -26,7 +27,7 @@ internal class SentryTracingPlugin : ITracingConfigurationPlugin
             return;
         }
 
-        tracerBuilder.AddSentry();
+        tracerBuilder.AddSentry(Propagators.DefaultTextMapPropagator);
         _logger.LogInformation("Sentry tracing initialized");
     }
 }

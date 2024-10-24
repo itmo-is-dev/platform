@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Common.Options;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -40,7 +41,14 @@ internal class TracingObservabilityPlugin : IObservabilityConfigurationPlugin
                     .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
-                    .AddGrpcCoreInstrumentation();
+                    .AddGrpcCoreInstrumentation()
+                    .AddNpgsql();
+
+                tracing.AddHttpClientInstrumentation(options =>
+                {
+                    options.FilterHttpRequestMessage = message => message.Version.Major < 2;
+                    options.RecordException = true;
+                });
 
                 foreach (string source in _options.Sources ?? [])
                 {

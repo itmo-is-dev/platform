@@ -23,6 +23,20 @@ Call `AddPlatformObservability` extension method on your `WebApplicationBuilder`
 }
 ```
 
+### Metrics
+
+```json
+{
+  "Platform": {
+    "Observability": {
+      "Metrics": {
+        "IsEnabled": bool
+      }
+    }
+  }
+}
+```
+
 ### Logging
 
 ```json

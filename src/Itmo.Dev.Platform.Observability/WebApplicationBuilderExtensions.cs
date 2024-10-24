@@ -1,7 +1,9 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Observability.Logging;
+using Itmo.Dev.Platform.Observability.Metrics;
 using Itmo.Dev.Platform.Observability.Sentry;
 using Itmo.Dev.Platform.Observability.Tracing;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itmo.Dev.Platform.Observability;
 
@@ -20,6 +22,7 @@ public static class WebApplicationBuilderExtensions
         collection.AddSentryPlugins();
         collection.AddTracingPlugins();
         collection.AddLoggingPlugins();
+        collection.AddMetricsPlugins();
 
         using var provider = collection.BuildServiceProvider();
         var plugins = provider.GetRequiredService<IEnumerable<IObservabilityConfigurationPlugin>>();
@@ -27,6 +30,14 @@ public static class WebApplicationBuilderExtensions
         foreach (IObservabilityConfigurationPlugin plugin in plugins)
         {
             plugin.Configure(builder);
+        }
+
+        IEnumerable<IObservabilityApplicationPlugin> applicationPlugins = provider
+            .GetRequiredService<IEnumerable<IObservabilityApplicationPlugin>>();
+
+        foreach (IObservabilityApplicationPlugin applicationPlugin in applicationPlugins)
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(applicationPlugin));
         }
     }
 }

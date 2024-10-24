@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Itmo.Dev.Platform.Grpc.Clients;
+namespace Itmo.Dev.Platform.Grpc.Clients.Options;
 
 public class PlatformGrpcClientOptions : IValidatableObject
 {

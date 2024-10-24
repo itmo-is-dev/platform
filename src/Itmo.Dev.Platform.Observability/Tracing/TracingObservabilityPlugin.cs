@@ -40,8 +40,7 @@ internal class TracingObservabilityPlugin : IObservabilityConfigurationPlugin
                     .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
-                    .AddGrpcCoreInstrumentation()
-                    .AddGrpcClientInstrumentation();
+                    .AddGrpcCoreInstrumentation();
 
                 foreach (string source in _options.Sources ?? [])
                 {

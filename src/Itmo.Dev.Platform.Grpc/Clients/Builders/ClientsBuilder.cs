@@ -1,6 +1,8 @@
 using Grpc.Core.Interceptors;
+using Itmo.Dev.Platform.Grpc.Clients.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Grpc.Clients.Builders;
 
@@ -33,7 +35,16 @@ internal class ClientsBuilder : IPlatformGrpcClientsConfigurator
         return this;
     }
 
-    public IPlatformGrpcClientsBuilder AddInterceptor<TInterceptor>() where TInterceptor : Interceptor
+    public IPlatformGrpcClientsConfigurator ConfigureOptions(Action<OptionsBuilder<PlatformGrpcClientsOptions>> action)
+    {
+        var builder = _collection.AddOptions<PlatformGrpcClientsOptions>();
+        action.Invoke(builder);
+
+        return this;
+    }
+
+    public IPlatformGrpcClientsBuilder AddInterceptor<TInterceptor>()
+        where TInterceptor : Interceptor
     {
         foreach (IPlatformGrpcClientServiceBuilder serviceBuilder in _serviceBuilders)
         {

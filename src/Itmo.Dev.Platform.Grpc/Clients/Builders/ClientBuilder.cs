@@ -1,9 +1,11 @@
 using Grpc.Core.Interceptors;
 using Grpc.Net.ClientFactory;
 using Itmo.Dev.Platform.Grpc.Clients.Interceptors;
+using Itmo.Dev.Platform.Grpc.Clients.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Instrumentation.GrpcCore;
 
 namespace Itmo.Dev.Platform.Grpc.Clients.Builders;
 
@@ -26,9 +28,11 @@ public class ClientBuilder<TClient> : IPlatformGrpcClientBuilder
         });
 
         _clientBuilder.AddInterceptor<PlatformHeaderClientInterceptor>(InterceptorScope.Client);
+        _clientBuilder.AddInterceptor<ClientTracingInterceptor>(InterceptorScope.Client);
     }
 
-    public IPlatformGrpcClientBuilder WithInterceptor<TInterceptor>() where TInterceptor : Interceptor
+    public IPlatformGrpcClientBuilder WithInterceptor<TInterceptor>()
+        where TInterceptor : Interceptor
     {
         _collection.TryAddScoped<TInterceptor>();
         _clientBuilder.AddInterceptor<TInterceptor>(InterceptorScope.Client);

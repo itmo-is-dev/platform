@@ -1,4 +1,5 @@
 using Grpc.Core.Interceptors;
+using Itmo.Dev.Platform.Grpc.Clients.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

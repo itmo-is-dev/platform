@@ -12,11 +12,12 @@ public static class ServiceCollectionExtensions
         this IServiceCollection collection,
         Func<IPlatformGrpcServicesBuilder, IPlatformGrpcServicesBuilder> action)
     {
+        var builder = new PlatformGrpcServicesBuilder(collection);
+        action.Invoke(builder);
+
         collection.AddGrpc(options =>
         {
-            var builder = new PlatformGrpcServicesBuilder(collection, options);
-            action.Invoke(builder);
-
+            builder.ConfigureOptions(options);
             options.Interceptors.Add<ServerTracingInterceptor>();
         });
 

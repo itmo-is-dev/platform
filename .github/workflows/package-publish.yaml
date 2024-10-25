@@ -54,6 +54,7 @@ jobs:
           package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
           package_projects=$(echo "$package_projects" | tr -d '\n')
           
+          echo "$package_projects"
           echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
 
       - name: Get changed files

@@ -41,7 +41,7 @@ jobs:
             | tr -d '"' \
             | sort \
             | uniq \
-            | jq --raw-input --slurp 'split("\n") | map(select(. != "")) \
+            | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' \
             | tr -d '\n') || :
 
           echo "$changed_packages"

@@ -10,8 +10,8 @@ on:
       - '!samples'
 
 jobs:
-  find-package-projects:
-    name: "find csproj files with packages"
+  find-changed-package-projects:
+    name: "find changed packages"
     runs-on: ubuntu-latest
     
     outputs:
@@ -51,7 +51,12 @@ jobs:
   publish-package-if-needed:
     name: "publish ${{ matrix.package-dir }}"
     runs-on: ubuntu-latest
-    needs: find-package-projects
+    needs: find-changed-package-projects
+    
+    if: ${{
+      needs.find-changed-package-projects.outputs.changed-package-projects != '[]'
+      && needs.find-changed-package-projects.outputs.changed-package-projects != ''
+      }}
     
     strategy:
       matrix:

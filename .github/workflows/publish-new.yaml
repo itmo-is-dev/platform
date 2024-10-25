@@ -55,4 +55,4 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           PACKAGE_DIR: ${{ matrix.package-dir }}
         run: |
-          .github/workflows/publish-new-find "$PACKAGE_DIR" | sort | uniq
+          .github/workflows/publish-new-find-csproj-dependencies.sh "$PACKAGE_DIR" | sort | uniq

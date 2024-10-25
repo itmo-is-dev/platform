@@ -7,7 +7,7 @@
     <PackageVersion Include="AutoBogus" Version="2.13.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.1" />
     <PackageVersion Include="FluentChaining" Version="1.0.4" />
     <PackageVersion Include="FluentMigrator" Version="5.0.0" />
     <PackageVersion Include="FluentMigrator.Runner" Version="5.0.0" />

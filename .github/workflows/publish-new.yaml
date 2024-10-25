@@ -5,7 +5,7 @@ on:
     branches: [ "chore/publish-new" ]
     paths:
       - 'src/**'
-      - '.github/workflows/publish-new.yaml'
+      - '.github/workflows/publish-new*'
       - '*.props'
       - '!samples'
 

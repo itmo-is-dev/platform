@@ -23,7 +23,7 @@ jobs:
       - name: find package projects
         id: find-package-projects
         run: |
-          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\"%s\", ", $1) }')
+          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\047%s\047, ", $1) }')
           package_projects=["$package_projects"]
           package_projects=$(echo "$package_projects" | sed 's/, ]/]/')
           

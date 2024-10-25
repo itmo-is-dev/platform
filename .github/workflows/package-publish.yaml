@@ -27,13 +27,13 @@ jobs:
       - name: find Directory.Build.props changes
         id: find-build
         run: |
-          changes_count=$(git --no-pager diff HEAD^1 HEAD Directory.Packages.props | grep -Ec '^\+ ')
+          changes_count=$(git diff HEAD^1 HEAD Directory.Packages.props | grep -Ec '^\+ ')
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
 
       - name: find Directory.Packages.props changes
         id: find-packages
         run: |
-          changed_packages=$(git --no-pager diff HEAD^1 HEAD Directory.Packages.props)
+          changed_packages=$(git diff HEAD^1 HEAD Directory.Packages.props)
           changed_packages=$(echo "${changed_packages}" | grep '^\+ ' | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"')
           changed_packages=$(echo "${changed_packages}" | tr -d '"')
           changed_packages=$(echo "${changed_packages}" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')

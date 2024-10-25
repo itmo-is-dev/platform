@@ -41,6 +41,9 @@ jobs:
       matrix:
         package-dir: ${{ fromJSON(needs.find-package-projects.outputs.package-projects) }}
     
+    outputs:
+      package-changed-${{ matrix.package-dir }}: ${{ steps.check-changes.outputs.package-changed }}
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,8 +54,32 @@ jobs:
         uses: tj-actions/changed-files@v45
 
       - name: check for changed dependencies
+        id: check-changes
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           PACKAGE_DIR: ${{ matrix.package-dir }}
         run: |
-          .github/workflows/publish-new-find-csproj-dependencies.sh "$PACKAGE_DIR" | sort | uniq
+          dependent_paths=$(.github/workflows/publish-new-find-csproj-dependencies.sh "$PACKAGE_DIR" | sort | uniq)
+          
+          for dependent_path in ${dependent_paths}
+          do
+            changes_count=$(echo "$ALL_CHANGED_FILES" | grep -Ec '"${dependent_path}")
+          
+            if [[ ! "$changes_count" -eq 0 ]]
+            then
+              echo package-changed=true >> "$GITHUB_OUTPUT"
+              break
+            fi
+          done
+          
+          echo package-changed=false >> "$GITHUB_OUTPUT"
+
+  handle-package-changes:
+    name: handle package changes
+    runs-on: ubuntu-latest
+    needs: check-package-project-changes
+    
+    steps:
+      - name: write outputs
+        run: |
+          echo ${{ toJSON(needs.check-package-project-changes.outputs) }}

@@ -1,15 +1,18 @@
 name: dotnet
 
 on:
+  push:
+    paths:
+      - '.github/workflows/dotnet.yaml'
   pull_request:
+    branches:
+      - master
     paths:
       - 'src/**'
       #     Ignored as there is a separate pipeline for these tests
       - '!src/Itmo.Dev.Platform.Kafka/**'
       - '!src/Itmo.Dev.Platform.Postgres/**'
       - '!src/Itmo.Dev.Platform.BackgroundTasks/**'
-    branches:
-      - master
 
 jobs:
   build:

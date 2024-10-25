@@ -1,13 +1,15 @@
 name: platform-persistence-postgres
 
 on:
+  push:
+    paths:
+      - '.github/workflows/build-test-postgres.yaml'
   pull_request:
     branches:
       - master
     paths:
       - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
       - 'tests/Itmo.Dev.Platform.Persistence.Postgres.Tests/**'
-      - '.github/workflows/build-test-postgres.yaml'
 
 jobs:
   build:

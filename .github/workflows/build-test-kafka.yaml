@@ -1,6 +1,9 @@
 name: platform-kafka
 
 on:
+  push:
+    paths:
+      - '.github/workflows/build-test-kafka.yaml'
   pull_request:
     branches:
       - master
@@ -11,7 +14,6 @@ on:
       - 'src/Itmo.Dev.Platform.MessagePersistence.Postgres/**'
       - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
       - 'tests/Itmo.Dev.Platform.Kafka.Tests/**'
-      - '.github/workflows/build-test-kafka.yaml'
 
 jobs:
   build:

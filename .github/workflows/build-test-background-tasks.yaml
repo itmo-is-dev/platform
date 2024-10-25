@@ -1,6 +1,9 @@
 name: platform-background-tasks
 
 on:
+  push:
+    paths:
+      - '.github/workflows/build-test-background-tasks.yaml'
   pull_request:
     branches:
       - master
@@ -13,7 +16,6 @@ on:
       - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
       - 'tests/Itmo.Dev.Platform.BackgroundTasks.Tests/**'
       - 'tests/Itmo.Dev.Platform.BackgroundTasks.Tests.Startup/**'
-      - '.github/workflows/build-test-background-tasks.yaml'
 
 jobs:
   build:

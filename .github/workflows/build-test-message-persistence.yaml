@@ -1,6 +1,9 @@
 name: platform-message-persistence
 
 on:
+  push:
+    paths:
+      - '.github/workflows/build-test-message-persistence.yaml'
   pull_request:
     branches:
       - master
@@ -11,7 +14,6 @@ on:
       - 'src/Itmo.Dev.Platform.Persistence.Postgres/**'
       - 'tests/Itmo.Dev.Platform.MessagePersistence.Tests/**'
       - 'tests/Itmo.Dev.Platform.MessagePersistence.Tests.Startup/**'
-      - '.github/workflows/build-test-message-persistence.yaml'
 
 jobs:
   build:

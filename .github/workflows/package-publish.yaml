@@ -27,7 +27,7 @@ jobs:
         id: find-build
         continue-on-error: true
         run: |
-          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props 2>/dev/null | grep -Ec '^\+ ')
+          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props 2>/dev/null | grep -Ec '^\+ ') || echo x
           
           echo "$changes_count"
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"

@@ -10,12 +10,12 @@ on:
       - '!samples'
 
 jobs:
-  find-changed-package-projects:
+  find-changed-packages:
     name: "find changed packages"
     runs-on: ubuntu-latest
     
     outputs:
-      changed-package-projects: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
+      packages: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
     
     steps:
       - uses: actions/checkout@v4
@@ -49,22 +49,22 @@ jobs:
   
   
   publish-package:
-    name: "publish ${{ matrix.package-dir }}"
+    name: "publish ${{ matrix.package }}"
     runs-on: ubuntu-latest
-    needs: find-changed-package-projects
+    needs: find-changed-packages
     
     if: ${{
-      needs.find-changed-package-projects.outputs.changed-package-projects != '[]'
-      && needs.find-changed-package-projects.outputs.changed-package-projects != ''
+      needs.find-changed-packages.outputs.packages != '[]'
+      && needs.find-changed-packages.outputs.packages != ''
       }}
     
     strategy:
       matrix:
-        package-dir: ${{ fromJSON(needs.find-changed-package-projects.outputs.changed-package-projects) }}
+        package: ${{ fromJSON(needs.find-changed-packages.outputs.packages) }}
     
     steps:
       - uses: actions/checkout@v4
 
       - name: write
         run: |
-          echo ${{ matrix.package-dir }}
+          echo ${{ matrix.package }}

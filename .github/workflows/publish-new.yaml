@@ -23,12 +23,17 @@ jobs:
       - name: find package projects
         id: find-package-projects
         run: |
-          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | tr '\n' ' ')
-          echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
+          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\"%s\"", $1) }' | tr '\n' ', ')
+          echo package-projects=["$package_projects"] >> "$GITHUB_OUTPUT"
   
   check-package-project-changes:
     name: "check package project changes"
     runs-on: ubuntu-latest
+    needs: find-package-projects
+    
+    strategy:
+      matrix:
+        package-dir: ${{ needs.find-package-projects.outputs.package-projects }}
     
     steps:
       - uses: actions/checkout@v4
@@ -38,11 +43,10 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
-        
-      - name: List all changed files
+
+      - name: check for changed dependencies
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          PACKAGE_DIR: ${{ matrix.package-dir }}
         run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
+          .github/workflows/publish-new-find "$PACKAGE_DIR" | sort | uniq

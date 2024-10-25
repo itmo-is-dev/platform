@@ -27,7 +27,7 @@ jobs:
         id: find-build
         continue-on-error: true
         run: |
-          changes_count=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props | grep -Ec '^\+ ')
+          changes_count=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props 2>/dev/null | grep -Ec '^\+ ')
           
           echo "$changes_count"
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
@@ -36,7 +36,7 @@ jobs:
         id: find-packages
         continue-on-error: true
         run: |
-          changed_packages=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props)
+          changed_packages=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props 2>/dev/null)
           changed_packages=$(echo "${changed_packages}" | grep '^\+ ' | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"')
           changed_packages=$(echo "${changed_packages}" | tr -d '"' | sort | uniq)
           changed_packages=$(echo "${changed_packages}" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')

@@ -83,26 +83,12 @@ jobs:
       - name: calculate all changed packages
         id: changed-packages
         run: |
-          selected=$(echo ${{ steps.find-changed-package-projects.outputs.changed-package-projects }})
-          all=$(echo ${{ steps.return-all-packages.outputs.changed-package-projects }})
-          
-          if [[ -z "$selected" ]]
+          if [[ ${{ steps.find-build.outputs.changed-count }} -eq 0 ]]
           then
-            selected=()
+            echo changed-package-projects=${{ steps.find-changed-package-projects.outputs.changed-package-projects }} >> "$GITHUB_OUTPUT"
           else
-            selected=$(echo "$selected" | jq -r 'values[]' | tr '\n' ' ')
-          fi
-          
-          if [[ -z "$all" ]]
-          then
-            all=()
-          else
-            all=$(echo "$all" | jq -r 'values[]' | tr '\n' ' ')
-          fi
-          
-          all+="$selected"
-          
-          echo changed-package-projects="$all" >> "$GITHUB_OUTPUT"
+            echo changed-package-projects=${{ steps.return-all-packages.outputs.changed-package-projects }} >> "$GITHUB_OUTPUT"
+          fi        
   
   
   publish-package:

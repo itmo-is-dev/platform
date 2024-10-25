@@ -14,10 +14,35 @@ jobs:
     name: "find csproj files with packages"
     runs-on: ubuntu-latest
     
+    outputs:
+      package-projects: ${{ steps.find-package-projects.outputs.package-projects }}
+    
     steps:
-      - uses: actions/checkout@v2
-        
+      - uses: actions/checkout@v4
+
       - name: find package projects
+        id: find-package-projects
         run: |
           package_projects=$(.github/workflows/publish-new-find-package-projects.sh | tr '\n' ' ')
-          echo package-projects="$package_projects"
+          echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
+  
+  check-package-project-changes:
+    name: "check package project changes"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done

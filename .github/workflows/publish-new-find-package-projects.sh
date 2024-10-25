@@ -8,6 +8,6 @@ do
 
   if [[ ! "${packable_count}" -eq 0 ]]
   then
-    basename "$(dirname "${project}")"
+    basename "$(dirname "${project}")" | sed 's/Itmo.Dev.Platform.//'
   fi
 done

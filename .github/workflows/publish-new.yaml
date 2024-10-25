@@ -26,7 +26,7 @@ jobs:
         id: find-package-projects
         run: |
           package_projects=$(.github/workflows/publish-new-find-package-projects.sh)
-          package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' | tr -d '\n')
           echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
 
       - name: Get changed files
@@ -58,7 +58,7 @@ jobs:
             done
           done
           
-          changed_package_projects=$(echo "$changed_package_projects" | tr ' ' '\n' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          changed_package_projects=$(echo "$changed_package_projects" | tr ' ' '\n' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' | tr -d '\n')
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
   
   

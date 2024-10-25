@@ -2,7 +2,7 @@ name: "publish packages"
 
 on:
   push:
-    branches: [ "chore/publish-new" ]
+    branches: [ "master" ]
     paths:
       - 'src/**'
       - '.github/workflows/package-publish.yaml'
@@ -116,14 +116,14 @@ jobs:
           
           echo path="$csproj_path" >> "$GITHUB_OUTPUT"
           echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
-          
+
       - name: restore
         run: dotnet restore ${{ steps.csproj.outputs.path }}
-        
+
       - name: build
         run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
-        
+
       - name: publish
         run: |
           nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/bin/Release/*.nupkg)
-          echo "$nuget_path"
+          dotnet nuget push "$nuget_path" --source "nuget.org" --api-key ${{ secrets.NUGET_API_KEY }}

@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Common.Options;
+using Itmo.Dev.Platform.Observability.Sentry.ExceptionFilters;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Grpc;
@@ -44,6 +45,7 @@ internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
                 _options.Configuration?.Bind(options);
 
                 options.UseOpenTelemetry();
+                options.AddExceptionFilter(new CancelledExceptionFilter());
             });
 
             sentry.AddGrpc();

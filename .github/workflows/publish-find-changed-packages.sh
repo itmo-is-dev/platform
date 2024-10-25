@@ -18,10 +18,7 @@ do
   done
 done
 
-changed_packages=$(git --no-pager diff HEAD^1 HEAD Directory.Packages.props)
-changed_packages=$(echo "${changed_packages}" | grep '^\+ ' | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"' | tr -d '"' | tr '\n' ' ')
-
-if [[ ! -z "${changed_packages}" ]]
+if [[ ! -z "${ALL_CHANGED_DEPENDENCIES}" ]]
 then
   for package_project in ${package_projects}
   do
@@ -29,7 +26,7 @@ then
     
     for package_reference in ${package_references}
     do
-      changes_count=$(echo "${changed_packages}" | grep -Ec "${package_reference}")
+      changes_count=$(echo "${ALL_CHANGED_DEPENDENCIES}" | grep -Ec "${package_reference}")
       
       if [[ ! "$changes_count" -eq 0 ]]
       then

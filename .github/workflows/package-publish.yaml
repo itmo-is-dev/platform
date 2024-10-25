@@ -11,12 +11,43 @@ on:
       - '!samples'
 
 jobs:
-  find-changed-packages:
-    name: "find changed packages"
+  find-props-changes:
+    name: "find dependency version changes"
     runs-on: ubuntu-latest
     
     outputs:
-      packages: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
+      dependencies: ${{ steps.find-packages.outputs.changed-packages }}
+      build-changes: ${{ steps.find-build.outputs.changes-count }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: find Directory.Build.props changes
+        id: find-build
+        run: |
+          changes_count=$(git --no-pager diff HEAD^1 HEAD Directory.Packages.props | grep -Ec '^\+ ')
+          echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
+
+      - name: find Directory.Packages.props changes
+        id: find-packages
+        run: |
+          changed_packages=$(git --no-pager diff HEAD^1 HEAD Directory.Packages.props)
+          changed_packages=$(echo "${changed_packages}" | grep '^\+ ' | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"')
+          changed_packages=$(echo "${changed_packages}" | tr -d '"')
+          changed_packages=$(echo "${changed_packages}" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          changed_packages=$(echo "${changed_packages}" | tr -d '\n')
+          
+          echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"
+  
+  find-changed-packages:
+    name: "find changed packages"
+    runs-on: ubuntu-latest
+    needs: find-props-changes
+    
+    outputs:
+      packages: ${{ steps.changed-packages.outputs.changed-package-projects }}
     
     steps:
       - uses: actions/checkout@v4
@@ -38,8 +69,10 @@ jobs:
 
       - name: find changed package projects
         id: find-changed-package-projects
+        if: ${{ needs.find-props-changes.outputs.build-changes == 0 }}
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          ALL_CHANGED_DEPENDENCIES: ${{ needs.find-props-changes.outputs.dependencies }}
           PACKAGE_PROJECTS_JSON: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
           changed_package_projects=$(.github/workflows/publish-find-changed-packages.sh | sort | uniq | tr ' ' '\n')
@@ -47,6 +80,22 @@ jobs:
           changed_package_projects=$(echo "$changed_package_projects" | tr -d '\n')
           
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
+
+      - name: return all packages
+        id: return-all-packages
+        if: ${{ needs.find-props-changes.outputs.build-changes != 0 }}
+        run: |
+          echo changed-package-projects=${{ steps.find-package-projects.outputs.package-projects }} >> "$GITHUB_OUTPUT"
+
+      - name: calculate all changed packages
+        id: changed-packages
+        run: |
+          selected=$(echo ${{ steps.find-changed-package-projects.outputs.changed-package-projects }} | jq -r 'values[]' | tr '\n' ' ')
+          all=$(echo ${{ steps.return-all-packages.outputs.changed-package-projects }} | jq -r 'values[]' | tr '\n' ' ')
+          
+          all+="$selected"
+          
+          echo changed-package-projects="$all" >> "$GITHUB_OUTPUT"
   
   
   publish-package:

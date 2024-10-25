@@ -83,7 +83,7 @@ jobs:
       - name: calculate all changed packages
         id: changed-packages
         run: |
-          if [[ ${{ steps.find-build.outputs.changed-count }} -eq 0 ]]
+          if [[ ${{ steps.find-build.outputs.changes-count }} -eq 0 ]]
           then
             echo changed-package-projects=${{ steps.find-changed-package-projects.outputs.changed-package-projects }} >> "$GITHUB_OUTPUT"
           else

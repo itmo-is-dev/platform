@@ -23,9 +23,12 @@ jobs:
       - name: find package projects
         id: find-package-projects
         run: |
-          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\"%s\"", $1) }' | tr '\n' ', ')
+          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\"%s\", ", $1) }')
+          package_projects=["$package_projects"]
+          package_projects=$(echo "$package_projects" | tr ', ]' ']')
+          
           echo "$package_projects"
-          echo package-projects=["$package_projects"] >> "$GITHUB_OUTPUT"
+          echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
   
   check-package-project-changes:
     name: "check package project changes"

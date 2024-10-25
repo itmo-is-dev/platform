@@ -1,10 +1,10 @@
 #!/bin/bash
 
 function find_dependencies {
-  local project_dir="$1"
+  project_dir="$1"
 
   csproj_path=$(find . -type d -name "$project_dir")/"$project_dir".csproj
-  dirname "${csproj_path}"
+  dirname "${csproj_path}" | sed 's/^.\///'
   
   dependent_project_paths=$(grep -E 'ProjectReference' "${csproj_path}" | grep -Eo '".*"' | tr -d '\"' | tr '\\' '/'| tr '\n' ' ')
   

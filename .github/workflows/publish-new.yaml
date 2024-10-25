@@ -24,6 +24,7 @@ jobs:
         id: find-package-projects
         run: |
           package_projects=$(.github/workflows/publish-new-find-package-projects.sh | awk '{ printf("\"%s\"", $1) }' | tr '\n' ', ')
+          echo "$package_projects"
           echo package-projects=["$package_projects"] >> "$GITHUB_OUTPUT"
   
   check-package-project-changes:

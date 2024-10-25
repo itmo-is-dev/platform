@@ -26,15 +26,15 @@ jobs:
       - name: find Directory.Build.props changes
         id: find-build
         run: |
-          changes_count=$(git diff ${{ github.event.befor }} ${{ github.event.after }} Directory.Packages.props | grep -Ec '^\+ ')
+          changes_count=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props | grep -Ec '^\+ ')
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
 
       - name: find Directory.Packages.props changes
         id: find-packages
         run: |
-          changed_packages=$(git diff ${{ github.event.befor }} ${{ github.event.after }} Directory.Packages.props)
+          changed_packages=$(git diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props)
           changed_packages=$(echo "${changed_packages}" | grep '^\+ ' | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"')
-          changed_packages=$(echo "${changed_packages}" | tr -d '"')
+          changed_packages=$(echo "${changed_packages}" | tr -d '"' | sort | uniq)
           changed_packages=$(echo "${changed_packages}" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
           changed_packages=$(echo "${changed_packages}" | tr -d '\n')
 

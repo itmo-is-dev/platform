@@ -29,6 +29,8 @@ jobs:
           
           echo "$package_projects"
           echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
+          
+          echo ${{ github.event.client_payload.versions }}
   
   check-package-project-changes:
     name: "check package project changes"

@@ -6,7 +6,7 @@ for project in ${projects}
 do
   packable_count=$(grep -Ec '<IsPackable>true</IsPackable>' "$project")
 
-  if [[ "${packable_count}" -eq 1 ]]
+  if [[ ! "${packable_count}" -eq 0 ]]
   then
     basename "$(dirname "${project}")"
   fi

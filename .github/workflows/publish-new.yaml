@@ -25,7 +25,9 @@ jobs:
       - name: find package projects
         id: find-package-projects
         run: |
+          echo determining packages
           package_projects=$(.github/workflows/publish-new-find-package-projects.sh)
+          echo formatting packaged
           package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != "")))
           
           echo "$package_projects"

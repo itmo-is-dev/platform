@@ -34,11 +34,15 @@ jobs:
       - name: find Directory.Packages.props changes
         id: find-packages
         run: |
-          changed_packages=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props | grep -E '^\+ ') || :
-          changed_packages=$(echo "${changed_packages}" | grep -Eo 'Include="[a-zA-Z.]*"' | grep -Eo '".*"')
-          changed_packages=$(echo "${changed_packages}" | tr -d '"' | sort | uniq)
-          changed_packages=$(echo "${changed_packages}" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
-          changed_packages=$(echo "${changed_packages}" | tr -d '\n')
+          changed_packages=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props \
+            | grep -E '^\+ ' \
+            | grep -Eo 'Include="[a-zA-Z.]*"' \
+            | grep -Eo '".*"' \
+            | tr -d '"' \
+            | sort \
+            | uniq \
+            | jq --raw-input --slurp 'split("\n") | map(select(. != "")) \
+            | tr -d '\n') || :
 
           echo "$changed_packages"
           echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"

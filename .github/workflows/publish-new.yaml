@@ -48,7 +48,7 @@ jobs:
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
   
   
-  publish-package-if-needed:
+  publish-package:
     name: "publish ${{ matrix.package-dir }}"
     runs-on: ubuntu-latest
     needs: find-changed-package-projects
@@ -60,7 +60,7 @@ jobs:
     
     strategy:
       matrix:
-        package-dir: ${{ fromJSON(needs.find-package-projects.outputs.changed-package-projects) }}
+        package-dir: ${{ fromJSON(needs.find-changed-package-projects.outputs.changed-package-projects) }}
     
     steps:
       - uses: actions/checkout@v4

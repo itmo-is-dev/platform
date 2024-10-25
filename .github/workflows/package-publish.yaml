@@ -125,5 +125,5 @@ jobs:
         
       - name: publish
         run: |
-          nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/*.nupkg)
+          nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/bin/Release/*.nupkg)
           echo "$nuget_path"

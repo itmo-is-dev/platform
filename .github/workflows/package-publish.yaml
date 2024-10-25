@@ -26,7 +26,7 @@ jobs:
       - name: find package projects
         id: find-package-projects
         run: |
-          package_projects=$(.github/workflows/publish-find-package-projects.sh)
+          package_projects=$(.github/workflows/publish-find-package-projects.sh | sort | uniq)
           package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
           package_projects=$(echo "$package_projects" | tr -d '\n')
           
@@ -42,7 +42,7 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           PACKAGE_PROJECTS_JSON: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
-          changed_package_projects=$(.github/workflows/publish-find-changed-packages.sh | tr ' ' '\n')
+          changed_package_projects=$(.github/workflows/publish-find-changed-packages.sh | sort | uniq | tr ' ' '\n')
           changed_package_projects=$(echo "$changed_package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
           changed_package_projects=$(echo "$changed_package_projects" | tr -d '\n')
           

@@ -26,7 +26,9 @@ jobs:
         id: find-package-projects
         run: |
           package_projects=$(.github/workflows/publish-new-find-package-projects.sh)
-          package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' | tr -d '\n')
+          package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          package_projects=$(echo "$package_projects" | tr -d '\n')
+          
           echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
 
       - name: Get changed files
@@ -39,26 +41,10 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           PACKAGE_PROJECTS_JSON: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
-          package_projects=$(echo "$PACKAGE_PROJECTS_JSON" | jq -r 'values[]' | tr '\n' ' ')
-          changed_package_projects=()
-
-          for package_project in ${package_projects}
-          do
-            dependent_paths=$(.github/workflows/publish-new-find-csproj-dependencies.sh "${package_project}" | sort | uniq)
+          changed_package_projects=$(.github/workflows/publish-new-find-changed-packages.sh | tr ' ' '\n')
+          changed_package_projects=$(echo "$changed_package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          changed_package_projects=$(echo "$changed_package_projects" | tr -d '\n')
           
-            for dependent_path in ${dependent_paths}
-            do
-              changes_count=$(echo "$ALL_CHANGED_FILES" | grep -Ec '"${dependent_path}")
-          
-              if [[ ! "$changes_count" -eq 0 ]]
-              then
-                changed_package_projects+=("${package_project})
-                break
-              fi
-            done
-          done
-          
-          changed_package_projects=$(echo "$changed_package_projects" | tr ' ' '\n' | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' | tr -d '\n')
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
   
   

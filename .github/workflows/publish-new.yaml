@@ -1,0 +1,23 @@
+name: "publish packages"
+
+on:
+  push:
+    branches: [ "chore/publish-new" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/package-publish.yaml'
+      - '*.props'
+      - '!samples'
+
+jobs:
+  find-package-projects:
+    name: "find csproj files with packages"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: find package projects
+        run: |
+          package_projects=$(.github/workflows/publish-new-find-package-projects.sh | tr '\n' ' ')
+          echo package-projects="$package_projects"

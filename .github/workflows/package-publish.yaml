@@ -81,7 +81,7 @@ jobs:
         run: |
           echo changed-package-projects=${{ fromJSON(steps.find-package-projects.outputs.package-projects) }} >> "$GITHUB_OUTPUT"
 
-      - name: calculate all changed packages
+      - name: calculate all changed packages 
         id: changed-packages
         env:
           SELECTED_PACKAGES: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}

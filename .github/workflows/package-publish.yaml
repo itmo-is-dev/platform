@@ -86,7 +86,7 @@ jobs:
           selected=${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
           all=${{ steps.return-all-packages.outputs.changed-package-projects }}
           
-          if [[ -z "$selected ]]
+          if [[ -z "$selected" ]]
           then
             selected=()
           else

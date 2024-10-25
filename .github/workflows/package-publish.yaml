@@ -75,17 +75,11 @@ jobs:
           
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
 
-      - name: return all packages
-        id: return-all-packages
-        if: ${{ steps.find-build.outputs.changes-count != 0 }}
-        run: |
-          echo changed-package-projects=${{ fromJSON(steps.find-package-projects.outputs.package-projects) }} >> "$GITHUB_OUTPUT"
-
-      - name: calculate all changed packages 
+      - name: calculate all changed packages
         id: changed-packages
         env:
           SELECTED_PACKAGES: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
-          ALL_PACKAGES: ${{ steps.return-all-packages.outputs.changed-package-projects }}
+          ALL_PACKAGES: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
           if [[ ${{ steps.find-build.outputs.changes-count }} -eq 0 ]]
           then

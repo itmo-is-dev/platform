@@ -94,6 +94,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: find-changed-packages
     
+    environment: nuget.org
+    
     if: ${{
       needs.find-changed-packages.outputs.packages != '[]'
       && needs.find-changed-packages.outputs.packages != ''
@@ -106,6 +108,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: write
+      - name: format csproj path
+        id: csproj
         run: |
-          echo ${{ matrix.package }}
+          csproj_path=$(find . -type d -name Itmo.Dev.Platform.${{ matrix.package }})/Itmo.Dev.Platform.${{ matrix.package }}.csproj
+          csproj_dir=$(dirname "$csproj_path")
+          
+          echo path="$csproj_path" >> "$GITHUB_OUTPUT"
+          echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
+          
+      - name: restore
+        run: dotnet restore ${{ steps.csproj.outputs.path }}
+        
+      - name: build
+        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
+        
+      - name: publish
+        run: |
+          nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/*.nupkg)
+          echo "$nuget_path"

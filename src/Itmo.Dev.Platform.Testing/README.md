@@ -1,3 +1,3 @@
 # Itmo.Dev.Platform.Testing
 
-Common code for automated testing
+Common code for automated testing 

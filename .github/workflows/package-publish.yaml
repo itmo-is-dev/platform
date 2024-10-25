@@ -83,8 +83,8 @@ jobs:
       - name: calculate all changed packages
         id: changed-packages
         run: |
-          selected=${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
-          all=${{ steps.return-all-packages.outputs.changed-package-projects }}
+          selected=$(echo ${{ steps.find-changed-package-projects.outputs.changed-package-projects }})
+          all=$(echo ${{ steps.return-all-packages.outputs.changed-package-projects }})
           
           if [[ -z "$selected" ]]
           then

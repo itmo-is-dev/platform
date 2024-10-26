@@ -82,6 +82,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: find-changed-packages
     
+    environment: itmo-is-dev-ci
+    
     permissions:
       contents: write
     

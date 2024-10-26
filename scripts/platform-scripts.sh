@@ -8,6 +8,7 @@ function change_package_patch_version {
   
   if [[ -z "$property_group_line_number" ]]
   then
+    >&2 echo 'failed to find property group for package = '"$package_name"
     exit 1
   fi
   

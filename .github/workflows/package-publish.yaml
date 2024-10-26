@@ -94,7 +94,7 @@ jobs:
       - uses: actions/create-github-app-token@v1
         id: app-token
         with:
-          app-id: ${{ vars.ITMO_IS_DEV_CI_APP_ID }}
+          app-id: ${{ secrets.ITMO_IS_DEV_CI_APP_ID }}
           private-key: ${{ secrets.ITMO_IS_DEV_CI_PRIVATE_KEY }}
 
       - uses: actions/checkout@v4

@@ -107,6 +107,8 @@ jobs:
 
       - name: commit patch version changes
         run: |
+          echo ${{ github.ref_name }}
+          git branch --show-current
           cat Directory.Platform.props
   
   publish-package:
@@ -129,6 +131,18 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+        
+      - name: change patch versions
+        env:
+          CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
+        run: |
+          source ./scripts/common-scripts.sh
+          source ./scripts/platform-scripts.sh
+
+          echo "$CHANGED_PACKAGES" | json_array_to_lines | while read -r line
+          do
+            change_package_patch_version "$line" ${{ github.run_number }}
+          done
 
       - name: debug
         run: |

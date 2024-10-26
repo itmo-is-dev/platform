@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPackable>true</IsPackable>
+        <IsPlatformPackage>true</IsPlatformPackage>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
@@ -12,12 +13,10 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <License>LICENSE</License>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
-        <PatchVersion>0</PatchVersion>
-        <Version>2.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
             Refactored persistence configuration
         </PackageReleaseNotes>

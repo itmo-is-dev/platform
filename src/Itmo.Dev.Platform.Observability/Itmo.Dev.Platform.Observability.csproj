@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPackable>true</IsPackable>
+        <IsPlatformPackage>true</IsPlatformPackage>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <OutputType>Library</OutputType>
     </PropertyGroup>
@@ -13,13 +14,13 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseUrl>https://github.com/itmo-is-dev/platform/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
-        <PatchVersion>0</PatchVersion>
-        <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Itmo.Dev.Platform</PackageReleaseNotes>
+        <PackageReleaseNotes>
+            Itmo.Dev.Platform
+        </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,13 +29,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Npgsql.OpenTelemetry" />
-        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+        <PackageReference Include="Npgsql.OpenTelemetry"/>
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"/>
         <PackageReference Include="OpenTelemetry.Extensions.Hosting"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.GrpcCore"/>
-        <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime"/>
         <PackageReference Include="Sentry.AspNetCore"/>
         <PackageReference Include="Sentry.AspNetCore.Grpc"/>
         <PackageReference Include="Sentry.OpenTelemetry"/>

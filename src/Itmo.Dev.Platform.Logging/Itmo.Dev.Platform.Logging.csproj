@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPackable>true</IsPackable>
+        <IsPlatformPackage>true</IsPlatformPackage>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <OutputType>Library</OutputType>
     </PropertyGroup>
@@ -13,13 +14,13 @@
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseUrl>https://github.com/itmo-is-dev/platform/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
-        <PatchVersion>0</PatchVersion>
-        <Version>1.0.$(PatchVersion)</Version>
-        <PackageReleaseNotes>Itmo.Dev.Platform</PackageReleaseNotes>
+        <PackageReleaseNotes>
+            Itmo.Dev.Platform
+        </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,12 +29,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Sentry.AspNetCore" />
-      <PackageReference Include="Sentry.AspNetCore.Grpc" />
-      <PackageReference Include="Sentry.Serilog" />
-      <PackageReference Include="Serilog" />
-      <PackageReference Include="Serilog.AspNetCore" />
-      <PackageReference Include="Serilog.Settings.Configuration" />
+        <PackageReference Include="Sentry.AspNetCore"/>
+        <PackageReference Include="Sentry.AspNetCore.Grpc"/>
+        <PackageReference Include="Sentry.Serilog"/>
+        <PackageReference Include="Serilog"/>
+        <PackageReference Include="Serilog.AspNetCore"/>
+        <PackageReference Include="Serilog.Settings.Configuration"/>
     </ItemGroup>
 
 </Project>

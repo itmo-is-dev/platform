@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPackable>true</IsPackable>
+        <IsPlatformPackage>true</IsPlatformPackage>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
@@ -16,8 +17,6 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <PatchVersion>0</PatchVersion>
-        <Version>2.0.$(PatchVersion)</Version>
         <PackageReleaseNotes>
             Refactored persistence configuration
         </PackageReleaseNotes>

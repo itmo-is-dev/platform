@@ -1,8 +1,12 @@
 #!/bin/bash
 
+source ./scripts/common-scripts.sh
+
 function change_package_patch_version {
-  package_name="$1"
+  short_name="$1"
   patch_version="$2"
+  
+  package_name=$(echo "$short_name" | short_name_to_full_name)
   
   property_group_line_number=$(grep -n \'"$package_name"\' Directory.Platform.props | awk -F : '{ print $1 }')
   

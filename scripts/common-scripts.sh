@@ -18,6 +18,13 @@ function dir_path_to_short_name {
   done
 }
 
+function short_name_to_full_name {
+  while read -r line
+  do
+    echo Itmo.Dev.Platform."$line"
+  done
+}
+
 function short_name_to_csproj_path {
   while IFS= read -r line
   do

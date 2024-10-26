@@ -129,7 +129,7 @@ jobs:
           comment=$(echo "$CHANGED_PACKAGES" | json_array_to_lines)
           
           git add Directory.Platform.props
-          git commit -m'[deploy] commited patch #${{ github.run_number }}'\n"$comment"
+          git commit -m'[deploy] commited patch #${{ github.run_number }}'"\n""$comment"
           
           git push
   
@@ -154,6 +154,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: debug
+        run: |
+          cat Directory.Platform.props
+
       - name: change patch versions
         env:
           CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
@@ -166,9 +170,6 @@ jobs:
             change_package_patch_version "$line" ${{ github.run_number }}
           done
 
-      - name: debug
-        run: |
-          cat Directory.Platform.props
 
 #      - name: format csproj path
 #        id: csproj

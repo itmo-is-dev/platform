@@ -32,7 +32,6 @@ function find_changed_dependencies {
       echo "$project" | find_package_references_by_short_name | while read -r package_referece
       do
         >&2 echo "\t"'checking changes for package = '"$package_referece"
-        
         changed=$(echo "$changed_dependencies" | grep -Ec "$package_referece")
         
         if [[ ! "$changed" -eq 0 ]]

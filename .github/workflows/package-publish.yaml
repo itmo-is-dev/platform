@@ -57,7 +57,10 @@ jobs:
         run: |
           source ./scripts/changes-scripts.sh
           
-          changed_package_projects=$({ echo "$ALL_CHANGED_FILES" | find_changed_projects; echo "$ALL_CHANGED_DEPENDENCIES" | find_changed_dependencies } | sort | uniq | lines_to_json_array)
+          changed_package_projects=$({ 
+            echo "$ALL_CHANGED_FILES" | find_changed_projects; 
+            echo "$ALL_CHANGED_DEPENDENCIES" | find_changed_dependencies 
+          } | sort | uniq | lines_to_json_array)
           
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
 

@@ -168,8 +168,10 @@ jobs:
       - name: format csproj path
         id: csproj
         run: |
-          csproj_path=$(find . -type d -name Itmo.Dev.Platform.${{ matrix.package }})/Itmo.Dev.Platform.${{ matrix.package }}.csproj
-          csproj_dir=$(dirname "$csproj_path")
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          csproj_dir=$(echo ${{ matrix.package }} | short_name_to_dir_path)
 
           echo path="$csproj_path" >> "$GITHUB_OUTPUT"
           echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
@@ -178,7 +180,7 @@ jobs:
         run: dotnet restore ${{ steps.csproj.outputs.path }}
 
       - name: build
-        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
+        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore
 
       - name: publish
         run: |

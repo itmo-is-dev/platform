@@ -106,10 +106,15 @@ jobs:
           done
 
       - name: commit patch version changes
+        env:
+          CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
         run: |
-          echo ${{ github.ref_name }}
-          git branch --show-current
-          cat Directory.Platform.props
+          comment=$(echo "$CHANGED_PACKAGES" | json_array_to_lines)
+          
+          git add Directory.Platform.props
+          git commit -m'[deploy] commited patch #${{ github.run_number }}'\n"$comment"
+          
+          git push
   
   publish-package:
     name: ${{ matrix.package }}
@@ -131,7 +136,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: change patch versions
         env:
           CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}

@@ -39,7 +39,7 @@ jobs:
           
           changed_packages=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props \
             | grep -E '^\+ ' \
-            | get_tag_attribute_value 'Include'
+            | get_tag_attribute_value 'Include' \
             | lines_to_json_array) || :
 
           echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"
@@ -134,23 +134,27 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-
-      - name: format csproj path
-        id: csproj
+        
+      - name: debug
         run: |
-          csproj_path=$(find . -type d -name Itmo.Dev.Platform.${{ matrix.package }})/Itmo.Dev.Platform.${{ matrix.package }}.csproj
-          csproj_dir=$(dirname "$csproj_path")
-          
-          echo path="$csproj_path" >> "$GITHUB_OUTPUT"
-          echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
+          cat Directory.Platform.props
 
-      - name: restore
-        run: dotnet restore ${{ steps.csproj.outputs.path }}
-
-      - name: build
-        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
-
-      - name: publish
-        run: |
-          nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/bin/Release/*.nupkg)
-          dotnet nuget push "$nuget_path" --source "nuget.org" --api-key ${{ secrets.NUGET_API_KEY }}
+#      - name: format csproj path
+#        id: csproj
+#        run: |
+#          csproj_path=$(find . -type d -name Itmo.Dev.Platform.${{ matrix.package }})/Itmo.Dev.Platform.${{ matrix.package }}.csproj
+#          csproj_dir=$(dirname "$csproj_path")
+#          
+#          echo path="$csproj_path" >> "$GITHUB_OUTPUT"
+#          echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
+#
+#      - name: restore
+#        run: dotnet restore ${{ steps.csproj.outputs.path }}
+#
+#      - name: build
+#        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:PatchVersion=${{ github.run_number }}
+#
+#      - name: publish
+#        run: |
+#          nuget_path=$(ls ${{ steps.csproj.outputs.dir }}/bin/Release/*.nupkg)
+#          dotnet nuget push "$nuget_path" --source "nuget.org" --api-key ${{ secrets.NUGET_API_KEY }}

@@ -5,61 +5,61 @@
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.BackgroundTasks'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.BackgroundTasks.Hangfire'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.BackgroundTasks.Postgres'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.MessagePersistence'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.MessagePersistence.Postgres'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Persistence.Abstractions'">
             <MajorVersion>1</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Persistence.Postgres'">
             <MajorVersion>1</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Common'">
             <MajorVersion>1</MajorVersion>
             <MinorVersion>2</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Enrichment'">
             <MajorVersion>1</MajorVersion>
             <MinorVersion>2</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Events'">
@@ -77,7 +77,7 @@
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Kafka'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Locking'">
@@ -95,7 +95,7 @@
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Observability'">
             <MajorVersion>1</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.Testing'">
@@ -107,7 +107,7 @@
         <PropertyGroup Condition="'$(Title)' == 'Itmo.Dev.Platform.YandexCloud'">
             <MajorVersion>2</MajorVersion>
             <MinorVersion>1</MinorVersion>
-            <PatchVersion>187</PatchVersion>
+            <PatchVersion>188</PatchVersion>
         </PropertyGroup>
 
         <CreateProperty Value="$(MajorVersion).$(MinorVersion).$(PatchVersion)">

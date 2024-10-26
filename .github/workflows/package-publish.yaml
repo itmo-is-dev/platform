@@ -6,8 +6,9 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/package-publish.yaml'
-      - '.github/workflows/publish-*.sh'
+      - 'scripts/*'
       - '*.props'
+      - '!Directory.Platform.props'
       - '!samples'
 
 jobs:
@@ -26,36 +27,22 @@ jobs:
       - name: find Directory.Build.props changes
         id: find-build
         run: |
-          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Build.props | grep -Ec '^\+ ') || :
+          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Build.props \
+            | grep -Ec '^\+ ') || :
           
-          echo "$changes_count"
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
 
       - name: find Directory.Packages.props changes
         id: find-packages
         run: |
+          source ./scripts/common-scripts.sh
+          
           changed_packages=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props \
             | grep -E '^\+ ' \
-            | grep -Eo 'Include="[a-zA-Z.]*"' \
-            | grep -Eo '".*"' \
-            | tr -d '"' \
-            | sort \
-            | uniq \
-            | jq --raw-input --slurp 'split("\n") | map(select(. != ""))' \
-            | tr -d '\n') || :
+            | get_tag_attribute_value 'Include' \
+            | lines_to_json_array) || :
 
-          echo "$changed_packages"
           echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"
-
-      - name: find package projects
-        id: find-package-projects
-        run: |
-          package_projects=$(.github/workflows/publish-find-package-projects.sh | sort | uniq)
-          package_projects=$(echo "$package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
-          package_projects=$(echo "$package_projects" | tr -d '\n')
-          
-          echo "$package_projects"
-          echo package-projects="$package_projects" >> "$GITHUB_OUTPUT"
 
       - name: Get changed files
         id: changed-files
@@ -67,32 +54,90 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           ALL_CHANGED_DEPENDENCIES: ${{ steps.find-packages.outputs.changed-packages }}
-          PACKAGE_PROJECTS_JSON: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
-          changed_package_projects=$(.github/workflows/publish-find-changed-packages.sh | sort | uniq | tr ' ' '\n')
-          changed_package_projects=$(echo "$changed_package_projects" | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
-          changed_package_projects=$(echo "$changed_package_projects" | tr -d '\n')
+          source ./scripts/changes-scripts.sh
+          
+          changed_package_projects=$({ 
+            echo "$ALL_CHANGED_FILES" | find_changed_projects; 
+            echo "$ALL_CHANGED_DEPENDENCIES" | find_changed_dependencies 
+          } | sort | uniq | lines_to_json_array)
           
           echo changed-package-projects="$changed_package_projects" >> "$GITHUB_OUTPUT"
 
-      - name: calculate all changed packages
+      - name: calculate final changed packages
         id: changed-packages
         env:
           SELECTED_PACKAGES: ${{ steps.find-changed-package-projects.outputs.changed-package-projects }}
-          ALL_PACKAGES: ${{ steps.find-package-projects.outputs.package-projects }}
         run: |
+          source ./scripts/project-scripts.sh
+          
           if [[ ${{ steps.find-build.outputs.changes-count }} -eq 0 ]]
           then
             echo changed-package-projects="$SELECTED_PACKAGES" >> "$GITHUB_OUTPUT"
           else
-            echo changed-package-projects="$ALL_PACKAGES" >> "$GITHUB_OUTPUT"
+            echo changed-package-projects="$(find_package_projects)" >> "$GITHUB_OUTPUT"
           fi        
   
+  commit-patches:
+    name: commit patch versions
+    runs-on: ubuntu-latest
+    needs: find-changed-packages
+    
+    environment: itmo-is-dev-ci
+    
+    permissions:
+      contents: write
+    
+    if: ${{
+      needs.find-changed-packages.outputs.packages != '[]'
+      && needs.find-changed-packages.outputs.packages != ''
+      }}
+    
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.ITMO_IS_DEV_CI_APP_ID }}
+          private-key: ${{ secrets.ITMO_IS_DEV_CI_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: set config
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: change patch versions
+        env:
+          CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
+        run: |
+          source ./scripts/common-scripts.sh
+          source ./scripts/platform-scripts.sh
+          
+          echo "$CHANGED_PACKAGES" | json_array_to_lines | while read -r line
+          do
+            change_package_patch_version "$line" ${{ github.run_number }}
+          done
+
+      - name: commit patch version changes
+        env:
+          CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          git add Directory.Platform.props
+          git commit -m'[deploy] commited patch #${{ github.run_number }}' -m "$(echo "$CHANGED_PACKAGES" | json_array_to_lines)"
+          
+          git push
   
   publish-package:
     name: ${{ matrix.package }}
     runs-on: ubuntu-latest
-    needs: find-changed-packages
+    needs:
+      - find-changed-packages
+      - commit-patches
     
     environment: nuget.org
     
@@ -108,12 +153,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: change patch versions
+        env:
+          CHANGED_PACKAGES: ${{ needs.find-changed-packages.outputs.packages }}
+        run: |
+          source ./scripts/common-scripts.sh
+          source ./scripts/platform-scripts.sh
+
+          echo "$CHANGED_PACKAGES" | json_array_to_lines | while read -r line
+          do
+            change_package_patch_version "$line" ${{ github.run_number }}
+          done
+
       - name: format csproj path
         id: csproj
         run: |
           csproj_path=$(find . -type d -name Itmo.Dev.Platform.${{ matrix.package }})/Itmo.Dev.Platform.${{ matrix.package }}.csproj
           csproj_dir=$(dirname "$csproj_path")
-          
+
           echo path="$csproj_path" >> "$GITHUB_OUTPUT"
           echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
 

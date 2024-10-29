@@ -170,17 +170,15 @@ jobs:
         run: |
           source ./scripts/common-scripts.sh
           
-          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
           csproj_dir=$(echo ${{ matrix.package }} | short_name_to_dir_path)
 
-          echo path="$csproj_path" >> "$GITHUB_OUTPUT"
           echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
 
       - name: restore
-        run: dotnet restore ${{ steps.csproj.outputs.path }}
+        run: dotnet restore Itmo.Dev.Platform.sln
 
       - name: build
-        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore
+        run: dotnet build Itmo.Dev.Platform.sln -c Release --no-restore
 
       - name: publish
         run: |

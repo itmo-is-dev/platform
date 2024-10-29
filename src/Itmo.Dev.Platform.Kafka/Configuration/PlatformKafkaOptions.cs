@@ -32,7 +32,7 @@ public class PlatformKafkaOptions : IValidatableObject
         {
             if (string.IsNullOrEmpty(SaslUsername))
                 yield return new ValidationResult("SaslUsername must be specified for SaslPlaintext protocol");
-            
+
             if (string.IsNullOrEmpty(SaslPassword))
                 yield return new ValidationResult("SaslPassword must be specified for SaslPlaintext protocol");
         }
@@ -41,10 +41,10 @@ public class PlatformKafkaOptions : IValidatableObject
         {
             if (string.IsNullOrEmpty(SslCaPem))
                 yield return new ValidationResult("SslCaPem must be specified for SaslSsl protocol");
-            
+
             if (string.IsNullOrEmpty(SaslUsername))
                 yield return new ValidationResult("SaslUsername must be specified for SaslSsl protocol");
-            
+
             if (string.IsNullOrEmpty(SaslPassword))
                 yield return new ValidationResult("SaslPassword must be specified for SaslSsl protocol");
         }

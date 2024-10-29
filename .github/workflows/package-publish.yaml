@@ -75,7 +75,7 @@ jobs:
           then
             echo changed-package-projects="$SELECTED_PACKAGES" >> "$GITHUB_OUTPUT"
           else
-            echo changed-package-projects="$(find_package_projects)" >> "$GITHUB_OUTPUT"
+            echo changed-package-projects="$(find_package_projects | lines_to_json_array)" >> "$GITHUB_OUTPUT"
           fi        
   
   commit-patches:

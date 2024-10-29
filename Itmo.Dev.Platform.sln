@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{65E3ED
 		Directory.Packages.props = Directory.Packages.props
 		.editorconfig = .editorconfig
 		README.md = README.md
-		Directory.Platform.props = Directory.Platform.props
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Common", "src\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj", "{3485ECDD-43E0-4E86-916E-CC0CBA084FA5}"
@@ -21,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\build-test-persistence-postgres.yaml = .github\workflows\build-test-persistence-postgres.yaml
 		.github\workflows\build-test-background-tasks.yaml = .github\workflows\build-test-background-tasks.yaml
 		.github\workflows\build-test-message-persistence.yaml = .github\workflows\build-test-message-persistence.yaml
+		.github\workflows\validate-platform-version.yaml = .github\workflows\validate-platform-version.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}"

@@ -6,23 +6,24 @@ function change_package_patch_version {
   short_name="$1"
   patch_version="$2"
   
-  package_name=$(echo "$short_name" | short_name_to_full_name)
+  csproj_path=$(echo "$short_name" | short_name_to_csproj_path)
   
-  property_group_line_number=$(grep -n \'"$package_name"\' Directory.Platform.props | awk -F : '{ print $1 }')
+  platform_version_line_number=$(grep -n '<PropertyGroup Label="PlatformVersion">' "$csproj_path" | awk -F : '{ print $1 }')
   
-  if [[ -z "$property_group_line_number" ]]
+  if [[ -z "$platform_version_line_number" ]]
   then
-    >&2 echo 'failed to find property group for package = '"$package_name"
+    >&2 echo 'failed to find platform version property group for package = '"$short_name"
     exit 1
   fi
   
-  patch_version_line_number=$(( property_group_line_number + 3 ))
-  current_patch_version=$(sed -n "$patch_version_line_number"p Directory.Platform.props | grep -Eo '[0-9]+')
+  patch_version_line_number=$(( platform_version_line_number + 3 ))
+  current_patch_version=$(sed -n "$patch_version_line_number"p "$csproj_path" | grep -Eo '[0-9]+')
   
   if [[ "$OSTYPE" == 'darwin'* ]]
   then
-    sed -i '' "$patch_version_line_number"s/"$current_patch_version"/"$patch_version"/ 'Directory.Platform.props'
+    sed -i '' "$patch_version_line_number"s/"$current_patch_version"/"$patch_version"/ "$csproj_path"
   else
-    sed -i "$patch_version_line_number"s/"$current_patch_version"/"$patch_version"/ 'Directory.Platform.props'
+    sed -i "$patch_version_line_number"s/"$current_patch_version"/"$patch_version"/ "$csproj_path"
   fi
+
 }

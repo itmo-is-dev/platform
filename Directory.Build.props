@@ -1,7 +1,5 @@
 <Project>
 
-    <Import Project="$(MSBuildThisFileDirectory)\Directory.Platform.props"/>
-
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>

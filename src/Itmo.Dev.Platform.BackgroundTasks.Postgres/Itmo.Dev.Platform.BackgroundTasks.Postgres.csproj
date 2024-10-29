@@ -22,14 +22,21 @@
         </PackageReleaseNotes>
     </PropertyGroup>
 
+    <PropertyGroup Label="PlatformVersion">
+        <MajorVersion>2</MajorVersion>
+        <MinorVersion>1</MinorVersion>
+        <PatchVersion>190</PatchVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
+    </PropertyGroup>
+
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
         <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj" />
-      <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Postgres\Itmo.Dev.Platform.Persistence.Postgres.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Postgres\Itmo.Dev.Platform.Persistence.Postgres.csproj"/>
     </ItemGroup>
 
 </Project>

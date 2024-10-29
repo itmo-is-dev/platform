@@ -1,0 +1,114 @@
+name: validate platform version
+
+on:
+  push:
+    paths:
+      - 'src/**/*.csproj'
+      - '.github/workflows/validate-platform-version.yaml'
+
+jobs:
+  find-package-projects:
+    name: "find package projects"
+    runs-on: ubuntu-latest
+    
+    outputs:
+      packages: ${{ steps.find-package-projects.outputs.packages }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "find package projects"
+        id: find-package-projects
+        run: |
+          source ./scripts/project-scripts.sh
+          
+          echo packages=$(find_package_projects | lines_to_json_array) >> "$GITHUB_OUTPUT"
+  
+  validate-platform-version-annotations:
+    name: ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    needs: find-package-projects
+    
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.find-package-projects.outputs.packages) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: validate property group
+        id: validate-property-group
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          
+          property_group_line_number=$(grep -n '<PropertyGroup Label="PlatformVersion">' "$csproj_path" | awk -F : '{ print $1 }')
+          
+          if [[ -z "$property_group_line_number" ]]
+          then
+            >&2 echo 'package project missing PropertyGroup with PlatformVersion label'
+            exit 1
+          fi
+          
+          echo line-number="$property_group_line_number" >> "$GITHUB_OUTPUT"
+
+      - name: validate major version
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 1 ))
+          
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
+          
+          if [[ ! "$line" =~ \<MajorVersion\>[0-9]+\<\/MajorVersion\> ]]
+          then
+            >&2 echo 'package platform version has ivalid MajorVersion annotation' "$line"
+            exit 1
+          fi
+
+      - name: validate minor version
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 2 ))
+          
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
+          
+          if [[ ! "$line" =~ \<MinorVersion\>[0-9]+\<\/MinorVersion\> ]]
+          then
+            >&2 echo 'package platform version has ivalid MinorVersion annotation' "$line"
+            exit 1
+          fi
+
+      - name: validate patch version
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 3 ))
+          
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
+          
+          if [[ ! "$line" =~ \<PatchVersion\>[0-9]+\<\/PatchVersion\> ]]
+          then
+            >&2 echo 'package platform version has ivalid PatchVersion annotation' "$line"
+            exit 1
+          fi
+
+      - name: validate package version
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
+          property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 4 ))
+          
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
+          
+          if [[ ! "$line" =~ '<PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>' ]]
+          then
+            >&2 echo 'package platform version has ivalid PackageVersion annotation' "$line"
+            exit 1
+          fi

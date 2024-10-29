@@ -127,7 +127,7 @@ jobs:
         run: |
           source ./scripts/common-scripts.sh
           
-          git add Directory.Platform.props
+          git add ./src/**/*.csproj
           git commit -m'[deploy] commited patch #${{ github.run_number }}' -m "$(echo "$CHANGED_PACKAGES" | json_array_to_lines)"
           
           git push

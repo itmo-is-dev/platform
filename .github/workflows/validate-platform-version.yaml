@@ -3,7 +3,8 @@ name: validate platform version
 on:
   push:
     paths:
-      - './src/**/*.csproj'
+      - 'src/**/*.csproj'
+      - '.github/workflows/validate-platform-version.yaml'
 
 jobs:
   find-package-projects:

@@ -62,7 +62,7 @@ jobs:
           
           line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
           
-          if [[ ! "$line" =~ <MajorVersion>[0-9]+</MajorVersion> ]]
+          if [[ ! "$line" =~ \<MajorVersion\>[0-9]+\<\/MajorVersion\> ]]
           then
             >&2 echo 'package platform version has ivalid MajorVersion annotation' "$line"
             exit 1
@@ -77,7 +77,7 @@ jobs:
           
           line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
           
-          if [[ ! "$line" =~ <MinorVersion>[0-9]+</MinorVersion> ]]
+          if [[ ! "$line" =~ \<MinorVersion\>[0-9]+\<\/MinorVersion\> ]]
           then
             >&2 echo 'package platform version has ivalid MinorVersion annotation' "$line"
             exit 1
@@ -92,7 +92,7 @@ jobs:
           
           line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
           
-          if [[ ! "$line" =~ <PatchVersion>[0-9]+</PatchVersion> ]]
+          if [[ ! "$line" =~ \<PatchVersion\>[0-9]+\<\/PatchVersion\> ]]
           then
             >&2 echo 'package platform version has ivalid PatchVersion annotation' "$line"
             exit 1

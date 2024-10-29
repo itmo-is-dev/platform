@@ -60,9 +60,9 @@ jobs:
           csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
           property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 1 ))
           
-          line=$(sed "${property_group_line_number}q;d" "$csproj_path")
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' ')
           
-          if [[ ! "$line" =~ '.*<MajorVersion>[0-9]+</MajorVersion>.*' ]]
+          if [[ ! "$line" =~ '<MajorVersion>[0-9]+</MajorVersion>' ]]
           then
             >&2 echo 'package platform version has ivalid MajorVersion annotation'
             exit 1
@@ -75,9 +75,9 @@ jobs:
           csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
           property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 2 ))
           
-          line=$(sed "${property_group_line_number}q;d" "$csproj_path")
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' ')
           
-          if [[ ! "$line" =~ '.*<MinorVersion>[0-9]+</MinorVersion>.*' ]]
+          if [[ ! "$line" =~ '<MinorVersion>[0-9]+</MinorVersion>' ]]
           then
             >&2 echo 'package platform version has ivalid MinorVersion annotation'
             exit 1
@@ -90,9 +90,9 @@ jobs:
           csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
           property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 3 ))
           
-          line=$(sed "${property_group_line_number}q;d" "$csproj_path")
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' ')
           
-          if [[ ! "$line" =~ '.*<PatchVersion>[0-9]+</PatchVersion>.*' ]]
+          if [[ ! "$line" =~ '<PatchVersion>[0-9]+</PatchVersion>' ]]
           then
             >&2 echo 'package platform version has ivalid PatchVersion annotation'
             exit 1
@@ -105,9 +105,9 @@ jobs:
           csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
           property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 4 ))
           
-          line=$(sed "${property_group_line_number}q;d" "$csproj_path")
+          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' ')
           
-          if [[ ! "$line" =~ '.*<PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>.*' ]]
+          if [[ ! "$line" =~ '<PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>' ]]
           then
             >&2 echo 'package platform version has ivalid PackageVersion annotation'
             exit 1

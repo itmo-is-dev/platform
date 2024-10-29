@@ -11,6 +11,8 @@ jobs:
     name: "find package projects"
     runs-on: ubuntu-latest
     
+    if: ${{ github.actor != 'itmo-is-dev-ci[bot]' }}
+    
     outputs:
       packages: ${{ steps.find-package-projects.outputs.packages }}
     

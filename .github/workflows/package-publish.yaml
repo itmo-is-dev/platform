@@ -8,13 +8,14 @@ on:
       - '.github/workflows/package-publish.yaml'
       - 'scripts/*'
       - '*.props'
-      - '!Directory.Platform.props'
       - '!samples'
 
 jobs:
   find-changed-packages:
     name: "find changed packages"
     runs-on: ubuntu-latest
+    
+    if: ${{ github.actor != 'itmo-is-dev-ci[bot]' }}
     
     outputs:
       packages: ${{ steps.changed-packages.outputs.changed-package-projects }}

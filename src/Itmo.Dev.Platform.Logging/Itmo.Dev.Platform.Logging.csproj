@@ -23,6 +23,13 @@
         </PackageReleaseNotes>
     </PropertyGroup>
 
+    <PropertyGroup Label="PlatformVersion">
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>1</MinorVersion>
+        <PatchVersion>190</PatchVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
+    </PropertyGroup>
+
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
         <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>

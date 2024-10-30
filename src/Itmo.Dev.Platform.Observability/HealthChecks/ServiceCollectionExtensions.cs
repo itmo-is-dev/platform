@@ -11,7 +11,7 @@ internal static class ServiceCollectionExtensions
 
         collection
             .AddOptions<PlatformHealthCheckOptions>()
-            .BindConfiguration("Platform:Observability:HealhChecks");
+            .BindConfiguration("Platform:Observability:HealthChecks");
 
         return collection;
     }

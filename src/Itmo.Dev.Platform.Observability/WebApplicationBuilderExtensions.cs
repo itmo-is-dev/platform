@@ -12,7 +12,7 @@ public static class WebApplicationBuilderExtensions
 {
     public static void AddPlatformObservability(
         this WebApplicationBuilder builder,
-        Action<IPlatformObservabilityExtensionConfigurator>? configuration)
+        Action<IPlatformObservabilityExtensionConfigurator>? configuration = null)
     {
         var collection = new ServiceCollection();
 

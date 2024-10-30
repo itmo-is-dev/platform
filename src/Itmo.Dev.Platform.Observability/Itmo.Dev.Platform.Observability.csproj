@@ -19,7 +19,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added serilog enrichers
+            Added serilog LogContext enrichers
         </PackageReleaseNotes>
     </PropertyGroup>
 

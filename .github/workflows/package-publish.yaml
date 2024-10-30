@@ -176,7 +176,7 @@ jobs:
           full_name=$(echo ${{ matrix.package }} | short_name_to_full_name)
           package_version=$(echo ${{ matrix.package }} | get_package_version)
           
-          url=https://www.nuget.org/packages/"$fill_name"/"$package_version"
+          url=https://www.nuget.org/packages/"$full_name"/"$package_version"
           
           echo url="$url" >> "$GITHUB_OUTPUT"
 

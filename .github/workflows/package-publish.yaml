@@ -174,7 +174,7 @@ jobs:
           source ./scripts/platform-scripts.sh
           
           full_name=$(echo ${{ matrix.package }} | short_name_to_full_name)
-          package_version=$(echo ${{ matrix.package }} | get_package_version)
+          package_version=$(get_package_version ${{ matrix.package }})
           
           url=https://www.nuget.org/packages/"$full_name"/"$package_version"
           

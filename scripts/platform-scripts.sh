@@ -31,6 +31,12 @@ function change_package_patch_version {
 function get_package_version {
     short_name="$1"
     
+    if [[ -z "$short_name" ]]
+    then
+      >&2 echo 'project short name is empty'
+      exit 1
+    fi
+    
     csproj_path=$(echo "$short_name" | short_name_to_csproj_path)
     
     platform_version_line_number=$(grep -n '<PropertyGroup Label="PlatformVersion">' "$csproj_path" | awk -F : '{ print $1 }')
@@ -42,6 +48,24 @@ function get_package_version {
     major_version=$(sed -n "$major_version_line_number"p "$csproj_path" | grep -Eo '[0-9]+')
     minor_version=$(sed -n "$minor_version_line_number"p "$csproj_path" | grep -Eo '[0-9]+')
     patch_version=$(sed -n "$patch_version_line_number"p "$csproj_path" | grep -Eo '[0-9]+')
+    
+    if [[ -z "$major_version" ]]
+    then
+      >&2 echo 'major version is empty'
+      exit 1
+    fi
+    
+    if [[ -z "$minor_version" ]]
+    then
+      >&2 echo 'minor version is empty'
+      exit 1
+    fi
+    
+    if [[ -z "$patch_version" ]]
+    then
+      >&2 echo 'patch version is empty'
+      exit 1
+    fi
     
     echo "$major_version"."$minor_version"."$patch_version"
 }

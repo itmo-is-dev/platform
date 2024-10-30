@@ -142,7 +142,7 @@ jobs:
     
     environment:
       name: nuget.org
-      url: https://www.nuget.org/packages/
+      url: ${{ steps.deployment-url.outputs.url }}
     
     if: ${{
       needs.find-changed-packages.outputs.packages != '[]'
@@ -152,7 +152,6 @@ jobs:
     strategy:
       matrix:
         package: ${{ fromJSON(needs.find-changed-packages.outputs.packages) }}
-        url: ${{ steps.deployment-url.outputs.url }}
     
     steps:
       - uses: actions/checkout@v4

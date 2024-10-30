@@ -140,7 +140,9 @@ jobs:
       - find-changed-packages
       - commit-patches
     
-    environment: nuget.org
+    environment:
+      name: nuget.org
+      url: ${{ steps.deployment-url.outputs.url }}
     
     if: ${{
       needs.find-changed-packages.outputs.packages != '[]'
@@ -165,6 +167,19 @@ jobs:
           do
             change_package_patch_version "$line" ${{ github.run_number }}
           done
+
+      - name: generate deployment url
+        id: deployment-url
+        run: |
+          source ./scripts/platform-scripts.sh
+          
+          full_name=$(echo ${{ matrix.package }} | short_name_to_full_name)
+          package_version=$(echo ${{ matrix.package }} | get_package_version)
+          
+          url=https://www.nuget.org/packages/"$fill_name"/"$package_version"
+          
+          echo url="$url" >> "$GITHUB_OUTPUT"
+
 
       - name: format csproj path
         id: csproj

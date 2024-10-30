@@ -9,16 +9,16 @@ using System.Net;
 
 namespace Itmo.Dev.Platform.Observability.Sentry;
 
-internal class SentryObservabilityPlugin : IObservabilityConfigurationPlugin
+internal class SentryConfigurationPlugin : IObservabilityConfigurationPlugin
 {
-    private readonly PlatformObservabilitySentryOptions _options;
+    private readonly PlatformSentryOptions _options;
     private readonly PlatformOptions _platformOptions;
-    private readonly ILogger<SentryObservabilityPlugin> _logger;
+    private readonly ILogger<SentryConfigurationPlugin> _logger;
 
-    public SentryObservabilityPlugin(
-        IOptions<PlatformObservabilitySentryOptions> options,
+    public SentryConfigurationPlugin(
+        IOptions<PlatformSentryOptions> options,
         IOptions<PlatformOptions> platformOptions,
-        ILogger<SentryObservabilityPlugin> logger)
+        ILogger<SentryConfigurationPlugin> logger)
     {
         _logger = logger;
         _options = options.Value;

@@ -5,16 +5,16 @@ using OpenTelemetry.Resources;
 
 namespace Itmo.Dev.Platform.Observability.Metrics;
 
-internal class MetricsObservabilityConfigurationPlugin : IObservabilityConfigurationPlugin
+internal class MetricsConfigurationPlugin : IObservabilityConfigurationPlugin
 {
     private readonly PlatformOptions _platformOptions;
-    private readonly PlatformObservabilityMetricsOptions _metricsOptions;
-    private readonly ILogger<MetricsObservabilityConfigurationPlugin> _logger;
+    private readonly PlatformMetricsOptions _metricsOptions;
+    private readonly ILogger<MetricsConfigurationPlugin> _logger;
 
-    public MetricsObservabilityConfigurationPlugin(
+    public MetricsConfigurationPlugin(
         IOptions<PlatformOptions> platformOptions,
-        IOptions<PlatformObservabilityMetricsOptions> metricsOptions,
-        ILogger<MetricsObservabilityConfigurationPlugin> logger)
+        IOptions<PlatformMetricsOptions> metricsOptions,
+        ILogger<MetricsConfigurationPlugin> logger)
     {
         _logger = logger;
         _platformOptions = platformOptions.Value;

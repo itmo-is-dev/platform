@@ -8,11 +8,11 @@ namespace Itmo.Dev.Platform.Observability.Sentry;
 
 internal class SentryTracingPlugin : ITracingConfigurationPlugin
 {
-    private readonly PlatformObservabilitySentryOptions _options;
+    private readonly PlatformSentryOptions _options;
     private readonly ILogger<SentryTracingPlugin> _logger;
 
     public SentryTracingPlugin(
-        IOptions<PlatformObservabilitySentryOptions> options,
+        IOptions<PlatformSentryOptions> options,
         ILogger<SentryTracingPlugin> logger)
     {
         _logger = logger;

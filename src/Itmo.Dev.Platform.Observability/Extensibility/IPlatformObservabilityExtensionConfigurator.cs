@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Observability.HealthChecks;
 using Itmo.Dev.Platform.Observability.Logging;
 using Itmo.Dev.Platform.Observability.Tracing;
 
@@ -10,4 +11,7 @@ public interface IPlatformObservabilityExtensionConfigurator
 
     IPlatformObservabilityExtensionConfigurator AddTracingPlugin<T>()
         where T : class, ITracingConfigurationPlugin;
+
+    IPlatformObservabilityExtensionConfigurator AddHealthCheckPlugin<T>()
+        where T : class, IHealthCheckConfigurationPlugin;
 }

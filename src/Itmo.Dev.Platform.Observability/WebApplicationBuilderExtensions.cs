@@ -1,7 +1,9 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Observability.Extensibility;
+using Itmo.Dev.Platform.Observability.HealthChecks;
 using Itmo.Dev.Platform.Observability.Logging;
 using Itmo.Dev.Platform.Observability.Metrics;
+using Itmo.Dev.Platform.Observability.Platform;
 using Itmo.Dev.Platform.Observability.Sentry;
 using Itmo.Dev.Platform.Observability.Tracing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -32,6 +34,8 @@ public static class WebApplicationBuilderExtensions
         collection.AddTracingPlugins();
         collection.AddLoggingPlugins();
         collection.AddMetricsPlugins();
+        collection.AddHealthCheckPlugins();
+        collection.AddPlatformPlugins();
 
         using var provider = collection.BuildServiceProvider();
         var plugins = provider.GetRequiredService<IEnumerable<IObservabilityConfigurationPlugin>>();

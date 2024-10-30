@@ -2,14 +2,14 @@ using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Observability.Metrics;
 
-internal class MetricsObservabilityApplicationPlugin : IObservabilityApplicationPlugin
+internal class MetricsApplicationPlugin : IObservabilityApplicationPlugin
 {
-    private readonly PlatformObservabilityMetricsOptions _metricsOptions;
-    private readonly ILogger<MetricsObservabilityApplicationPlugin> _logger;
+    private readonly PlatformMetricsOptions _metricsOptions;
+    private readonly ILogger<MetricsApplicationPlugin> _logger;
 
-    public MetricsObservabilityApplicationPlugin(
-        IOptions<PlatformObservabilityMetricsOptions> metricsOptions,
-        ILogger<MetricsObservabilityApplicationPlugin> logger)
+    public MetricsApplicationPlugin(
+        IOptions<PlatformMetricsOptions> metricsOptions,
+        ILogger<MetricsApplicationPlugin> logger)
     {
         _logger = logger;
         _metricsOptions = metricsOptions.Value;

@@ -6,11 +6,11 @@ namespace Itmo.Dev.Platform.Observability.Sentry;
 
 internal class SentrySerilogPlugin : ISerilogConfigurationPlugin
 {
-    private readonly PlatformObservabilitySentryOptions _options;
+    private readonly PlatformSentryOptions _options;
     private readonly ILogger<SentrySerilogPlugin> _logger;
 
     public SentrySerilogPlugin(
-        IOptions<PlatformObservabilitySentryOptions> options,
+        IOptions<PlatformSentryOptions> options,
         ILogger<SentrySerilogPlugin> logger)
     {
         _options = options.Value;

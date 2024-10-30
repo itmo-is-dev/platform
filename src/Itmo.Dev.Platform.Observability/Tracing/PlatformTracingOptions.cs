@@ -1,6 +1,6 @@
 namespace Itmo.Dev.Platform.Observability.Tracing;
 
-internal class PlatformObservabilityTracingOptions
+internal class PlatformTracingOptions
 {
     public bool IsEnabled { get; set; }
 

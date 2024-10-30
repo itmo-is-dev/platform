@@ -4,11 +4,11 @@ internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddMetricsPlugins(this IServiceCollection collection)
     {
-        collection.AddSingleton<IObservabilityConfigurationPlugin, MetricsObservabilityConfigurationPlugin>();
-        collection.AddSingleton<IObservabilityApplicationPlugin, MetricsObservabilityApplicationPlugin>();
+        collection.AddSingleton<IObservabilityConfigurationPlugin, MetricsConfigurationPlugin>();
+        collection.AddSingleton<IObservabilityApplicationPlugin, MetricsApplicationPlugin>();
 
         collection
-            .AddOptions<PlatformObservabilityMetricsOptions>()
+            .AddOptions<PlatformMetricsOptions>()
             .BindConfiguration("Platform:Observability:Metrics");
 
         return collection;

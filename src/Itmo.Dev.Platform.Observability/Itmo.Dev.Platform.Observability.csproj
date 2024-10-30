@@ -19,13 +19,13 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added serilog enrichers
+            Added health checks
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Label="PlatformVersion">
         <MajorVersion>1</MajorVersion>
-        <MinorVersion>2</MinorVersion>
+        <MinorVersion>3</MinorVersion>
         <PatchVersion>214</PatchVersion>
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>

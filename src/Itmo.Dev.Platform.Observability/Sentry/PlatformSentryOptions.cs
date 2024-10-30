@@ -1,6 +1,6 @@
 namespace Itmo.Dev.Platform.Observability.Sentry;
 
-internal class PlatformObservabilitySentryOptions
+internal class PlatformSentryOptions
 {
     public bool IsEnabled { get; set; }
     

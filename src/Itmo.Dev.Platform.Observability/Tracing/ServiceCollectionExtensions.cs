@@ -4,10 +4,10 @@ internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTracingPlugins(this IServiceCollection collection)
     {
-        collection.AddSingleton<IObservabilityConfigurationPlugin, TracingObservabilityPlugin>();
+        collection.AddSingleton<IObservabilityConfigurationPlugin, TracingConfigurationPlugin>();
 
         collection
-            .AddOptions<PlatformObservabilityTracingOptions>()
+            .AddOptions<PlatformTracingOptions>()
             .BindConfiguration("Platform:Observability:Tracing");
 
         return collection;

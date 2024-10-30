@@ -1,6 +1,6 @@
 namespace Itmo.Dev.Platform.Observability.Metrics;
 
-internal class PlatformObservabilityMetricsOptions
+internal class PlatformMetricsOptions
 {
     public bool IsEnabled { get; set; }
 }

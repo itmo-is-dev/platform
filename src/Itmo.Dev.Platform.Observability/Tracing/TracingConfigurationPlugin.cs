@@ -6,18 +6,18 @@ using OpenTelemetry.Trace;
 
 namespace Itmo.Dev.Platform.Observability.Tracing;
 
-internal class TracingObservabilityPlugin : IObservabilityConfigurationPlugin
+internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
 {
-    private readonly PlatformObservabilityTracingOptions _options;
+    private readonly PlatformTracingOptions _options;
     private readonly PlatformOptions _platformOptions;
     private readonly IEnumerable<ITracingConfigurationPlugin> _plugins;
-    private readonly ILogger<TracingObservabilityPlugin> _logger;
+    private readonly ILogger<TracingConfigurationPlugin> _logger;
 
-    public TracingObservabilityPlugin(
-        IOptions<PlatformObservabilityTracingOptions> options,
+    public TracingConfigurationPlugin(
+        IOptions<PlatformTracingOptions> options,
         IOptions<PlatformOptions> platformOptions,
         IEnumerable<ITracingConfigurationPlugin> plugins,
-        ILogger<TracingObservabilityPlugin> logger)
+        ILogger<TracingConfigurationPlugin> logger)
     {
         _plugins = plugins;
         _logger = logger;

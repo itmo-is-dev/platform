@@ -4,10 +4,10 @@ internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddLoggingPlugins(this IServiceCollection collection)
     {
-        collection.AddSingleton<IObservabilityConfigurationPlugin, SerilogObservabilityPlugin>();
+        collection.AddSingleton<IObservabilityConfigurationPlugin, SerilogConfigurationPlugin>();
 
         collection
-            .AddOptions<PlatformObservabilityLoggingOptions>()
+            .AddOptions<PlatformLoggingOptions>()
             .BindConfiguration("Platform:Observability:Logging");
 
         return collection;

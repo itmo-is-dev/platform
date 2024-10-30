@@ -6,16 +6,16 @@ using Serilog.Settings.Configuration;
 
 namespace Itmo.Dev.Platform.Observability.Logging;
 
-internal class SerilogObservabilityPlugin : IObservabilityConfigurationPlugin
+internal class SerilogConfigurationPlugin : IObservabilityConfigurationPlugin
 {
-    private readonly PlatformObservabilityLoggingOptions _options;
+    private readonly PlatformLoggingOptions _options;
     private readonly IEnumerable<ISerilogConfigurationPlugin> _plugins;
-    private readonly ILogger<SerilogObservabilityPlugin> _logger;
+    private readonly ILogger<SerilogConfigurationPlugin> _logger;
 
-    public SerilogObservabilityPlugin(
-        IOptions<PlatformObservabilityLoggingOptions> options,
+    public SerilogConfigurationPlugin(
+        IOptions<PlatformLoggingOptions> options,
         IEnumerable<ISerilogConfigurationPlugin> plugins,
-        ILogger<SerilogObservabilityPlugin> logger)
+        ILogger<SerilogConfigurationPlugin> logger)
     {
         _plugins = plugins;
         _logger = logger;

@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Observability.HealthChecks;
 using Itmo.Dev.Platform.Observability.Logging;
 using Itmo.Dev.Platform.Observability.Tracing;
 
@@ -23,6 +24,13 @@ internal class PlatformObservabilityExtensionConfigurator : IPlatformObservabili
         where T : class, ITracingConfigurationPlugin
     {
         _collection.AddSingleton<ITracingConfigurationPlugin, T>();
+        return this;
+    }
+
+    public IPlatformObservabilityExtensionConfigurator AddHealthCheckPlugin<T>()
+        where T : class, IHealthCheckConfigurationPlugin
+    {
+        _collection.AddSingleton<IHealthCheckConfigurationPlugin, T>();
         return this;
     }
 }

@@ -49,6 +49,8 @@
         <PackageReference Include="Sentry.Serilog"/>
         <PackageReference Include="Serilog"/>
         <PackageReference Include="Serilog.AspNetCore"/>
+        <PackageReference Include="Serilog.Enrichers.OpenTelemetry" />
+        <PackageReference Include="Serilog.Exceptions" />
         <PackageReference Include="Serilog.Settings.Configuration"/>
     </ItemGroup>
 

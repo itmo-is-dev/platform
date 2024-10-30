@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Common.Extensions;
+using Itmo.Dev.Platform.Observability.Extensibility;
 using Itmo.Dev.Platform.Observability.Logging;
 using Itmo.Dev.Platform.Observability.Metrics;
 using Itmo.Dev.Platform.Observability.Sentry;
@@ -9,12 +10,20 @@ namespace Itmo.Dev.Platform.Observability;
 
 public static class WebApplicationBuilderExtensions
 {
-    public static void AddPlatformObservability(this WebApplicationBuilder builder)
+    public static void AddPlatformObservability(
+        this WebApplicationBuilder builder,
+        Action<IPlatformObservabilityExtensionConfigurator>? configuration)
     {
         var collection = new ServiceCollection();
 
         collection.AddSingleton<IConfiguration>(builder.Configuration);
         collection.AddSingleton<IConfigurationRoot>(builder.Configuration);
+
+        if (configuration is not null)
+        {
+            var configurator = new PlatformObservabilityExtensionConfigurator(collection);
+            configuration.Invoke(configurator);
+        }
 
         collection.AddPlatform();
         collection.AddLogging(x => x.AddConsole());

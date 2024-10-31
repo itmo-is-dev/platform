@@ -28,7 +28,7 @@ public static class WebApplicationBuilderExtensions
         }
 
         collection.AddPlatform();
-        collection.AddLogging(x => x.AddConsole());
+        collection.AddLogging(x => x.AddConsole().SetMinimumLevel(LogLevel.Trace));
 
         collection.AddSentryPlugins();
         collection.AddTracingPlugins();
@@ -37,7 +37,7 @@ public static class WebApplicationBuilderExtensions
         collection.AddHealthCheckPlugins();
         collection.AddPlatformPlugins();
 
-        using var provider = collection.BuildServiceProvider();
+        var provider = collection.BuildServiceProvider();
         var plugins = provider.GetRequiredService<IEnumerable<IObservabilityConfigurationPlugin>>();
 
         foreach (IObservabilityConfigurationPlugin plugin in plugins)

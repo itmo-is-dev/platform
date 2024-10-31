@@ -5,7 +5,6 @@ using Sentry.AspNetCore;
 using Sentry.AspNetCore.Grpc;
 using Sentry.Infrastructure;
 using Sentry.OpenTelemetry;
-using System.Net;
 
 namespace Itmo.Dev.Platform.Observability.Sentry;
 
@@ -45,7 +44,7 @@ internal class SentryConfigurationPlugin : IObservabilityConfigurationPlugin
                 _options.Configuration?.Bind(options);
 
                 options.UseOpenTelemetry();
-                options.AddExceptionFilter(new CancelledExceptionFilter());
+                options.AddExceptionFilter(new CancelledExceptionFilter(_logger));
             });
 
             sentry.AddGrpc();

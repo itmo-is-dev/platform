@@ -8,7 +8,7 @@ internal class HealthChecksSerilogPlugin : ISerilogConfigurationPlugin
 {
     public LoggerConfiguration Configure(WebApplicationBuilder builder, LoggerConfiguration loggerConfiguration)
     {
-        return loggerConfiguration.MinimumLevel
-            .Override("Microsoft.Extensions.Diagnostics.HealthChecks", LogEventLevel.Information);
+        return loggerConfiguration
+            .MinimumLevel.Override("Microsoft.Extensions.Diagnostics.HealthChecks", LogEventLevel.Information);
     }
 }

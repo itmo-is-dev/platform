@@ -19,13 +19,13 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added health checks
+            Added HealthChecks logging override; changed HealthChecks default uri's;
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Label="PlatformVersion">
         <MajorVersion>1</MajorVersion>
-        <MinorVersion>3</MinorVersion>
+        <MinorVersion>4</MinorVersion>
         <PatchVersion>218</PatchVersion>
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>

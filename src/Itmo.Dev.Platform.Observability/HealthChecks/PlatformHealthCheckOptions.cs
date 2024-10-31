@@ -6,7 +6,7 @@ internal class PlatformHealthCheckOptions
 
     public string StartupCheckUri { get; set; } = "/health/startup";
 
-    public string ReadinessCheckUri { get; set; } = "/health/readiness";
+    public string ReadinessCheckUri { get; set; } = "/health/readyz";
 
-    public string LivenessCheckUri { get; set; } = "/health/liveness";
+    public string LivenessCheckUri { get; set; } = "/health/livez";
 }

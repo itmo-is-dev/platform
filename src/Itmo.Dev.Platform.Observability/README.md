@@ -69,3 +69,27 @@ Call `AddPlatformObservability` extension method on your `WebApplicationBuilder`
   }
 }
 ```
+
+### Health checks
+
+```json
+{
+  "Platform": {
+    "Observability": {
+      "HealthChecks": {
+        "IsEnabled": bool,
+        "StartupCheckUri": string,
+        "ReadinessCheckUri": string,
+        "LivenessCheckUri": string
+      }
+    }
+  }
+}
+```
+
+| field             | default value   |
+|-------------------|-----------------|
+| StartupCheckUri   | /health/startup |
+| ReadinessCheckUri | /health/readyz  |
+| LivenessCheckUri  | /health/livez   |
+

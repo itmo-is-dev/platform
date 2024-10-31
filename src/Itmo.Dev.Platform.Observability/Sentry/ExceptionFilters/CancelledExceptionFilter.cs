@@ -13,13 +13,13 @@ internal class CancelledExceptionFilter : IExceptionFilter
 
     public bool Filter(Exception ex)
     {
-        var isRelevant = ex is not TaskCanceledException and not OperationCanceledException;
+        var isFilteredOut = ex is TaskCanceledException or OperationCanceledException;
 
-        if (isRelevant is false)
+        if (isFilteredOut)
         {
             _logger.LogTrace(ex, "Skipping writing exception to sentry");
         }
 
-        return isRelevant;
+        return isFilteredOut;
     }
 }

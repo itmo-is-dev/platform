@@ -1,6 +1,6 @@
+using Itmo.Dev.Platform.Observability.Logging.Enrichers;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Enrichers.OpenTelemetry;
 using Serilog.Exceptions;
 using Serilog.Settings.Configuration;
 
@@ -36,8 +36,7 @@ internal class SerilogConfigurationPlugin : IObservabilityConfigurationPlugin
         configuration = configuration
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
-            .Enrich.WithOpenTelemetrySpanId()
-            .Enrich.WithOpenTelemetryTraceId();
+            .Enrich.With<ActivityLogEnricher>();
 
         configuration = configuration
             .ReadFrom.Configuration(_options.Serilog, readerOptions);

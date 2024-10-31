@@ -51,7 +51,7 @@
     <PackageVersion Include="Sentry.Serilog" Version="4.12.1" />
     <PackageVersion Include="Serilog" Version="3.1.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
-    <PackageVersion Include="Serilog.Enrichers.OpenTelemetry" Version="1.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.ActivityTags" Version="0.2.0" />
     <PackageVersion Include="Serilog.Exceptions" Version="8.4.0" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.0" />

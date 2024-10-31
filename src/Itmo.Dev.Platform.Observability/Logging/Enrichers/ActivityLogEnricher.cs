@@ -18,6 +18,9 @@ internal class ActivityLogEnricher : ILogEventEnricher
 
         foreach (KeyValuePair<string, string?> tag in activity.Tags)
         {
+            if (tag.Value is null)
+                continue;
+
             logEvent.AddOrUpdateProperty(new LogEventProperty(tag.Key, new ScalarValue(tag.Value)));
         }
     }

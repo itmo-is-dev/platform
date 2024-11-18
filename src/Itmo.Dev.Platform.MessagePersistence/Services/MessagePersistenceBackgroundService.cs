@@ -48,7 +48,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
         {
             try
             {
-                await ExecuteSingleAsync(scope.ServiceProvider, handlerOptions, cts.Token);
+                await ExecuteSingleAsync(handlerOptions, cts.Token);
             }
             catch (Exception e) when (e is not TaskCanceledException and not OperationCanceledException)
             {
@@ -58,21 +58,33 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
     }
 
     private async Task ExecuteSingleAsync(
-        IServiceProvider provider,
         MessagePersistenceHandlerOptions options,
         CancellationToken cancellationToken)
     {
-        var repository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
-        var transactionProvider = provider.GetRequiredService<IPersistenceTransactionProvider>();
-
         var query = SerializedMessageQuery.Build(builder => builder
             .WithName(_messageName)
             .WithState(MessageState.Pending)
             .WithCursor(DateTimeOffset.MinValue)
             .WithPageSize(options.BatchSize));
 
+        var firstRun = true;
+
         while (cancellationToken.IsCancellationRequested is false)
         {
+            if (firstRun)
+            {
+                firstRun = false;
+            }
+            else
+            {
+                await Task.Delay(options.PollingDelay, cancellationToken);
+            }
+
+            await using var scope = _scopeFactory.CreateAsyncScope();
+
+            var repository = scope.ServiceProvider.GetRequiredService<IMessagePersistenceInternalRepository>();
+            var transactionProvider = scope.ServiceProvider.GetRequiredService<IPersistenceTransactionProvider>();
+
             await using var transaction = await transactionProvider
                 .BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
@@ -91,9 +103,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             var messageStates = serializedMessages.ToDictionary(x => x.Id, x => x.State);
             var messageRetryCounts = serializedMessages.ToDictionary(x => x.Id, x => x.RetryCount);
 
-            var messages = MapMessages(serializedMessages, messageStates, options, provider).ToArray();
-
-            await using var scope = _scopeFactory.CreateAsyncScope();
+            var messages = MapMessages(serializedMessages, messageStates, options, scope.ServiceProvider).ToArray();
 
             var handler = scope.ServiceProvider
                 .GetRequiredKeyedService<IMessagePersistenceHandler<TKey, TValue>>(_messageName);
@@ -133,10 +143,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             }
 
             await repository.UpdateAsync(serializedMessages, cancellationToken);
-
             await transaction.CommitAsync(cancellationToken);
-
-            await Task.Delay(options.PollingDelay, cancellationToken);
         }
     }
 

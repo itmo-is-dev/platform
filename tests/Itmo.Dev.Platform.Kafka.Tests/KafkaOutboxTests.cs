@@ -5,14 +5,18 @@ using Itmo.Dev.Platform.Kafka.Producer;
 using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.MessagePersistence;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
+using Itmo.Dev.Platform.MessagePersistence.Models;
+using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
+using System.Data;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -141,6 +145,20 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
                             .Including(x => x.Key)
                             .Including(x => x.Value)));
 
+        var outboxRepository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
+
+        var query = SerializedMessageQuery.Build(builder => builder
+            .WithPageSize(int.MaxValue)
+            .WithName($"_platform_kafka_outbox_{TopicName}")
+            .WithCursor(DateTimeOffset.MinValue)
+            .WithState(MessageState.Completed));
+
+        var outboxMessages = await outboxRepository
+            .QueryAsync(query, default)
+            .ToArrayAsync(default);
+
+        outboxMessages.Should().HaveCount(messages.Length);
+
         // Dispose
         consumer.Close();
     }
@@ -155,7 +173,6 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
                 new KafkaProducerMessage<int, string>(1, "aboba"),
             },
         ];
-
 
         yield return
         [
@@ -199,8 +216,22 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
         await _kafkaFixture.CreateTopicsAsync(TopicName);
     }
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        return Task.CompletedTask;
+        const string truncateSql = """
+        truncate table message_persistence.persisted_messages;
+        """;
+
+        await using var command = _databaseFixture.Connection.CreateCommand();
+        command.CommandText = truncateSql;
+
+        if (_databaseFixture.Connection.State is not ConnectionState.Open)
+        {
+            await _databaseFixture.Connection.OpenAsync();
+        }
+
+        await command.ExecuteNonQueryAsync();
+
+        await _databaseFixture.ResetAsync();
     }
 }

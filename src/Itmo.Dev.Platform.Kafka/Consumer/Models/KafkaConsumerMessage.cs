@@ -21,6 +21,10 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
         Offset = result.Offset;
     }
 
+    /// <summary>
+    ///     Needed for inbox message deserialization.
+    ///     Main constructor causes NRE from accessing result parameter.
+    /// </summary>
     [JsonConstructor]
     private KafkaConsumerMessage(
         IConsumer<TKey, TValue> consumer,

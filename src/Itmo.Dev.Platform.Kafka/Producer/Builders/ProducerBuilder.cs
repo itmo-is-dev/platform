@@ -4,6 +4,7 @@ using Itmo.Dev.Platform.Kafka.Producer.Services;
 using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Builders;
 
@@ -85,7 +86,8 @@ internal class ProducerBuilder<TKey, TValue> :
         _configuration = configuration;
     }
 
-    public IProducerValueSerializerSelector<TKey, TValue> SerializeKeyWith<T>() where T : class, ISerializer<TKey>
+    public IProducerValueSerializerSelector<TKey, TValue> SerializeKeyWith<T>()
+        where T : class, ISerializer<TKey>
     {
         _collection.AddKeyedSingleton<ISerializer<TKey>, T>(_topicName);
         return this;
@@ -100,7 +102,8 @@ internal class ProducerBuilder<TKey, TValue> :
     public IProducerValueSerializerSelector<TKey, TValue> SerializeByDefault()
         => this;
 
-    public IOutboxProducerBuilder SerializeValueWith<T>() where T : class, ISerializer<TValue>
+    public IOutboxProducerBuilder SerializeValueWith<T>()
+        where T : class, ISerializer<TValue>
     {
         _collection.AddKeyedSingleton<ISerializer<TValue>, T>(_topicName);
         return this;
@@ -122,7 +125,7 @@ internal class ProducerBuilder<TKey, TValue> :
             string message = $"Outbox for topic {_topicName} is configured, but Outbox sub-section is not specified";
             throw new InvalidOperationException(message);
         }
-        
+
         var messageName = $"_platform_kafka_outbox_{_topicName}";
 
         _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(
@@ -141,7 +144,11 @@ internal class ProducerBuilder<TKey, TValue> :
 
     public void Build()
     {
-        _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(
+        _collection.AddKeyedScoped<IKafkaMessageProducer<TKey, TValue>>(
+            _topicName,
+            (p, _) => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
+        
+        _collection.TryAddScoped<IKafkaMessageProducer<TKey, TValue>>(
             p => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
     }
 }

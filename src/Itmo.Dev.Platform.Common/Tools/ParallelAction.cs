@@ -38,7 +38,7 @@ internal sealed class ParallelAction
 
         return ExecuteAllAsync(cts, tasks);
 
-        static async Task ExecuteAllAsync(CancellationTokenSource cts, IEnumerable<Task> tasks)
+        static async Task ExecuteAllAsync(CancellationTokenSource cts, Task[] tasks)
         {
             using var source = cts;
             await Task.WhenAll(tasks);
@@ -55,7 +55,7 @@ internal sealed class ParallelAction
         }
         catch
         {
-            cts.Cancel();
+            await cts.CancelAsync();
             throw;
         }
     }

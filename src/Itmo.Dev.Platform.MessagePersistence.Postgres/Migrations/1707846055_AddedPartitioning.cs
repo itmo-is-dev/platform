@@ -23,13 +23,13 @@ public class AddedPartitioning : SqlMigration
         partition by list (persisted_message_state);
         
         create table {options.Value.SchemaName}.persisted_messages_pending
-        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults including identity);
+        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults);
         
         create table {options.Value.SchemaName}.persisted_messages_failed
-        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults including identity);
+        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults);
         
         create table {options.Value.SchemaName}.persisted_messages_completed
-        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults including identity);
+        (like {options.Value.SchemaName}.persisted_messages including constraints including defaults);
         
         alter table {options.Value.SchemaName}.persisted_messages    
         attach partition {options.Value.SchemaName}.persisted_messages_pending for values in ('pending');

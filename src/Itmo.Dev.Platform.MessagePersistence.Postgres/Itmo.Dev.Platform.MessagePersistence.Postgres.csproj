@@ -18,7 +18,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added postgres persistence provider
+            Fix: partitioning migration
         </PackageReleaseNotes>
     </PropertyGroup>
 

@@ -2,14 +2,14 @@ using Itmo.Dev.Platform.MessagePersistence;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Outbox;
 
-internal class OutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>
+internal class AlwaysOutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>
 {
-    private readonly string _messageName;
+    private readonly string _topicName;
     private readonly IMessagePersistenceConsumer _consumer;
 
-    public OutboxMessageProducer(string messageName, IMessagePersistenceConsumer consumer)
+    public AlwaysOutboxMessageProducer(string topicName, IMessagePersistenceConsumer consumer)
     {
-        _messageName = messageName;
+        _topicName = topicName;
         _consumer = consumer;
     }
 
@@ -21,6 +21,6 @@ internal class OutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey,
             .Select(x => new PersistedMessage<TKey, TValue>(x.Key, x.Value))
             .ToArrayAsync(cancellationToken);
 
-        await _consumer.ConsumeAsync(_messageName, persistedMessages, cancellationToken);
+        await _consumer.ConsumeAsync(KafkaOutboxMessageName.ForTopic(_topicName), persistedMessages, cancellationToken);
     }
 }

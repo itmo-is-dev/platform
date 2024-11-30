@@ -18,13 +18,13 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added ssl/sasl configuration
+            Added outbox strategy
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Label="PlatformVersion">
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>2</MinorVersion>
+        <MinorVersion>3</MinorVersion>
         <PatchVersion>234</PatchVersion>
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>

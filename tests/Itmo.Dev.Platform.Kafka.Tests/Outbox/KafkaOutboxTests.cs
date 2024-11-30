@@ -2,8 +2,10 @@ using Confluent.Kafka;
 using FluentAssertions;
 using Itmo.Dev.Platform.Kafka.Extensions;
 using Itmo.Dev.Platform.Kafka.Producer;
+using Itmo.Dev.Platform.Kafka.Producer.Outbox;
 using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
+using Itmo.Dev.Platform.Kafka.Tests.Outbox.Models;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Itmo.Dev.Platform.MessagePersistence;
 using Itmo.Dev.Platform.MessagePersistence.Configuration;
@@ -14,13 +16,12 @@ using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using System.Data;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Itmo.Dev.Platform.Kafka.Tests;
+namespace Itmo.Dev.Platform.Kafka.Tests.Outbox;
 
 #pragma warning disable CA1506
 
@@ -44,21 +45,23 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
     [Theory]
     [MemberData(nameof(GetMessages))]
-    public async Task ProduceAsync_ShouldWriteMessage(int bufferSize, KafkaProducerMessage<int, string>[] messages)
+    public async Task ProduceAsync_ShouldWriteMessage(KafkaOutboxTestData testData, KafkaOutboxConfigData configData)
     {
         // Arrange
         await using var fixtureScope = _databaseFixture.Scope;
 
         void ConfigureAppConfiguration(IConfigurationBuilder configuration)
         {
-            configuration.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["MessagePersistence:SchemaName"] = "message_persistence",
-                    [$"Producer:{nameof(KafkaProducerOptions.Topic)}"] = TopicName,
-                    [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
-                    [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
-                });
+            var dictionary = new Dictionary<string, string?>
+            {
+                ["MessagePersistence:SchemaName"] = "message_persistence",
+                [$"Producer:{nameof(KafkaProducerOptions.Topic)}"] = TopicName,
+                [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = testData.BufferSizeString,
+                [$"Producer:Outbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
+            };
+
+            configData.ApplyConfig(dictionary);
+            configuration.AddInMemoryCollection(dictionary);
         }
 
         void ConfigureServices(IServiceCollection collection, IConfiguration configuration)
@@ -113,15 +116,17 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         consumer.Subscribe(TopicName);
 
-        await producer.ProduceAsync(messages.ToAsyncEnumerable(), default);
+        await producer.ProduceAsync(testData.Messages.ToAsyncEnumerable(), default);
 
         // Act
 
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
+        cts.CancelAfter(TimeSpan.FromSeconds(5 * testData.Messages.Length));
 
         // Assert
-        var consumedMessages = messages
+        producer.Should().BeOfType(configData.ExpectedProducerType);
+
+        var consumedMessages = testData.Messages
             .Select(
                 _ =>
                 {
@@ -134,7 +139,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
             .Select(x => x.Message)
             .ToArray();
 
-        consumedMessages.Zip(messages)
+        consumedMessages.Zip(testData.Messages)
             .Should()
             .AllSatisfy(
                 tuple => tuple.First
@@ -149,7 +154,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         var query = SerializedMessageQuery.Build(builder => builder
             .WithPageSize(int.MaxValue)
-            .WithName($"_platform_kafka_outbox_{TopicName}")
+            .WithName(KafkaOutboxMessageName.ForTopic(TopicName))
             .WithCursor(DateTimeOffset.MinValue)
             .WithState(MessageState.Completed));
 
@@ -157,7 +162,14 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
             .QueryAsync(query, default)
             .ToArrayAsync(default);
 
-        outboxMessages.Should().HaveCount(messages.Length);
+        if (configData.ShouldWriteOutboxMessages)
+        {
+            outboxMessages.Should().HaveCount(testData.Messages.Length);
+        }
+        else
+        {
+            outboxMessages.Should().BeEmpty();
+        }
 
         // Dispose
         consumer.Close();
@@ -165,50 +177,23 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
     public static IEnumerable<object[]> GetMessages()
     {
-        yield return
+        KafkaOutboxConfigData[] configs =
         [
-            1,
-            new[]
-            {
-                new KafkaProducerMessage<int, string>(1, "aboba"),
-            },
+            new(null, typeof(AlwaysOutboxMessageProducer<int, string>), true),
+            new(OutboxStrategy.Always, typeof(AlwaysOutboxMessageProducer<int, string>), true),
+            new(OutboxStrategy.Fallback, typeof(FallbackOutboxMessageProducer<int, string>), false),
         ];
 
-        yield return
+        KafkaOutboxTestData[] data =
         [
-            10,
-            new[]
-            {
-                new KafkaProducerMessage<int, string>(1, "aboba"),
-            },
+            KafkaOutboxTestData.Single(1),
+            KafkaOutboxTestData.Single(10),
+            KafkaOutboxTestData.Many(1, 10),
+            KafkaOutboxTestData.Many(5, 10),
+            KafkaOutboxTestData.Many(10, 10),
         ];
 
-        yield return
-        [
-            1,
-            Enumerable
-                .Range(0, 10)
-                .Select(i => new KafkaProducerMessage<int, string>(i, i.ToString()))
-                .ToArray(),
-        ];
-
-        yield return
-        [
-            5,
-            Enumerable
-                .Range(0, 10)
-                .Select(i => new KafkaProducerMessage<int, string>(i, i.ToString()))
-                .ToArray(),
-        ];
-
-        yield return
-        [
-            5,
-            Enumerable
-                .Range(0, 10)
-                .Select(i => new KafkaProducerMessage<int, string>(i, i.ToString()))
-                .ToArray(),
-        ];
+        return data.SelectMany(_ => configs, static (data, config) => new object[] { data, config });
     }
 
     public async Task InitializeAsync()

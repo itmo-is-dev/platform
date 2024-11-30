@@ -120,24 +120,34 @@ internal class ProducerBuilder<TKey, TValue> :
 
     public IProducerBuilder WithOutbox()
     {
-        if (_configuration.GetSection("Outbox").Exists() is false)
+        IConfigurationSection outboxSection = _configuration.GetSection("Outbox");
+
+        if (outboxSection.Exists() is false)
         {
             string message = $"Outbox for topic {_topicName} is configured, but Outbox sub-section is not specified";
             throw new InvalidOperationException(message);
         }
 
-        var messageName = $"_platform_kafka_outbox_{_topicName}";
+        var outboxStrategy = outboxSection.GetValue("Strategy", OutboxStrategy.Always);
 
-        _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(
-            p => ActivatorUtilities.CreateInstance<OutboxMessageProducer<TKey, TValue>>(p, messageName));
+        if (outboxStrategy is OutboxStrategy.Fallback)
+        {
+            _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(provider => ActivatorUtilities
+                .CreateInstance<FallbackOutboxMessageProducer<TKey, TValue>>(provider, _topicName));
+        }
+        else
+        {
+            _collection.AddScoped<IKafkaMessageProducer<TKey, TValue>>(provider => ActivatorUtilities
+                .CreateInstance<AlwaysOutboxMessageProducer<TKey, TValue>>(provider, _topicName));
+        }
 
         _collection.AddPlatformMessagePersistenceHandler(builder => builder
-            .Called(messageName)
-            .WithConfiguration(_configuration.GetSection("Outbox"))
+            .Called(KafkaOutboxMessageName.ForTopic(_topicName))
+            .WithConfiguration(outboxSection)
             .WithKey<TKey>()
             .WithValue<TValue>()
             .HandleBy<OutboxMessagePersistenceHandler<TKey, TValue>>(
-                (p, _) => new OutboxMessagePersistenceHandler<TKey, TValue>(_topicName, p)));
+                (provider, _) => new OutboxMessagePersistenceHandler<TKey, TValue>(_topicName, provider)));
 
         return this;
     }
@@ -147,7 +157,7 @@ internal class ProducerBuilder<TKey, TValue> :
         _collection.AddKeyedScoped<IKafkaMessageProducer<TKey, TValue>>(
             _topicName,
             (p, _) => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
-        
+
         _collection.TryAddScoped<IKafkaMessageProducer<TKey, TValue>>(
             p => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
     }

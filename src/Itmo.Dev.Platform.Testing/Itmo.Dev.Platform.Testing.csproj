@@ -18,7 +18,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Itmo.Dev.Platform.Testing
+            Added postgres container customization
         </PackageReleaseNotes>
     </PropertyGroup>
 

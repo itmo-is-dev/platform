@@ -19,11 +19,15 @@ public abstract class DatabaseFixture : IAsyncLifetime
     // ReSharper disable once ConvertConstructorToMemberInitializers
     protected DatabaseFixture()
     {
-        Container = new PostgreSqlBuilder()
+        var containerBuilder = new PostgreSqlBuilder()
             .WithUsername(User)
             .WithPassword(Password)
-            .WithDatabase(Database)
-            .Build();
+            .WithDatabase(Database);
+
+        // ReSharper disable once VirtualMemberCallInConstructor
+        ConfigurePostgresContainer(containerBuilder);
+
+        Container = containerBuilder.Build();
 
         Connection = null!;
         Provider = null!;
@@ -88,6 +92,8 @@ public abstract class DatabaseFixture : IAsyncLifetime
     }
 
     protected virtual void ConfigureServices(IServiceCollection collection) { }
+
+    protected virtual void ConfigurePostgresContainer(PostgreSqlBuilder builder) { }
 
     protected virtual ValueTask UseProviderAsync(IServiceProvider provider)
     {

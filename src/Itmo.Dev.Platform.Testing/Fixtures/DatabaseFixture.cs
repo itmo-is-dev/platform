@@ -25,7 +25,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
             .WithDatabase(Database);
 
         // ReSharper disable once VirtualMemberCallInConstructor
-        ConfigurePostgresContainer(containerBuilder);
+        containerBuilder = ConfigurePostgresContainer(containerBuilder);
 
         Container = containerBuilder.Build();
 
@@ -93,7 +93,10 @@ public abstract class DatabaseFixture : IAsyncLifetime
 
     protected virtual void ConfigureServices(IServiceCollection collection) { }
 
-    protected virtual void ConfigurePostgresContainer(PostgreSqlBuilder builder) { }
+    protected virtual PostgreSqlBuilder ConfigurePostgresContainer(PostgreSqlBuilder builder)
+    {
+        return builder;
+    }
 
     protected virtual ValueTask UseProviderAsync(IServiceProvider provider)
     {

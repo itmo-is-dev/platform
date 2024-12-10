@@ -18,7 +18,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added postgres container customization
+            Added .AsOptionsMonitor
         </PackageReleaseNotes>
     </PropertyGroup>
 
@@ -39,6 +39,7 @@
       <PackageReference Include="FluentAssertions" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Moq" />
       <PackageReference Include="Npgsql" />
       <PackageReference Include="Respawn" />
       <PackageReference Include="Serilog.Extensions.Logging" />

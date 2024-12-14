@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 
-internal class MigrationRunnerBackgroundService : BackgroundService
+internal class MigrationRunnerBackgroundService : IHostedService
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -13,11 +13,13 @@ internal class MigrationRunnerBackgroundService : BackgroundService
         _scopeFactory = scopeFactory;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
         var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 
         runner.MigrateUp();
     }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

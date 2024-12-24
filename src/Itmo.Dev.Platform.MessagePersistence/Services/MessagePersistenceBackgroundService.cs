@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Data;
+using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
 
@@ -92,6 +93,11 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
                 .QueryAsync(query, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
+            _logger.LogInformation(
+                "Polling persisted messages = {MessageName}, received {Count} messages",
+                _messageName,
+                serializedMessages.Length);
+
             if (serializedMessages is [])
             {
                 await transaction.CommitAsync(cancellationToken);
@@ -108,7 +114,19 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
             var handler = scope.ServiceProvider
                 .GetRequiredKeyedService<IMessagePersistenceHandler<TKey, TValue>>(_messageName);
 
-            await handler.HandleAsync(messages, cancellationToken);
+            try
+            {
+                await handler.HandleAsync(messages, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while processing persistence messages = {MessageName}", _messageName);
+
+                foreach (Message<TKey, TValue> message in messages)
+                {
+                    message.SetResult(MessageHandleResult.Failure);
+                }
+            }
 
             foreach (Message<TKey, TValue> message in messages)
             {
@@ -117,7 +135,7 @@ internal class MessagePersistenceBackgroundService<TKey, TValue> : RestartableBa
                     MessageHandleResult.Success => MessageState.Completed,
                     MessageHandleResult.Failure => MessageState.Failed,
                     MessageHandleResult.Ignored => MessageState.Pending,
-                    _ => throw new ArgumentOutOfRangeException(),
+                    _ => throw new UnreachableException(),
                 };
 
                 if (message.Result is MessageHandleResult.Failure)

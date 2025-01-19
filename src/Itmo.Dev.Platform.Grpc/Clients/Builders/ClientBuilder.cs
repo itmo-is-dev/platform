@@ -19,13 +19,15 @@ public class ClientBuilder<TClient> : IPlatformGrpcClientBuilder
     {
         _collection = collection;
 
-        _clientBuilder = collection.AddGrpcClient<TClient>((sp, o) =>
-        {
-            var monitor = sp.GetRequiredService<IOptionsMonitor<PlatformGrpcClientOptions>>();
-            var options = monitor.Get(serviceName);
+        _clientBuilder = collection.AddGrpcClient<TClient>(
+            $"{serviceName}:{typeof(TClient).Name}",
+            (sp, o) =>
+            {
+                var monitor = sp.GetRequiredService<IOptionsMonitor<PlatformGrpcClientOptions>>();
+                var options = monitor.Get(serviceName);
 
-            o.Address = options.Address;
-        });
+                o.Address = options.Address;
+            });
 
         _clientBuilder.AddInterceptor<PlatformHeaderClientInterceptor>(InterceptorScope.Client);
         _clientBuilder.AddInterceptor<ClientTracingInterceptor>(InterceptorScope.Client);

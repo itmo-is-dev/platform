@@ -95,6 +95,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Observability", "src\Itmo.Dev.Platform.Observability\Itmo.Dev.Platform.Observability.csproj", "{0767B762-D752-470E-829D-6550322889D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Postgres", "src\Itmo.Dev.Platform.Postgres\Itmo.Dev.Platform.Postgres.csproj", "{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,10 @@ Global
 		{0767B762-D752-470E-829D-6550322889D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0767B762-D752-470E-829D-6550322889D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0767B762-D752-470E-829D-6550322889D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -262,5 +268,6 @@ Global
 		{67985877-6BBE-4F6B-AFCC-5C00B078C950} = {38EA42C0-A34A-4977-A6FF-6B82E9016439}
 		{4FA08F0C-2847-479D-8841-AA012F8581B3} = {38EA42C0-A34A-4977-A6FF-6B82E9016439}
 		{0767B762-D752-470E-829D-6550322889D2} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
+		{D0DD3F4B-10CC-4A5E-AAD4-21C84EE999E3} = {8B6CE8C2-3319-44B9-A8B7-19F5F94B911D}
 	EndGlobalSection
 EndGlobal

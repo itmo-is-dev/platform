@@ -1,8 +1,10 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Configuration;
+using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Services;
 
@@ -50,6 +52,10 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
         IAsyncEnumerable<KafkaProducerMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken)
     {
+        using var activity = PlatformKafkaActivitySource.Value.StartActivity(
+            name: $"produce: {_options.Topic}",
+            ActivityKind.Producer);
+
         try
         {
             await foreach (var producerKafkaMessage in messages.WithCancellation(cancellationToken))

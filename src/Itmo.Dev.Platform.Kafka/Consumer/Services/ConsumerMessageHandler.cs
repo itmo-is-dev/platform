@@ -1,6 +1,8 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
+using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Services;
@@ -36,6 +38,10 @@ internal class ConsumerMessageHandler<TKey, TValue>
             var consumerMessages = chunk
                 .Where(x => x.Value is not null)
                 .ToArray();
+
+            using var activity = PlatformKafkaActivitySource.Value.StartActivity(
+                name: $"consume: {_consumerOptions.Topic}",
+                ActivityKind.Consumer);
 
             await handler.HandleAsync(consumerMessages, cancellationToken);
 

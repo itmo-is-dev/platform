@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Common.Options;
+using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using OpenTelemetry.Resources;
@@ -39,6 +40,7 @@ internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
             {
                 tracing
                     .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
+                    .AddSource(PlatformKafkaActivitySource.Name)
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
                     .AddGrpcCoreInstrumentation()

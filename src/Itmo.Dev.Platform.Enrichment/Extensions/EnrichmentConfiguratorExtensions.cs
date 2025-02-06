@@ -1,7 +1,7 @@
 using Itmo.Dev.Platform.Common.Models;
-using Itmo.Dev.Platform.Enrichment.Configuration;
 
-namespace Itmo.Dev.Platform.Enrichment.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Itmo.Dev.Platform.Enrichment;
 
 public static class EnrichmentConfiguratorExtensions
 {

@@ -1,4 +1,3 @@
-using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;

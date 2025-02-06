@@ -11,4 +11,8 @@ public interface IEnrichmentContext<TKey, out TModel, TState>
     TState State { get; }
 
     TModel GetModel(TKey key);
+
+    TModel? FindModel(TKey key);
+
+    IEnumerable<TModel> FindModels(TKey key);
 }

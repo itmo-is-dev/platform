@@ -2,10 +2,16 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 
-namespace Itmo.Dev.Platform.Common.Extensions;
+// ReSharper disable once CheckNamespace
+namespace System.Collections.Generic;
 
 public static class AsyncEnumerableExtensions
 {
+    public static async Task AsTask<T>(this IAsyncEnumerable<T> enumerable, CancellationToken cancellationToken)
+    {
+        await foreach (T value in enumerable.WithCancellation(cancellationToken)) { }
+    }
+
     /// <summary>
     ///     Chunks an async enumerable
     /// </summary>

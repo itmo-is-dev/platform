@@ -18,7 +18,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added state to enrichment context
+            Added transitive enrichment
         </PackageReleaseNotes>
     </PropertyGroup>
 

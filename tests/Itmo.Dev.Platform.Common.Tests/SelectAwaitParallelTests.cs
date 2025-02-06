@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Itmo.Dev.Platform.Common.Extensions;
 using Xunit;
 
 namespace Itmo.Dev.Platform.Common.Tests;

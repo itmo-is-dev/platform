@@ -1,3 +1,4 @@
+using Grpc.Core;
 using Sentry.Extensibility;
 
 namespace Itmo.Dev.Platform.Observability.Sentry.ExceptionFilters;
@@ -13,7 +14,10 @@ internal class CancelledExceptionFilter : IExceptionFilter
 
     public bool Filter(Exception ex)
     {
-        var isFilteredOut = ex is TaskCanceledException or OperationCanceledException;
+        var isFilteredOut = ex is
+            TaskCanceledException
+            or OperationCanceledException
+            or RpcException { StatusCode: StatusCode.Cancelled };
 
         if (isFilteredOut)
         {

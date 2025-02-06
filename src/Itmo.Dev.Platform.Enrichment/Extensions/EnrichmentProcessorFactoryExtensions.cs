@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.Common.Models;
 
-namespace Itmo.Dev.Platform.Enrichment.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Itmo.Dev.Platform.Enrichment;
 
 public static class EnrichmentProcessorFactoryExtensions
 {

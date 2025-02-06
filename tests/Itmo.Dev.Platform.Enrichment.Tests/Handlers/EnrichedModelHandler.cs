@@ -3,15 +3,20 @@ using Itmo.Dev.Platform.Enrichment.Tests.Models;
 
 namespace Itmo.Dev.Platform.Enrichment.Tests.Handlers;
 
-public class AbobaModelHandler : IEnrichmentHandler<int, EnrichedModel>
+public class EnrichedModelHandler : IEnrichmentHandler<int, EnrichedModel>
 {
-    public const string Value = "aboba";
-    
+    private readonly string _value;
+
+    public EnrichedModelHandler(string value)
+    {
+        _value = value;
+    }
+
     public Task HandleAsync(IEnrichmentContext<int, EnrichedModel, Unit> context, CancellationToken cancellationToken)
     {
         foreach (var model in context.Models)
         {
-            model.Value = Value;
+            model.Value = _value;
         }
 
         return Task.CompletedTask;

@@ -6,5 +6,5 @@ internal class PlatformEnrichmentFeature : IPlatformFeature
 {
     public static string Name => "Enrichment";
 
-    public static string RegistrationMethod => nameof(Extensions.ServiceCollectionExtensions.AddPlatformEnrichment);
+    public static string RegistrationMethod => nameof(ServiceCollectionExtensions.AddPlatformEnrichment);
 }

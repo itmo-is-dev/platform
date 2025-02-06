@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Enrichment.Handlers;
 using Itmo.Dev.Platform.Enrichment.Processors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -44,8 +45,26 @@ file class EnrichmentTypeConfigurator<TKey, TModel, TState> : IEnrichmentTypeCon
     public IEnrichmentTypeConfigurator<TKey, TModel, TState> WithHandler<THandler>()
         where THandler : class, IEnrichmentHandler<TKey, TModel, TState>
     {
-        _collection.TryAddEnumerable(
-            ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel, TState>, THandler>());
+        _collection.TryAddScoped<THandler>();
+
+        _collection.TryAddEnumerable(ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel, TState>, THandler>(
+            provider => provider.GetRequiredService<THandler>()));
+
+        return this;
+    }
+
+    public IEnrichmentTypeConfigurator<TKey, TModel, TState> WithTransitive<TTransitiveKey, TTransitiveModel>(
+        Func<TModel, TTransitiveModel> func)
+        where TTransitiveKey : notnull
+        where TTransitiveModel : IEnrichedModel<TTransitiveKey>
+    {
+        var descriptor = ServiceDescriptor.Scoped<
+            IEnrichmentHandler<TKey, TModel, TState>,
+            TransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState>>(provider
+            => ActivatorUtilities.CreateInstance<
+                TransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState>>(provider, func));
+
+        _collection.Add(descriptor);
 
         return this;
     }

@@ -4,7 +4,8 @@ using Itmo.Dev.Platform.Enrichment.Factories;
 using Itmo.Dev.Platform.Enrichment.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Itmo.Dev.Platform.Enrichment.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Itmo.Dev.Platform.Enrichment;
 
 public static class ServiceCollectionExtensions
 {

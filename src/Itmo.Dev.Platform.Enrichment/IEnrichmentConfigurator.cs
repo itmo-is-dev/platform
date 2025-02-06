@@ -1,4 +1,4 @@
-namespace Itmo.Dev.Platform.Enrichment.Configuration;
+namespace Itmo.Dev.Platform.Enrichment;
 
 public interface IEnrichmentConfigurator
 {
@@ -14,4 +14,9 @@ public interface IEnrichmentTypeConfigurator<TKey, out TModel, TState>
 {
     IEnrichmentTypeConfigurator<TKey, TModel, TState> WithHandler<THandler>()
         where THandler : class, IEnrichmentHandler<TKey, TModel, TState>;
+
+    IEnrichmentTypeConfigurator<TKey, TModel, TState> WithTransitive<TTransitiveKey, TTransitiveModel>(
+        Func<TModel, TTransitiveModel> func)
+        where TTransitiveKey : notnull
+        where TTransitiveModel : IEnrichedModel<TTransitiveKey>;
 }

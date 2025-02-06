@@ -25,6 +25,9 @@ internal class EnrichmentProcessor<TKey, TModel, TState> : IEnrichmentProcessor<
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         models = models.ToArray();
+        
+        if (models.Count() is 0)
+            yield break;
 
         var context = new EnrichmentContext<TKey, TModel, TState>(models, state);
 

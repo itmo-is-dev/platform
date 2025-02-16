@@ -1,4 +1,4 @@
-using Itmo.Dev.Platform.Observability.HealthChecks.Readiness;
+using Itmo.Dev.Platform.Observability.HealthChecks.Startup;
 using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Observability.HealthChecks.Plugins;
@@ -40,9 +40,9 @@ internal class HealthChecksConfigurationPlugin : IObservabilityConfigurationPlug
 
     private void AddApplicationReadinessCheck(IServiceCollection collection, IHealthChecksBuilder builder)
     {
-        collection.AddSingleton<ApplicationStartedReadinessCheck>();
-        collection.AddHostedService(p => p.GetRequiredService<ApplicationStartedReadinessCheck>());
+        collection.AddSingleton<ApplicationStartedCheck>();
+        collection.AddHostedService(p => p.GetRequiredService<ApplicationStartedCheck>());
 
-        builder.AddCheck<ApplicationStartedReadinessCheck>(nameof(ApplicationStartedReadinessCheck));
+        builder.AddCheck<ApplicationStartedCheck>(nameof(ApplicationStartedCheck));
     }
 }

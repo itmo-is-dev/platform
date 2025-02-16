@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Itmo.Dev.Platform.Observability.HealthChecks.Readiness;
+namespace Itmo.Dev.Platform.Observability.HealthChecks.Startup;
 
-public class ApplicationStartedReadinessCheck : IPlatformReadinessHealthCheck, IHostedLifecycleService
+public class ApplicationStartedCheck : IPlatformStartupHealthCheck, IHostedLifecycleService
 {
     private static readonly Task<HealthCheckResult> NotStartedResult = Task.FromResult(HealthCheckResult.Unhealthy());
     private static readonly Task<HealthCheckResult> StartedResult = Task.FromResult(HealthCheckResult.Healthy());

@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
 
         collection
             .AddOptions<PlatformOptions>()
-            .Configure<IConfigurationRoot>((op, root) =>
+            .Configure<IConfiguration>((op, root) =>
             {
                 var aspEnvironment = root.GetSection("ASPNETCORE_ENVIRONMENT").Value;
 

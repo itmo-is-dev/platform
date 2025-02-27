@@ -84,7 +84,14 @@ public readonly struct FinishedWithResultBuilder
         {
             return new CastHandle<TStateBase, TResult, TError>(
                 _state,
-                new BackgroundTaskExecutionResult<TResult, TError>.Suspended());
+                new BackgroundTaskExecutionResult<TResult, TError>.Suspended(Until: null));
+        }
+
+        public CastHandle<TStateBase, TResult, TError> WithSuspendedUntilResult(DateTimeOffset value)
+        {
+            return new CastHandle<TStateBase, TResult, TError>(
+                _state,
+                new BackgroundTaskExecutionResult<TResult, TError>.Suspended(Until: value));
         }
 
         public CastHandle<TStateBase, TResult, TError> WithFailureResult(TError? error = default)

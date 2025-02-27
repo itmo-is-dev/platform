@@ -1,10 +1,11 @@
 using FluentMigrator;
+using Itmo.Dev.Platform.BackgroundTasks.Postgres.Migrations;
 using Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Persistence.Migrations;
 
 [Migration(1701107928, "Added suspension state cases")]
-internal class AddedSuspensionStateValues : SqlMigration 
+internal class AddedSuspensionStateValues : BackgroundTasksMigration 
 {
     protected override string GetUpSql(IServiceProvider serviceProvider) =>
     """

@@ -23,9 +23,22 @@ internal class RunTaskRequest<TMetadata, TExecutionMetadata> : IRunTaskRequest<T
     public Task<BackgroundTaskId> RunWithAsync<TTask>(CancellationToken cancellationToken)
         where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>
     {
-        return _runner.RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+        return _runner.CreateBackgroundTaskAsync<TTask, TMetadata, TExecutionMetadata>(
             _metadata,
             _executionMetadata,
+            scheduledAt: null,
+            cancellationToken);
+    }
+
+    public Task<BackgroundTaskId> ScheduleWithAsync<TTask>(
+        DateTimeOffset scheduledAt,
+        CancellationToken cancellationToken)
+        where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>
+    {
+        return _runner.CreateBackgroundTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+            _metadata,
+            _executionMetadata,
+            scheduledAt: scheduledAt,
             cancellationToken);
     }
 }

@@ -13,6 +13,7 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
         select background_task_id,
                background_task_name,
                background_task_created_at,
+               background_task_scheduled_at,
                background_task_state,
                background_task_retry_number,
                background_task_metadata,
@@ -25,7 +26,10 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
             and (cardinality(:names) = 0 or background_task_name = any (:names))
             and (cardinality(:states) = 0 or background_task_state = any (:states))
             and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
-            and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata)) 
+            and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata))
+            and (:max_scheduled_at is null
+                or background_task_scheduled_at is null
+                or background_task_scheduled_at <= :max_scheduled_at)
             and background_task_created_at > :cursor
         order by background_task_created_at
         limit :page_size;
@@ -36,6 +40,7 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
         select background_task_id,
                background_task_name,
                background_task_created_at,
+               background_task_scheduled_at,
                background_task_state,
                background_task_retry_number,
                background_task_metadata,
@@ -49,6 +54,9 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
             and (cardinality(:states) = 0 or background_task_state = any (:states))
             and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
             and (cardinality(:execution_metadata) = 0 or background_task_execution_metadata @> any (:execution_metadata)) 
+            and (:max_scheduled_at is null
+                or background_task_scheduled_at is null
+                or background_task_scheduled_at <= :max_scheduled_at)
             and background_task_created_at < :cursor
         order by background_task_created_at desc 
         limit :page_size;
@@ -63,6 +71,9 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
             and (cardinality(:names) = 0 or background_task_name = any (:names))
             and (cardinality(:states) = 0 or background_task_state = any (:states))
             and (cardinality(:metadata) = 0 or background_task_metadata @> any (:metadata))
+            and (:max_scheduled_at is null
+                or background_task_scheduled_at is null
+                or background_task_scheduled_at <= :max_scheduled_at)
             and background_task_created_at >= :cursor
         order by background_task_created_at
         limit :page_size
@@ -75,10 +86,11 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
         (
             background_task_name,
             background_task_created_at,
+            background_task_scheduled_at,
             background_task_metadata,
             background_task_execution_metadata
         )
-        select * from unnest(:names, :created_at, :metadata, :execution_metadata)
+        select * from unnest(:names, :created_at, :scheduled_at, :metadata, :execution_metadata)
         returning background_task_id;
         """);
 
@@ -96,7 +108,8 @@ internal class BackgroundTaskQueryStorage(BackgroundTasksQueryFactory factory)
             background_task_retry_number = :retry_number,
             background_task_execution_metadata = :execution_metadata,
             background_task_result = :result,
-            background_task_error = :error
+            background_task_error = :error,
+            background_task_scheduled_at = :scheduled_at
         where background_task_id = :id;
         """);
 }

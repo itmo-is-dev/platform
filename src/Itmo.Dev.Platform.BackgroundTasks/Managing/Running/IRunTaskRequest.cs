@@ -7,7 +7,8 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Managing.Running;
 
 public interface IMetadataConfigurator
 {
-    IExecutionMetadataConfigurator<T> WithMetadata<T>(T metadata) where T : IBackgroundTaskMetadata;
+    IExecutionMetadataConfigurator<T> WithMetadata<T>(T metadata)
+        where T : IBackgroundTaskMetadata;
 }
 
 public interface IExecutionMetadataConfigurator<TMetadata>
@@ -22,5 +23,8 @@ public interface IRunTaskRequest<TMetadata, TExecutionMetadata>
     where TExecutionMetadata : IBackgroundTaskExecutionMetadata
 {
     Task<BackgroundTaskId> RunWithAsync<TTask>(CancellationToken cancellationToken)
+        where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>;
+
+    Task<BackgroundTaskId> ScheduleWithAsync<TTask>(DateTimeOffset scheduledAt, CancellationToken cancellationToken)
         where TTask : IBackgroundTask<TMetadata, TExecutionMetadata>;
 }

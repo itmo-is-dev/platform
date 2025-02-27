@@ -13,5 +13,6 @@ public partial record BackgroundTaskQuery(
     IBackgroundTaskMetadata[] Metadatas,
     IBackgroundTaskExecutionMetadata[] ExecutionMetadatas,
     DateTimeOffset Cursor,
+    DateTimeOffset? MaxScheduledAt,
     int? PageSize,
     OrderDirection? OrderDirection);

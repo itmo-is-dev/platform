@@ -20,6 +20,14 @@ internal class ProceedTaskRequest : IProceedTaskRequest
 
     public Task<ProceedTaskResult> ProceedAsync(CancellationToken cancellationToken)
     {
-        return _runner.ProceedAsync(_query, _executionMetadataModification, cancellationToken);
+        return _runner.ProceedAsync(_query, _executionMetadataModification, scheduledAt: null, cancellationToken);
+    }
+
+    public Task<ProceedTaskResult> ProceedAtAsync(DateTimeOffset scheduledAt, CancellationToken cancellationToken)
+    {
+        return _runner.ProceedAsync(_query,
+            _executionMetadataModification,
+            scheduledAt: scheduledAt,
+            cancellationToken);
     }
 }

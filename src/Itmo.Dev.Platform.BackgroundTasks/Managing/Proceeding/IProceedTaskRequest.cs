@@ -25,4 +25,6 @@ public interface IExecutionMetadataConfigurator
 public interface IProceedTaskRequest
 {
     Task<ProceedTaskResult> ProceedAsync(CancellationToken cancellationToken);
+
+    Task<ProceedTaskResult> ProceedAtAsync(DateTimeOffset scheduledAt, CancellationToken cancellationToken);
 }

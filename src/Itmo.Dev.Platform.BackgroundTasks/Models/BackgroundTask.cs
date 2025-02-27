@@ -10,6 +10,7 @@ public record BackgroundTask(
     string Name,
     Type Type,
     DateTimeOffset CreatedAt,
+    DateTimeOffset? ScheduledAt,
     BackgroundTaskState State,
     int RetryNumber,
     IBackgroundTaskMetadata Metadata,

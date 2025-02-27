@@ -24,9 +24,10 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
 
     public IQueryParameterConfigurator ProceedBackgroundTask => new QueryParameterConfigurator(this);
 
-    internal async Task<BackgroundTaskId> RunTaskAsync<TTask, TMetadata, TExecutionMetadata>(
+    internal async Task<BackgroundTaskId> CreateBackgroundTaskAsync<TTask, TMetadata, TExecutionMetadata>(
         TMetadata metadata,
         TExecutionMetadata executionMetadata,
+        DateTimeOffset? scheduledAt,
         CancellationToken cancellationToken)
         where TMetadata : IBackgroundTaskMetadata
         where TExecutionMetadata : IBackgroundTaskExecutionMetadata
@@ -37,6 +38,7 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
             Name: TTask.Name,
             Type: typeof(TTask),
             CreatedAt: _dateTimeProvider.Current,
+            ScheduledAt: scheduledAt,
             State: BackgroundTaskState.Pending,
             RetryNumber: 0,
             Metadata: metadata,

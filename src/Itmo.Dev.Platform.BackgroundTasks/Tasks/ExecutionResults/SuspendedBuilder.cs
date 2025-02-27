@@ -30,10 +30,14 @@ public readonly record struct SuspendedBuilder
         where TResult : IBackgroundTaskResult
         where TError : IBackgroundTaskError
     {
+        private DateTimeOffset? UntilValue { get; init; }
+
+        public CastHandle<TResult, TError> Until(DateTimeOffset value) => this with { UntilValue = value };
+
         public static implicit operator BackgroundTaskExecutionResult<TResult, TError>(
             CastHandle<TResult, TError> builder)
         {
-            return new BackgroundTaskExecutionResult<TResult, TError>.Suspended();
+            return new BackgroundTaskExecutionResult<TResult, TError>.Suspended(Until: builder.UntilValue);
         }
     }
 }

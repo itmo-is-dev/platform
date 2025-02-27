@@ -1,6 +1,7 @@
 using FluentMigrator;
 using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Postgres.Configuration;
+using Itmo.Dev.Platform.BackgroundTasks.Postgres.Migrations;
 using Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Itmo.Dev.Platform.BackgroundTasks.Persistence.Migrations;
 
 [Migration(1699204381, "Initialized background tasks")]
-internal class Initial : SqlMigration 
+internal class Initial : BackgroundTasksMigration 
 {
     protected override string GetUpSql(IServiceProvider serviceProvider)
     {

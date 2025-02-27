@@ -18,7 +18,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Refactored persistence configuration
+            Added ScheduledAt
         </PackageReleaseNotes>
     </PropertyGroup>
 

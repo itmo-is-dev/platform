@@ -7,6 +7,9 @@ public static class DbDataReaderExtensions
 {
     public static string? GetNullableString(this DbDataReader reader, int ordinal)
         => reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+    
+    public static string? GetNullableString(this DbDataReader reader, string name) 
+        => reader.GetNullableString(reader.GetOrdinal(name));
 
     public static T GetJsonFieldValue<T>(this DbDataReader reader, int ordinal, JsonSerializerSettings serializerSettings)
     {

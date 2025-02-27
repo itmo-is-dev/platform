@@ -2,6 +2,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Persistence;
 using Itmo.Dev.Platform.Common.BackgroundServices;
+using Itmo.Dev.Platform.Common.DateTime;
 using Itmo.Dev.Platform.Common.Lifetime;
 using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,17 +18,20 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<BackgroundTaskSchedulingService> _logger;
     private readonly IPlatformLifetime _platformLifetime;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
     public BackgroundTaskSchedulingService(
         IOptionsMonitor<BackgroundTaskSchedulingOptions> options,
         IServiceScopeFactory scopeFactory,
         ILogger<BackgroundTaskSchedulingService> logger,
-        IPlatformLifetime platformLifetime)
+        IPlatformLifetime platformLifetime,
+        IDateTimeProvider dateTimeProvider)
     {
         _options = options;
         _scopeFactory = scopeFactory;
         _logger = logger;
         _platformLifetime = platformLifetime;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationTokenSource cts)
@@ -73,6 +77,7 @@ internal class BackgroundTaskSchedulingService : RestartableBackgroundService
                     .WithState(BackgroundTaskState.Retrying)
                     .WithState(BackgroundTaskState.Proceeded)
                     .WithCursor(DateTimeOffset.UnixEpoch)
+                    .WithMaxScheduledAt(_dateTimeProvider.Current)
                     .WithPageSize(options.BatchSize));
 
             var backgroundTaskIds = await repository

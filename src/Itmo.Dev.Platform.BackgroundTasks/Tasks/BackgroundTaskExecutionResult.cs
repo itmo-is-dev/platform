@@ -12,7 +12,7 @@ public abstract record BackgroundTaskExecutionResult<TResult, TError>
 
     internal sealed record Success(TResult Result) : BackgroundTaskExecutionResult<TResult, TError>;
 
-    internal sealed record Suspended : BackgroundTaskExecutionResult<TResult, TError>;
+    internal sealed record Suspended(DateTimeOffset? Until) : BackgroundTaskExecutionResult<TResult, TError>;
 
     internal sealed record Failure(TError? Error) : BackgroundTaskExecutionResult<TResult, TError>;
 

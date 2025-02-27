@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.Common.Models;
 using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Newtonsoft.Json;
+using System.Data;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Postgres.Repositories;
@@ -50,45 +51,37 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
             .AddJsonArrayParameter("execution_metadata", query.ExecutionMetadatas, _serializerSettings)
             .AddParameter("cursor", query.Cursor)
+            .AddParameter("max_scheduled_at", query.MaxScheduledAt)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-        var id = reader.GetOrdinal("background_task_id");
-        var name = reader.GetOrdinal("background_task_name");
-        var createdAt = reader.GetOrdinal("background_task_created_at");
-        var state = reader.GetOrdinal("background_task_state");
-        var retryNumber = reader.GetOrdinal("background_task_retry_number");
-        var metadata = reader.GetOrdinal("background_task_metadata");
-        var executionMetadata = reader.GetOrdinal("background_task_execution_metadata");
-        var result = reader.GetOrdinal("background_task_result");
-        var error = reader.GetOrdinal("background_task_error");
-
         while (await reader.ReadAsync(cancellationToken))
         {
-            var nameValue = reader.GetString(name);
-            var record = _backgroundTaskRegistry[nameValue];
+            var name = reader.GetString("background_task_name");
+            var record = _backgroundTaskRegistry[name];
 
-            var metadataValue = reader.GetString(metadata);
-            var executionMetadataValue = reader.GetString(executionMetadata);
-            var resultValue = reader.GetNullableString(result);
-            var errorValue = reader.GetNullableString(error);
+            var metadata = reader.GetString("background_task_metadata");
+            var executionMetadata = reader.GetString("background_task_execution_metadata");
+            var resultValue = reader.GetNullableString("background_task_result");
+            var errorValue = reader.GetNullableString("background_task_error");
 
             var deserializedMetadata =
-                Deserialize<IBackgroundTaskMetadata>(metadataValue, record.MetadataType)
+                Deserialize<IBackgroundTaskMetadata>(metadata, record.MetadataType)
                 ?? throw new InvalidOperationException("Failed to deserialize metadata");
 
             var deserializedExecutionMetadata =
-                Deserialize<IBackgroundTaskExecutionMetadata>(executionMetadataValue, record.ExecutionMetadataType)
+                Deserialize<IBackgroundTaskExecutionMetadata>(executionMetadata, record.ExecutionMetadataType)
                 ?? throw new InvalidOperationException("Failed to deserialize execution metadata");
 
             yield return new BackgroundTask(
-                Id: new BackgroundTaskId(reader.GetInt64(id)),
-                Name: reader.GetString(name),
+                Id: new BackgroundTaskId(reader.GetInt64("background_task_id")),
+                Name: name,
                 Type: record.TaskType,
-                CreatedAt: reader.GetFieldValue<DateTimeOffset>(createdAt),
-                State: reader.GetFieldValue<BackgroundTaskState>(state),
-                RetryNumber: reader.GetInt32(retryNumber),
+                CreatedAt: reader.GetFieldValue<DateTimeOffset>("background_task_created_at"),
+                ScheduledAt: reader.GetFieldValue<DateTimeOffset?>("background_task_scheduled_at"),
+                State: reader.GetFieldValue<BackgroundTaskState>("background_task_state"),
+                RetryNumber: reader.GetInt32("background_task_retry_number"),
                 Metadata: deserializedMetadata,
                 ExecutionMetadata: deserializedExecutionMetadata,
                 Result: Deserialize<IBackgroundTaskResult>(resultValue, record.ResultType),
@@ -107,16 +100,15 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
             .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
+            .AddParameter("max_scheduled_at", query.MaxScheduledAt)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-        var id = reader.GetOrdinal("background_task_id");
-
         while (await reader.ReadAsync(cancellationToken))
         {
-            yield return new BackgroundTaskId(Value: reader.GetInt64(id));
+            yield return new BackgroundTaskId(Value: reader.GetInt64("background_task_id"));
         }
     }
 
@@ -129,6 +121,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
         await using var command = connection.CreateCommand(_queryStorage.AddRange.Value)
             .AddParameter("names", tasks.Select(x => x.Name).ToArray())
             .AddParameter("types", tasks.Select(x => x.Type.AssemblyQualifiedName).ToArray())
+            .AddParameter("scheduled_at", tasks.Select(x => x.ScheduledAt))
             .AddParameter("created_at", tasks.Select(x => x.CreatedAt).ToArray())
             .AddJsonArrayParameter("metadata", tasks.Select(x => x.Metadata), _serializerSettings)
             .AddJsonArrayParameter("execution_metadata", tasks.Select(x => x.ExecutionMetadata), _serializerSettings);
@@ -165,7 +158,8 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("retry_number", backgroundTask.RetryNumber)
             .AddJsonParameter("execution_metadata", backgroundTask.ExecutionMetadata, _serializerSettings)
             .AddNullableJsonParameter("result", backgroundTask.Result, _serializerSettings)
-            .AddNullableJsonParameter("error", backgroundTask.Error, _serializerSettings);
+            .AddNullableJsonParameter("error", backgroundTask.Error, _serializerSettings)
+            .AddParameter("scheduled_at", backgroundTask.ScheduledAt);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

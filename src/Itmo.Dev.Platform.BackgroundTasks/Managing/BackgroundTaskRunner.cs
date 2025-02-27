@@ -56,6 +56,7 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
     internal async Task<ProceedTaskResult> ProceedAsync(
         BackgroundTaskQuery query,
         ExecutionMetadataModification modification,
+        DateTimeOffset? scheduledAt,
         CancellationToken cancellationToken)
     {
         var backgroundTasks = await _repository
@@ -76,6 +77,7 @@ internal class BackgroundTaskRunner : IBackgroundTaskRunner
         backgroundTask = backgroundTask with
         {
             State = BackgroundTaskState.Proceeded,
+            ScheduledAt = scheduledAt,
             ExecutionMetadata = modificationSuccess.Metadata,
         };
 

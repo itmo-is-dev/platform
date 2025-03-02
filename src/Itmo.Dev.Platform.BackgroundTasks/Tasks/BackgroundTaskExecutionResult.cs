@@ -10,13 +10,45 @@ public abstract record BackgroundTaskExecutionResult<TResult, TError>
 {
     private BackgroundTaskExecutionResult() { }
 
-    internal sealed record Success(TResult Result) : BackgroundTaskExecutionResult<TResult, TError>;
+    public sealed record Success : BackgroundTaskExecutionResult<TResult, TError>
+    {
+        internal Success(TResult result)
+        {
+            Result = result;
+        }
 
-    internal sealed record Suspended(DateTimeOffset? Until) : BackgroundTaskExecutionResult<TResult, TError>;
+        public TResult Result { get; internal init; }
+    }
 
-    internal sealed record Failure(TError? Error) : BackgroundTaskExecutionResult<TResult, TError>;
+    public sealed record Suspended : BackgroundTaskExecutionResult<TResult, TError>
+    {
+        internal Suspended(DateTimeOffset? until)
+        {
+            Until = until;
+        }
 
-    internal sealed record Cancellation(TError? Error) : BackgroundTaskExecutionResult<TResult, TError>;
+        public DateTimeOffset? Until { get; internal init; }
+    }
+
+    public sealed record Failure : BackgroundTaskExecutionResult<TResult, TError>
+    {
+        internal Failure(TError? error)
+        {
+            Error = error;
+        }
+
+        public TError? Error { get; internal init; }
+    }
+
+    public sealed record Cancellation : BackgroundTaskExecutionResult<TResult, TError>
+    {
+        internal Cancellation(TError? error)
+        {
+            Error = error;
+        }
+
+        public TError? Error { get; internal init; }
+    }
 }
 
 public static class BackgroundTaskExecutionResult

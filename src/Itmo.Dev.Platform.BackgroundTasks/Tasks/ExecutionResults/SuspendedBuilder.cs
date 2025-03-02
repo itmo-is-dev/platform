@@ -37,7 +37,7 @@ public readonly record struct SuspendedBuilder
         public static implicit operator BackgroundTaskExecutionResult<TResult, TError>(
             CastHandle<TResult, TError> builder)
         {
-            return new BackgroundTaskExecutionResult<TResult, TError>.Suspended(Until: builder.UntilValue);
+            return new BackgroundTaskExecutionResult<TResult, TError>.Suspended(until: builder.UntilValue);
         }
     }
 }

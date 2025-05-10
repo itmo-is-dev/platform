@@ -17,12 +17,12 @@ public interface IDefaultKeyFormatterConfigurator
         where TFormatter : class, ILockingKeyFormatter;
 }
 
-public interface IKeyFormatterConfigurator
+public interface IKeyFormatterConfigurator : IRedisLockingConfigurator
 {
-    IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>()
+    IKeyFormatterConfigurator WithKeyFormatter<TKey, TFormatter>()
         where TFormatter : class, ILockingKeyFormatter;
 
-    IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
+    IKeyFormatterConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
         where TFormatter : class, ILockingKeyFormatter;
 }
 
@@ -31,8 +31,7 @@ public interface IRedisLockingConfigurator;
 internal class RedisLockingConfigurator :
     IOptionsConfigurator,
     IDefaultKeyFormatterConfigurator,
-    IKeyFormatterConfigurator,
-    IRedisLockingConfigurator
+    IKeyFormatterConfigurator
 {
     private readonly IServiceCollection _collection;
 
@@ -67,14 +66,14 @@ internal class RedisLockingConfigurator :
         return this;
     }
 
-    public IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>()
+    public IKeyFormatterConfigurator WithKeyFormatter<TKey, TFormatter>()
         where TFormatter : class, ILockingKeyFormatter
     {
         _collection.AddKeyedSingleton<ILockingKeyFormatter, TFormatter>(typeof(TKey));
         return this;
     }
 
-    public IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
+    public IKeyFormatterConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
         where TFormatter : class, ILockingKeyFormatter
     {
         _collection.AddKeyedSingleton<ILockingKeyFormatter>(

@@ -11,21 +11,4 @@
         <InternalsVisibleTo Include="$(AssemblyName).Benchmarks"/>
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(IsPlatformPackage)' == 'true'">
-        <IsPackable>true</IsPackable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-        <Authors>itmo-is-dev</Authors>
-        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    </PropertyGroup>
-
-    <ItemGroup Condition="'$(IsPlatformPackage)' == 'true'">
-        <None Include="README.md" Pack="true" PackagePath="\"/>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-
 </Project>

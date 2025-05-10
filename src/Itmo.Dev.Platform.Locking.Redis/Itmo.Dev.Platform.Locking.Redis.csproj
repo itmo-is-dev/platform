@@ -2,10 +2,18 @@
 
     <PropertyGroup>
         <IsPlatformPackage>true</IsPlatformPackage>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup>
         <Title>Itmo.Dev.Platform.Locking.Redis</Title>
+        <Authors>itmo-is-dev</Authors>
+        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -20,6 +28,11 @@
         <PatchVersion>271</PatchVersion>
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Locking\Itmo.Dev.Platform.Locking.csproj"/>

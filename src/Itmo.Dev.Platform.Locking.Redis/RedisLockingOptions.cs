@@ -4,6 +4,8 @@ public class RedisLockingOptions
 {
     public string Endpoint { get; set; } = string.Empty;
 
+    public string? KeyPrefix { get; set; }
+
     /// <summary>
     ///     Time after which Redis will automatically remove lock, if application crashed/did not remove it
     /// </summary>

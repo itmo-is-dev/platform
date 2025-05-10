@@ -28,8 +28,15 @@ internal class RedisLockService : ILockingService
 
         try
         {
+            var formattedKey = _lockingKeyFormatter.Format(key);
+
+            if (string.IsNullOrEmpty(options.KeyPrefix) is false)
+            {
+                formattedKey = $"{options.KeyPrefix}:{formattedKey}";
+            }
+
             lck = await _redLockFactory.CreateLockAsync(
-                resource: _lockingKeyFormatter.Format(key),
+                resource: formattedKey,
                 expiryTime: options.ExpiryTime,
                 waitTime: options.WaitTime,
                 retryTime: options.RetryInterval,

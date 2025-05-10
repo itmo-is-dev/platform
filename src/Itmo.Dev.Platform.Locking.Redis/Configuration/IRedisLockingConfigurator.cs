@@ -5,23 +5,33 @@ namespace Itmo.Dev.Platform.Locking.Redis.Configuration;
 
 public interface IOptionsConfigurator
 {
-    IKeyFormattingStrategyConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action);
+    IDefaultKeyFormatterConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action);
 }
 
-public interface IKeyFormattingStrategyConfigurator
+public interface IDefaultKeyFormatterConfigurator
 {
-    IRedisLockingConfigurator WithKeyFormatter<T>()
-        where T : class, IKeyFormattingStrategy;
+    IKeyFormatterConfigurator WithDefaultKeyFormatter<TFormatter>()
+        where TFormatter : class, ILockingKeyFormatter;
 
-    IRedisLockingConfigurator WithKeyFormatter<T>(T value)
-        where T : class, IKeyFormattingStrategy;
+    IKeyFormatterConfigurator WithDefaultKeyFormatter<TFormatter>(TFormatter formatter)
+        where TFormatter : class, ILockingKeyFormatter;
 }
 
-public interface IRedisLockingConfigurator { }
+public interface IKeyFormatterConfigurator
+{
+    IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>()
+        where TFormatter : class, ILockingKeyFormatter;
+
+    IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
+        where TFormatter : class, ILockingKeyFormatter;
+}
+
+public interface IRedisLockingConfigurator;
 
 internal class RedisLockingConfigurator :
     IOptionsConfigurator,
-    IKeyFormattingStrategyConfigurator,
+    IDefaultKeyFormatterConfigurator,
+    IKeyFormatterConfigurator,
     IRedisLockingConfigurator
 {
     private readonly IServiceCollection _collection;
@@ -31,7 +41,7 @@ internal class RedisLockingConfigurator :
         _collection = collection;
     }
 
-    public IKeyFormattingStrategyConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action)
+    public IDefaultKeyFormatterConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action)
     {
         var builder = _collection
             .AddOptions<RedisLockingOptions>()
@@ -43,17 +53,34 @@ internal class RedisLockingConfigurator :
         return this;
     }
 
-    public IRedisLockingConfigurator WithKeyFormatter<T>()
-        where T : class, IKeyFormattingStrategy
+    public IKeyFormatterConfigurator WithDefaultKeyFormatter<TFormatter>()
+        where TFormatter : class, ILockingKeyFormatter
     {
-        _collection.AddSingleton<IKeyFormattingStrategy, T>();
+        _collection.AddSingleton<ILockingKeyFormatter, TFormatter>();
         return this;
     }
 
-    public IRedisLockingConfigurator WithKeyFormatter<T>(T value)
-        where T : class, IKeyFormattingStrategy
+    public IKeyFormatterConfigurator WithDefaultKeyFormatter<TFormatter>(TFormatter formatter)
+        where TFormatter : class, ILockingKeyFormatter
     {
-        _collection.AddSingleton<IKeyFormattingStrategy>(value);
+        _collection.AddSingleton<ILockingKeyFormatter>(formatter);
+        return this;
+    }
+
+    public IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>()
+        where TFormatter : class, ILockingKeyFormatter
+    {
+        _collection.AddKeyedSingleton<ILockingKeyFormatter, TFormatter>(typeof(TKey));
+        return this;
+    }
+
+    public IRedisLockingConfigurator WithKeyFormatter<TKey, TFormatter>(TFormatter formatter)
+        where TFormatter : class, ILockingKeyFormatter
+    {
+        _collection.AddKeyedSingleton<ILockingKeyFormatter>(
+            serviceKey: typeof(TKey),
+            implementationInstance: formatter);
+
         return this;
     }
 }

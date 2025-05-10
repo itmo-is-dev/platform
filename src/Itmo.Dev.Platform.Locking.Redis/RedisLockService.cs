@@ -9,16 +9,16 @@ internal class RedisLockService : ILockingService
 {
     private readonly RedLockFactory _redLockFactory;
     private readonly IOptionsMonitor<RedisLockingOptions> _options;
-    private readonly IKeyFormattingStrategy _keyFormattingStrategy;
+    private readonly ILockingKeyFormatter _lockingKeyFormatter;
 
     public RedisLockService(
         RedLockFactory redLockFactory,
         IOptionsMonitor<RedisLockingOptions> options,
-        IKeyFormattingStrategy keyFormattingStrategy)
+        ILockingKeyFormatter lockingKeyFormatter)
     {
         _redLockFactory = redLockFactory;
         _options = options;
-        _keyFormattingStrategy = keyFormattingStrategy;
+        _lockingKeyFormatter = lockingKeyFormatter;
     }
 
     public async ValueTask<ILockHandle> AcquireAsync(object key, CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ internal class RedisLockService : ILockingService
         try
         {
             lck = await _redLockFactory.CreateLockAsync(
-                resource: _keyFormattingStrategy.Format(key),
+                resource: _lockingKeyFormatter.Format(key),
                 expiryTime: options.ExpiryTime,
                 waitTime: options.WaitTime,
                 retryTime: options.RetryInterval,

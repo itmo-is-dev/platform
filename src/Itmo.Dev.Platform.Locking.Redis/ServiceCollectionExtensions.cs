@@ -1,5 +1,5 @@
+using Itmo.Dev.Platform.Locking.FormattingStrategies;
 using Itmo.Dev.Platform.Locking.Redis.Configuration;
-using Itmo.Dev.Platform.Locking.Redis.FormattingStrategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,15 +32,27 @@ public static class ServiceCollectionExtensions
         return collection;
     }
 
-    public static IRedisLockingConfigurator WithNewtonsoftKeyFormatter(
-        this IKeyFormattingStrategyConfigurator configurator)
+    public static IKeyFormatterConfigurator WithNewtonsoftDefaultKeyFormatter(
+        this IDefaultKeyFormatterConfigurator configurator)
     {
-        return configurator.WithKeyFormatter<NewtonsoftFormattingStrategy>();
+        return configurator.WithDefaultKeyFormatter<NewtonsoftLockingKeyFormatter>();
     }
 
-    public static IRedisLockingConfigurator WithHashCodeKeyFormatter(
-        this IKeyFormattingStrategyConfigurator configurator)
+    public static IKeyFormatterConfigurator WithHashCodeDefaultKeyFormatter(
+        this IDefaultKeyFormatterConfigurator configurator)
     {
-        return configurator.WithKeyFormatter(new HashCodeFormattingStrategy());
+        return configurator.WithDefaultKeyFormatter(new HashCodeLockingKeyFormatter());
+    }
+
+    public static IRedisLockingConfigurator WithNewtonsoftKeyFormatter<TKey>(
+        this IKeyFormatterConfigurator configurator)
+    {
+        return configurator.WithKeyFormatter<TKey, NewtonsoftLockingKeyFormatter>();
+    }
+
+    public static IRedisLockingConfigurator WithHashCodeKeyFormatter<TKey>(
+        this IKeyFormatterConfigurator configurator)
+    {
+        return configurator.WithKeyFormatter<TKey, HashCodeLockingKeyFormatter>(new HashCodeLockingKeyFormatter());
     }
 }

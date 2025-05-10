@@ -29,7 +29,7 @@ jobs:
         id: find-build
         run: |
           changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Build.props \
-            | grep -Ec '^\+ ') || :
+            | grep -Ec '^[\+\-] ') || :
           
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
 
@@ -39,11 +39,21 @@ jobs:
           source ./scripts/common-scripts.sh
           
           changed_packages=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Packages.props \
-            | grep -E '^\+ ' \
+            | grep -E '^[\+\-] ' \
             | get_tag_attribute_value 'Include' \
             | lines_to_json_array) || :
 
           echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"
+
+      - name: find Platform.targets changes
+        id: find-targets
+        run: |
+          source ./scripts/common-scripts.sh
+          
+          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Platform.targets \
+            | grep -Ec '^[\+\-] ') || :
+          
+          echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"
 
       - name: Get changed files
         id: changed-files
@@ -51,7 +61,7 @@ jobs:
 
       - name: find changed package projects
         id: find-changed-package-projects
-        if: ${{ steps.find-build.outputs.changes-count == 0 }}
+        if: ${{ steps.find-build.outputs.changes-count == 0 && steps.find-targets.outputs.changes-count == 0 }}
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           ALL_CHANGED_DEPENDENCIES: ${{ steps.find-packages.outputs.changed-packages }}
@@ -72,7 +82,7 @@ jobs:
         run: |
           source ./scripts/project-scripts.sh
           
-          if [[ ${{ steps.find-build.outputs.changes-count }} -eq 0 ]]
+          if [[ ${{ steps.find-build.outputs.changes-count }} -eq 0 && ${{ steps.find-targets.outputs.changes-count }} -eq 0 ]]
           then
             echo changed-package-projects="$SELECTED_PACKAGES" >> "$GITHUB_OUTPUT"
           else

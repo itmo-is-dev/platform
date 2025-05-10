@@ -1,19 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
         <IsPlatformPackage>true</IsPlatformPackage>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Title>Itmo.Dev.Platform.Testing</Title>
-        <Authors>itmo-is-dev</Authors>
-        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,21 +18,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="AutoBogus" />
-      <PackageReference Include="FluentAssertions" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-      <PackageReference Include="Moq" />
-      <PackageReference Include="Npgsql" />
-      <PackageReference Include="Respawn" />
-      <PackageReference Include="Serilog.Extensions.Logging" />
-      <PackageReference Include="Serilog.Sinks.XUnit" />
-      <PackageReference Include="Testcontainers.PostgreSql" />
+        <PackageReference Include="AutoBogus"/>
+        <PackageReference Include="FluentAssertions"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+        <PackageReference Include="Moq"/>
+        <PackageReference Include="Npgsql"/>
+        <PackageReference Include="Respawn"/>
+        <PackageReference Include="Serilog.Extensions.Logging"/>
+        <PackageReference Include="Serilog.Sinks.XUnit"/>
+        <PackageReference Include="Testcontainers.PostgreSql"/>
     </ItemGroup>
 
 </Project>

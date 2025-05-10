@@ -6,7 +6,7 @@ public record KafkaOutboxTestData(int BufferSize, KafkaProducerMessage<int, stri
 {
     public string BufferSizeString => BufferSize.ToString();
     
-    public static KafkaOutboxTestData Single(int bufferSize)
+    public static KafkaOutboxTestData SingleMessage(int bufferSize)
         => new(bufferSize, [new KafkaProducerMessage<int, string>(1, "aboba")]);
 
     public static KafkaOutboxTestData Many(int bufferSize, int messageCount)

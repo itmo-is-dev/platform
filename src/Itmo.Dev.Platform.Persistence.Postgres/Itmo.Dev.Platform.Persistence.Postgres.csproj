@@ -1,19 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
         <IsPlatformPackage>true</IsPlatformPackage>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Title>Itmo.Dev.Platform.Persistence.Postgres</Title>
-        <Authors>itmo-is-dev</Authors>
-        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,18 +18,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Npgsql"/>
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
         <PackageReference Include="FluentMigrator.Runner.Postgres"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Samples.SimpleTask;
 
-public static class Extensions
+public static class ServiceCollectionExtensions
 {
     public static void AddSimpleBackgroundTask(this IBackgroundTaskConfigurationBuilder builder)
     {

@@ -1,19 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
         <IsPlatformPackage>true</IsPlatformPackage>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Title>Itmo.Dev.Platform.MessagePersistence.Postgres</Title>
-        <Authors>itmo-is-dev</Authors>
-        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,17 +18,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Tests"/>
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence\Itmo.Dev.Platform.MessagePersistence.csproj"/>
         <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Postgres\Itmo.Dev.Platform.Persistence.Postgres.csproj"/>
     </ItemGroup>
-    
-    <ItemGroup>
-        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Tests"/>
-    </ItemGroup>
-    
+
 </Project>

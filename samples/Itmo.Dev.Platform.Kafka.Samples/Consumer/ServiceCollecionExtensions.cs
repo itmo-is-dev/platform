@@ -2,11 +2,11 @@ using Itmo.Dev.Platform.Kafka.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Itmo.Dev.Platform.Kafka.Samples.ConsumerInbox;
+namespace Itmo.Dev.Platform.Kafka.Samples.Consumer;
 
-public static class Extensions
+public static class ServiceCollecionExtensions
 {
-    public static IServiceCollection AddInboxConsumer(this IServiceCollection collection, IConfiguration configuration)
+    public static IServiceCollection AddConsumer(this IServiceCollection collection, IConfiguration configuration)
     {
         return collection.AddPlatformKafka(builder => builder
             .ConfigureOptions(configuration.GetSection("Kafka"))
@@ -16,6 +16,6 @@ public static class Extensions
                 .WithConfiguration(configuration.GetSection("Kafka:Consumers:Message"))
                 .DeserializeKeyWithNewtonsoft()
                 .DeserializeValueWithNewtonsoft()
-                .HandleInboxWith<InboxHandler>()));
+                .HandleWith<ConsumerHandler>()));
     }
 }

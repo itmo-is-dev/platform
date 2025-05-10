@@ -1,24 +1,13 @@
-using Itmo.Dev.Platform.Postgres.Connection;
 using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Itmo.Dev.Platform.Postgres.Transactions;
 
 public class PostgresTransactionProvider : IPostgresTransactionProvider
 {
-    private readonly IPostgresConnectionProvider _connectionProvider;
-
-    public PostgresTransactionProvider(IPostgresConnectionProvider connectionProvider)
-    {
-        _connectionProvider = connectionProvider;
-    }
-
-    public async Task<IPostgresTransaction> CreateTransactionAsync(
+    public Task<IPostgresTransaction> CreateTransactionAsync(
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken)
     {
-        // var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-        // return await connection.BeginTransactionAsync(isolationLevel, cancellationToken);
-
         System.Transactions.IsolationLevel level = isolationLevel switch
         {
             IsolationLevel.Unspecified => System.Transactions.IsolationLevel.Unspecified,
@@ -31,6 +20,8 @@ public class PostgresTransactionProvider : IPostgresTransactionProvider
             _ => throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null),
         };
 
-        return new PostgresTransaction(level);
+        IPostgresTransaction transaction = new PostgresTransaction(level);
+
+        return Task.FromResult(transaction);
     }
 }

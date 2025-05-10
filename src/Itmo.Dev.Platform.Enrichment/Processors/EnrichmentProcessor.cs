@@ -26,7 +26,7 @@ internal class EnrichmentProcessor<TKey, TModel, TState> : IEnrichmentProcessor<
     {
         models = models.ToArray();
         
-        if (models.Count() is 0)
+        if (models.Any() is false)
             yield break;
 
         var context = new EnrichmentContext<TKey, TModel, TState>(models, state);

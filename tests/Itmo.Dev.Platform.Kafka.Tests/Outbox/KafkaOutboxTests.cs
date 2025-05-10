@@ -186,8 +186,8 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         KafkaOutboxTestData[] data =
         [
-            KafkaOutboxTestData.Single(1),
-            KafkaOutboxTestData.Single(10),
+            KafkaOutboxTestData.SingleMessage(1),
+            KafkaOutboxTestData.SingleMessage(10),
             KafkaOutboxTestData.Many(1, 10),
             KafkaOutboxTestData.Many(5, 10),
             KafkaOutboxTestData.Many(10, 10),

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Grpc.Samples.Services;
 
-public static class Extensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddGrpcServices(this IServiceCollection collection)
     {

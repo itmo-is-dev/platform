@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Samples.StateTask;
 
-public static class Extensions
+public static class ServiceCollectionExtensions
 {
     public static void AddStateTask(this IBackgroundTaskConfigurationBuilder builder)
     {

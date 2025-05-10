@@ -1,7 +1,7 @@
 namespace Itmo.Dev.Platform.Testing.Tools;
 
 [AttributeUsage(AttributeTargets.Assembly)]
-public class SeedAttribute : Attribute
+public sealed class SeedAttribute : Attribute
 {
     public SeedAttribute(int value)
     {

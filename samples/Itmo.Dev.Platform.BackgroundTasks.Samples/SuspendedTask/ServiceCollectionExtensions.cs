@@ -4,7 +4,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Samples.SuspendedTask;
 
-public static class Extensions
+public static class ServiceCollectionExtensions
 {
     public static void AddSuspendedTask(this IBackgroundTaskConfigurationBuilder builder)
     {

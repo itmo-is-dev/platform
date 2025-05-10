@@ -1,19 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
         <IsPlatformPackage>true</IsPlatformPackage>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Title>Itmo.Dev.Platform.MessagePersistence</Title>
-        <Authors>itmo-is-dev</Authors>
-        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,14 +18,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
-        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
-        <PackageReference Include="SourceKit.Generators.Builder"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka.Tests"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Postgres"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -46,9 +29,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka"/>
-        <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka.Tests"/>
-        <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Postgres"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
+        <PackageReference Include="SourceKit.Generators.Builder"/>
     </ItemGroup>
 
 </Project>

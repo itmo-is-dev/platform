@@ -1,5 +1,6 @@
 using FluentAssertions;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Itmo.Dev.Platform.Common.Tests;
@@ -35,7 +36,7 @@ public class ChunkAsyncTests
     }
 
     private async IAsyncEnumerable<int> GenerateInfiniteEnumerable(
-        CancellationToken cancellationToken,
+        [EnumeratorCancellation] CancellationToken cancellationToken,
         params int[] elements)
     {
         foreach (int element in elements)

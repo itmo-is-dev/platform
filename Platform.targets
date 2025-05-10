@@ -1,0 +1,32 @@
+<Project>
+
+    <Target Name="ApplyPlatformPackageProperties"
+            Condition="'$(IsPlatformPackage)' == 'true'"
+            BeforeTargets="Build;Pack">
+
+        <PropertyGroup Label="Build">
+            <IsPackable>true</IsPackable>
+            <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        </PropertyGroup>
+
+        <PropertyGroup Label="NuGet info">
+            <Title>$(AssemblyName)</Title>
+            <PackageId>$(Title)</PackageId>
+            <Authors>itmo-is-dev</Authors>
+            <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+            <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+            <RepositoryType>github</RepositoryType>
+            <PackageReadmeFile>README.md</PackageReadmeFile>
+            <PackageLicenseFile>LICENSE</PackageLicenseFile>
+            <PackageIcon>icon.png</PackageIcon>
+        </PropertyGroup>
+
+        <ItemGroup Label="NuGet items">
+            <None Include="README.md" Pack="true" PackagePath="\"/>
+            <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\"/>
+            <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+        </ItemGroup>
+
+    </Target>
+
+</Project>

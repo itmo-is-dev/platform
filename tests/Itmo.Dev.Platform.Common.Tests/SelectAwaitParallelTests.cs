@@ -89,6 +89,6 @@ public class AsyncEnumerableExtensionsTests
         // Assert
         await action.Should()
             .ThrowAsync<AggregateException>()
-            .Where(e => e.InnerExceptions.All(ie => ie.Message.Equals(message)));
+            .Where(e => e.InnerExceptions.All(ie => ie.Message.Equals(message, StringComparison.OrdinalIgnoreCase)));
     }
 }

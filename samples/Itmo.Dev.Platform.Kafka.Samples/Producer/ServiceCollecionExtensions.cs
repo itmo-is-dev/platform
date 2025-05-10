@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Kafka.Samples.Producer;
 
-public static class Extensions
+public static class ServiceCollecionExtensions
 {
     public static IServiceCollection AddProducer(this IServiceCollection collection, IConfiguration configuration)
     {

@@ -39,7 +39,7 @@ public class ReusableUnitOfWork : IUnitOfWork, IDisposable
 
     public async ValueTask CommitAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
     {
-        if (_queue.Count is 0)
+        if (_queue.IsEmpty)
             return;
 
         using var subscription = await _semaphore.UseAsync(cancellationToken);

@@ -35,11 +35,14 @@ internal class RedisLockService : ILockingService
                 formattedKey = $"{options.KeyPrefix}:{formattedKey}";
             }
 
+            var retryTimeJitter = TimeSpan.FromMilliseconds(
+                Random.Shared.Next(0, options.MaxRetryIntervalJitterMilliseconds));
+
             lck = await _redLockFactory.CreateLockAsync(
                 resource: formattedKey,
                 expiryTime: options.ExpiryTime,
                 waitTime: options.WaitTime,
-                retryTime: options.RetryInterval,
+                retryTime: options.RetryInterval + retryTimeJitter,
                 cancellationToken: cancellationToken);
         }
         catch (Exception e)

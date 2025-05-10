@@ -20,4 +20,9 @@ public class RedisLockingOptions
     ///     Interval between retries of lock acquisition 
     /// </summary>
     public TimeSpan RetryInterval { get; set; }
+
+    /// <summary>
+    ///     Maximum value of added jitter to <see cref="RetryInterval"/>
+    /// </summary>
+    public int MaxRetryIntervalJitterMilliseconds { get; set; } = 100;
 }

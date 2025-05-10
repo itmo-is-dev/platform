@@ -4,12 +4,7 @@ namespace Itmo.Dev.Platform.Locking.InMemory;
 
 internal class InMemoryLockingService : ILockingService
 {
-    private readonly ConditionalWeakTable<object, SemaphoreWrapper> _table;
-
-    public InMemoryLockingService()
-    {
-        _table = new ConditionalWeakTable<object, SemaphoreWrapper>();
-    }
+    private readonly ConditionalWeakTable<object, SemaphoreWrapper> _table = new();
 
     public async ValueTask<ILockHandle> AcquireAsync(object key, CancellationToken cancellationToken)
     {

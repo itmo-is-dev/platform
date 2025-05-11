@@ -6,6 +6,11 @@ namespace Itmo.Dev.Platform.Locking.Redis.Configuration;
 public interface IOptionsConfigurator
 {
     IDefaultKeyFormatterConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action);
+
+    IDefaultKeyFormatterConfigurator WithOptions(string sectionPath)
+    {
+        return WithOptions(builder => builder.BindConfiguration(sectionPath));
+    }
 }
 
 public interface IDefaultKeyFormatterConfigurator

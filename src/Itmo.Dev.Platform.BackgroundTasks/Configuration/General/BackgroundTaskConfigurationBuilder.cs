@@ -6,7 +6,6 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -59,13 +58,10 @@ internal class BackgroundTaskConfigurationBuilder :
     }
 
     public IBackgroundTaskStateMachineConfigurator ConfigureExecution(
-        IConfiguration configuration,
-        Action<BackgroundTaskExecutionOptions>? action = null)
+        Action<OptionsBuilder<BackgroundTaskExecutionOptions>> action)
     {
-        var builder = _collection.AddOptions<BackgroundTaskExecutionOptions>().Bind(configuration);
-
-        if (action is not null)
-            builder.Configure(action);
+        var builder = _collection.AddOptions<BackgroundTaskExecutionOptions>();
+        action.Invoke(builder);
 
         return this;
     }

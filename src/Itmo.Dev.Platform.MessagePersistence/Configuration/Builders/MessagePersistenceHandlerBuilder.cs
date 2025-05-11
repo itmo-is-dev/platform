@@ -1,6 +1,6 @@
 using Itmo.Dev.Platform.MessagePersistence.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
 
@@ -31,17 +31,14 @@ internal class MessagePersistenceHandlerConfigurator : IMessagePersistenceHandle
     }
 
     public IMessagePersistenceHandlerKeyConfigurator WithConfiguration(
-        IConfiguration configuration,
-        Action<MessagePersistenceHandlerOptions>? options = null)
+        Action<OptionsBuilder<MessagePersistenceHandlerOptions>> action)
     {
         var builder = _collection
             .AddOptions<MessagePersistenceHandlerOptions>(_name)
-            .Bind(configuration)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        if (options is not null)
-            builder.Configure(options);
+        action.Invoke(builder);
 
         return new MessagePersistenceHandlerKeyConfigurator(_name, _collection);
     }

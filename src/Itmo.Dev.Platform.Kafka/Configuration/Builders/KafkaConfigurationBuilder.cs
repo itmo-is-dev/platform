@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Kafka.Configuration.Builders;
 
@@ -14,27 +14,14 @@ internal class KafkaConfigurationBuilder :
 
     public IServiceCollection Services { get; }
 
-    public IKafkaConfigurationBuilder ConfigureOptions(
-        IConfiguration configuration,
-        Action<PlatformKafkaOptions>? action = null)
+    public IKafkaConfigurationBuilder ConfigureOptions(Action<OptionsBuilder<PlatformKafkaOptions>> action)
     {
-        var builder = Services.AddOptions<PlatformKafkaOptions>()
-            .Bind(configuration)
+        var builder = Services
+            .AddOptions<PlatformKafkaOptions>()
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        if (action is not null)
-            builder.Configure(action);
-
-        return this;
-    }
-
-    public IKafkaConfigurationBuilder ConfigureOptions(Action<PlatformKafkaOptions> action)
-    {
-        Services.AddOptions<PlatformKafkaOptions>()
-            .Configure(action)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        action.Invoke(builder);
 
         return this;
     }

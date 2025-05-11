@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RedLockNet.SERedis;
-using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
 
 namespace Itmo.Dev.Platform.Locking.Redis;

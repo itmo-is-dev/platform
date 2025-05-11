@@ -4,7 +4,6 @@ using Itmo.Dev.Platform.BackgroundTasks.Postgres.Plugins;
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Lifetime.Initializers;
 using Itmo.Dev.Platform.Persistence.Abstractions.Extensions;
-using Itmo.Dev.Platform.Persistence.Postgres.Connections;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Microsoft.Extensions.DependencyInjection;

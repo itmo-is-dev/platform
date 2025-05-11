@@ -1,9 +1,7 @@
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
-using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
-using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.Common.DateTime;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.

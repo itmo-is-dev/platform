@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
 
@@ -10,8 +12,25 @@ public interface IMessagePersistenceHandlerNameConfigurator
 public interface IMessagePersistenceHandlerConfigurator
 {
     IMessagePersistenceHandlerKeyConfigurator WithConfiguration(
+        Action<OptionsBuilder<MessagePersistenceHandlerOptions>> action);
+
+    IMessagePersistenceHandlerKeyConfigurator WithConfiguration(
         IConfiguration configuration,
-        Action<MessagePersistenceHandlerOptions>? options = null);
+        Action<MessagePersistenceHandlerOptions>? options = null)
+    {
+        return WithConfiguration(builder =>
+        {
+            builder.Bind(configuration);
+
+            if (options is not null)
+                builder.Configure(options);
+        });
+    }
+
+    IMessagePersistenceHandlerKeyConfigurator WithConfiguration(string sectionPath)
+    {
+        return WithConfiguration(builder => builder.BindConfiguration(sectionPath));
+    }
 }
 
 public interface IMessagePersistenceHandlerKeyConfigurator

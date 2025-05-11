@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.Observability.HealthChecks.Plugins;

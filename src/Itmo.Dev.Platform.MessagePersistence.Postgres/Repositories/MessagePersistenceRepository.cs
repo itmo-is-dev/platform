@@ -2,7 +2,6 @@ using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Queries;
 using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
-using Npgsql;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Repositories;

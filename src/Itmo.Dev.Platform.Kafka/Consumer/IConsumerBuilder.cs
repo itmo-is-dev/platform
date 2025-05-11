@@ -22,7 +22,8 @@ public interface IConsumerConfigurationSelector<TKey, TValue>
 
 public interface IConsumerKeyDeserializerSelector<TKey, TValue>
 {
-    IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith<T>() where T : class, IDeserializer<TKey>;
+    IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith<T>()
+        where T : class, IDeserializer<TKey>;
 
     IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith(IDeserializer<TKey> deserializer);
 
@@ -31,7 +32,8 @@ public interface IConsumerKeyDeserializerSelector<TKey, TValue>
 
 public interface IConsumerValueDeserializerSelector<out TKey, TValue>
 {
-    IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith<T>() where T : class, IDeserializer<TValue>;
+    IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith<T>()
+        where T : class, IDeserializer<TValue>;
 
     IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith(IDeserializer<TValue> deserializer);
 
@@ -40,9 +42,11 @@ public interface IConsumerValueDeserializerSelector<out TKey, TValue>
 
 public interface IConsumerHandlerSelector<out TKey, out TValue>
 {
-    IConsumerBuilder HandleWith<T>() where T : class, IKafkaConsumerHandler<TKey, TValue>;
+    IConsumerBuilder HandleWith<T>()
+        where T : class, IKafkaConsumerHandler<TKey, TValue>;
 
-    IConsumerBuilder HandleInboxWith<T>() where T : class, IKafkaInboxHandler<TKey, TValue>;
+    IConsumerBuilder HandleInboxWith<T>()
+        where T : class, IKafkaInboxHandler<TKey, TValue>;
 }
 
 public interface IConsumerBuilder

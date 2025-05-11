@@ -1,4 +1,3 @@
-using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 using Microsoft.Extensions.Options;
 

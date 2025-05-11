@@ -1,5 +1,4 @@
 using Itmo.Dev.Platform.Grpc.Clients;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Grpc.Samples.Clients;

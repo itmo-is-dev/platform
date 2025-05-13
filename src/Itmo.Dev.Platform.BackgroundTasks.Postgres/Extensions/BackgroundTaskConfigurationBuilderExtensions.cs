@@ -16,7 +16,7 @@ public static class BackgroundTaskConfigurationBuilderExtensions
     }
 
     public static IBackgroundTaskSchedulingOptionsConfigurator UsePostgresPersistence(
-        IBackgroundTaskPersistenceConfigurationSelector selector,
+        this IBackgroundTaskPersistenceConfigurationSelector selector,
         string sectionPath)
     {
         var configurator = new PostgresBackgroundTaskPersistenceConfigurator(

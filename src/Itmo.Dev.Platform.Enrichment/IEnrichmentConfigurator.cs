@@ -19,4 +19,9 @@ public interface IEnrichmentTypeConfigurator<TKey, out TModel, TState>
         Func<TModel, TTransitiveModel> func)
         where TTransitiveKey : notnull
         where TTransitiveModel : IEnrichedModel<TTransitiveKey>;
+
+    IEnrichmentTypeConfigurator<TKey, TModel, TState> WithNullableTransitive<TTransitiveKey, TTransitiveModel>(
+        Func<TModel, TTransitiveModel?> func)
+        where TTransitiveKey : notnull
+        where TTransitiveModel : IEnrichedModel<TTransitiveKey>;
 }

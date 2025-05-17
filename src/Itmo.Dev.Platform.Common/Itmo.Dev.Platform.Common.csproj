@@ -6,7 +6,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added Semaphore subscription
+            Added WhereNotNull
         </PackageReleaseNotes>
     </PropertyGroup>
 

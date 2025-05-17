@@ -47,8 +47,9 @@ file class EnrichmentTypeConfigurator<TKey, TModel, TState> : IEnrichmentTypeCon
     {
         _collection.TryAddScoped<THandler>();
 
-        _collection.TryAddEnumerable(ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel, TState>, THandler>(
-            provider => provider.GetRequiredService<THandler>()));
+        _collection.TryAddEnumerable(
+            ServiceDescriptor.Scoped<IEnrichmentHandler<TKey, TModel, TState>, THandler>(provider
+                => provider.GetRequiredService<THandler>()));
 
         return this;
     }
@@ -67,5 +68,29 @@ file class EnrichmentTypeConfigurator<TKey, TModel, TState> : IEnrichmentTypeCon
         _collection.Add(descriptor);
 
         return this;
+    }
+
+    public IEnrichmentTypeConfigurator<TKey, TModel, TState> WithNullableTransitive<TTransitiveKey, TTransitiveModel>(
+        Func<TModel, TTransitiveModel?> func)
+        where TTransitiveKey : notnull
+        where TTransitiveModel : IEnrichedModel<TTransitiveKey>
+    {
+        var descriptor = ServiceDescriptor.Scoped<
+            IEnrichmentHandler<TKey, TModel, TState>,
+            NullableTransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState>>(
+            Create);
+
+        _collection.Add(descriptor);
+
+        return this;
+
+        NullableTransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState> Create(
+            IServiceProvider provider)
+        {
+            return ActivatorUtilities.CreateInstance<
+                NullableTransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState>>(
+                provider,
+                func);
+        }
     }
 }

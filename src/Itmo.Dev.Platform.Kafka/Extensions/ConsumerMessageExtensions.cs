@@ -7,6 +7,7 @@ public static class ConsumerMessageExtensions
     public static IEnumerable<IKafkaConsumerMessage<TKey, TValue>> GetLatestBy<TKey, TValue, TSelector>(
         this IEnumerable<IKafkaConsumerMessage<TKey, TValue>> messages,
         Func<IKafkaConsumerMessage<TKey, TValue>, TSelector> selector)
+        where TSelector : IComparable<TSelector>
     {
         return messages.GroupBy(
             selector,
@@ -18,6 +19,7 @@ public static class ConsumerMessageExtensions
 
     public static IEnumerable<IKafkaConsumerMessage<TKey, TValue>> GetLatestByKey<TKey, TValue>(
         this IEnumerable<IKafkaConsumerMessage<TKey, TValue>> messages)
+        where TKey : IComparable<TKey>
     {
         return messages.GetLatestBy(x => x.Key);
     }

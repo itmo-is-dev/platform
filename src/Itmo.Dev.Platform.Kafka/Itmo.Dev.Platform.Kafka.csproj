@@ -6,7 +6,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added outbox strategy
+            Fixed GetLatestBy
         </PackageReleaseNotes>
     </PropertyGroup>
 

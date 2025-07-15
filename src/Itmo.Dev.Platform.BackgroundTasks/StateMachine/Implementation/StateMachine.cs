@@ -49,6 +49,7 @@ internal class StateMachine<TStateBase, TMetadata, TExecutionMetadata, TResult, 
                 if (result is StateHandleResult<TStateBase, TResult, TError>.Finished finished)
                 {
                     handled = true;
+
                     context.ExecutionMetadata.UpdateState(finished.State);
 
                     break;

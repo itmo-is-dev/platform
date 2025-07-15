@@ -7,7 +7,7 @@ public class PlatformEnrichmentException : PlatformException
 {
     private PlatformEnrichmentException(string? message) : base(message) { }
 
-    public static PlatformEnrichmentException ModelNotFound<TKey, TModel>(TKey key)
+    internal static PlatformEnrichmentException ModelNotFound<TKey, TModel>(TKey key)
         where TKey : notnull
         where TModel : IEnrichedModel<TKey>
     {

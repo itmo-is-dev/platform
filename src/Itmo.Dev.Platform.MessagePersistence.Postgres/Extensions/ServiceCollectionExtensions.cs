@@ -5,7 +5,7 @@ namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IMessagePersistenceConfigurationBuilder UsePostgresPersistence(
+    public static IMessagePersistenceBufferingGroupConfigurator UsePostgresPersistence(
         this IMessagePersistencePersistenceConfigurationSelector selector,
         Func<IMessagePersistencePostgresOptionsConfigurator, IMessagePersistencePostgresConfigurator> configuration)
     {

@@ -1,7 +1,7 @@
 using Confluent.Kafka;
 using Itmo.Dev.Platform.Kafka.Producer.Outbox;
 using Itmo.Dev.Platform.Kafka.Producer.Services;
-using Itmo.Dev.Platform.MessagePersistence.Extensions;
+using Itmo.Dev.Platform.MessagePersistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -121,12 +121,6 @@ internal class ProducerBuilder<TKey, TValue> :
     public IProducerBuilder WithOutbox()
     {
         IConfigurationSection outboxSection = _configuration.GetSection("Outbox");
-
-        if (outboxSection.Exists() is false)
-        {
-            string message = $"Outbox for topic {_topicName} is configured, but Outbox sub-section is not specified";
-            throw new InvalidOperationException(message);
-        }
 
         var outboxStrategy = outboxSection.GetValue("Strategy", OutboxStrategy.Always);
 

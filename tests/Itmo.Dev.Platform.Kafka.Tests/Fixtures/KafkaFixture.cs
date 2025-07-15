@@ -12,10 +12,7 @@ public class KafkaFixture : IAsyncLifetime
 
     public KafkaFixture()
     {
-        Container = new KafkaBuilder()
-            .WithImage("confluentinc/cp-kafka:latest")
-            .Build();
-
+        Container = new KafkaBuilder().Build();
         _createdTopics = new HashSet<string>();
     }
 

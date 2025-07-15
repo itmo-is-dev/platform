@@ -2,6 +2,8 @@ using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Queries;
 using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
+using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
+using System.Data;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Repositories;
@@ -26,7 +28,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
         await using var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         await using var command = connection.CreateCommand(_queryStorage.Query.Value)
-            .AddParameter("message_name", query.Name)
+            .AddParameter("ids", query.Ids)
+            .AddParameter("message_names", query.Names)
             .AddParameter("states", query.States)
             .AddParameter("ignore_cursor", query.Cursor is null)
             .AddParameter("cursor", query.Cursor ?? DateTimeOffset.MinValue)
@@ -34,24 +37,17 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-        int id = reader.GetOrdinal("persisted_message_id");
-        int name = reader.GetOrdinal("persisted_message_name");
-        int createdAt = reader.GetOrdinal("persisted_message_created_at");
-        int state = reader.GetOrdinal("persisted_message_state");
-        int key = reader.GetOrdinal("persisted_message_key");
-        int value = reader.GetOrdinal("persisted_message_value");
-        int retryCount = reader.GetOrdinal("persisted_message_retry_count");
-
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new SerializedMessage(
-                Id: reader.GetInt64(id),
-                Name: reader.GetString(name),
-                CreatedAt: reader.GetFieldValue<DateTimeOffset>(createdAt),
-                State: reader.GetFieldValue<MessageState>(state),
-                Key: reader.GetString(key),
-                Value: reader.GetString(value),
-                RetryCount: reader.GetInt32(retryCount));
+                Id: reader.GetInt64("persisted_message_id"),
+                Name: reader.GetString("persisted_message_name"),
+                CreatedAt: reader.GetFieldValue<DateTimeOffset>("persisted_message_created_at"),
+                State: reader.GetFieldValue<MessageState>("persisted_message_state"),
+                Key: reader.GetString("persisted_message_key"),
+                Value: reader.GetString("persisted_message_value"),
+                RetryCount: reader.GetInt32("persisted_message_retry_count"),
+                BufferingStep: reader.GetNullableString("persisted_message_buffering_step"));
         }
     }
 
@@ -64,7 +60,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
             .AddParameter("created_at", messages.Select(message => message.CreatedAt))
             .AddParameter("states", messages.Select(message => message.State))
             .AddJsonArrayParameter("keys", messages.Select(message => message.Key))
-            .AddJsonArrayParameter("values", messages.Select(message => message.Value));
+            .AddJsonArrayParameter("values", messages.Select(message => message.Value))
+            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep));
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
@@ -73,10 +70,11 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
     {
         await using var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
-        await using var command = connection.CreateCommand(_queryStorage.UpdateStates.Value)
-            .AddParameter("ids", messages.Select(x => x.Id))
-            .AddParameter("states", messages.Select(x => x.State))
-            .AddParameter("retry_counts", messages.Select(x => x.RetryCount));
+        await using var command = connection.CreateCommand(_queryStorage.Update.Value)
+            .AddParameter("ids", messages.Select(message => message.Id))
+            .AddParameter("states", messages.Select(message => message.State))
+            .AddParameter("retry_counts", messages.Select(message => message.RetryCount))
+            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep));
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

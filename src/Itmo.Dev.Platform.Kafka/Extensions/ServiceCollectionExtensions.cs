@@ -24,10 +24,7 @@ public static class ServiceCollectionExtensions
         this IKafkaConfigurationBuilder builder,
         Func<IConsumerKeySelector, IConsumerBuilder> configuration)
     {
-        var selector = new ConsumerKeySelector(builder.Services);
-        IConsumerBuilder consumerBuilder = configuration.Invoke(selector);
-
-        consumerBuilder.Build();
+        builder.Services.AddConsumerInternal(configuration);
         return builder;
     }
 
@@ -35,9 +32,25 @@ public static class ServiceCollectionExtensions
         this IKafkaConfigurationBuilder builder,
         Func<IProducerKeySelector, IProducerBuilder> configuration)
     {
-        var selector = new ProducerKeySelector(builder.Services);
-        configuration.Invoke(selector).Build();
-
+        builder.Services.AddProducerInternal(configuration);
         return builder;
+    }
+
+    internal static void AddConsumerInternal(
+        this IServiceCollection collection,
+        Func<IConsumerKeySelector, IConsumerBuilder> configuration)
+    {
+        var selector = new ConsumerKeySelector(collection);
+        IConsumerBuilder consumerBuilder = configuration.Invoke(selector);
+
+        consumerBuilder.Build();
+    }
+
+    internal static void AddProducerInternal(
+        this IServiceCollection collection,
+        Func<IProducerKeySelector, IProducerBuilder> configuration)
+    {
+        var selector = new ProducerKeySelector(collection);
+        configuration.Invoke(selector).Build();
     }
 }

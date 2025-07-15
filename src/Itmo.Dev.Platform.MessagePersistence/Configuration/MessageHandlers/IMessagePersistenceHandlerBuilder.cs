@@ -1,12 +1,13 @@
+using Itmo.Dev.Platform.MessagePersistence.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
+namespace Itmo.Dev.Platform.MessagePersistence.Configuration.MessageHandlers;
 
 public interface IMessagePersistenceHandlerNameConfigurator
 {
-    IMessagePersistenceHandlerConfigurator Called(string name);
+    IMessagePersistenceHandlerConfigurator Called(string messageName);
 }
 
 public interface IMessagePersistenceHandlerConfigurator
@@ -35,21 +36,26 @@ public interface IMessagePersistenceHandlerConfigurator
 
 public interface IMessagePersistenceHandlerKeyConfigurator
 {
-    IMessagePersistenceValueConfigurator<TKey> WithKey<TKey>();
+    IMessagePersistenceHandlerValueConfigurator<TKey> WithKey<TKey>();
 }
 
-public interface IMessagePersistenceValueConfigurator<out TKey>
+public interface IMessagePersistenceHandlerValueConfigurator<out TKey>
 {
     IMessagePersistenceHandlerConfigurator<TKey, TValue> WithValue<TValue>();
 }
 
 public interface IMessagePersistenceHandlerConfigurator<out TKey, out TValue>
 {
-    IMessagePersistenceHandlerBuilder HandleBy<THandler>()
+    IMessagePersistenceHandlerBufferingGroupBuilder HandleBy<THandler>()
         where THandler : class, IMessagePersistenceHandler<TKey, TValue>;
 
-    IMessagePersistenceHandlerBuilder HandleBy<THandler>(Func<IServiceProvider, string, THandler> implementationFactory)
+    IMessagePersistenceHandlerBufferingGroupBuilder HandleBy<THandler>(Func<IServiceProvider, string, THandler> implementationFactory)
         where THandler : class, IMessagePersistenceHandler<TKey, TValue>;
+}
+
+public interface IMessagePersistenceHandlerBufferingGroupBuilder : IMessagePersistenceHandlerBuilder
+{
+    IMessagePersistenceHandlerBuilder WithBufferingGroup(string bufferingGroupName);
 }
 
 public interface IMessagePersistenceHandlerBuilder

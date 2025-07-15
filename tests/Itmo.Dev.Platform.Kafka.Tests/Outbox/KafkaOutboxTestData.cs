@@ -1,11 +1,9 @@
 using Itmo.Dev.Platform.Kafka.Producer;
 
-namespace Itmo.Dev.Platform.Kafka.Tests.Outbox.Models;
+namespace Itmo.Dev.Platform.Kafka.Tests.Outbox;
 
 public record KafkaOutboxTestData(int BufferSize, KafkaProducerMessage<int, string>[] Messages)
 {
-    public string BufferSizeString => BufferSize.ToString();
-    
     public static KafkaOutboxTestData SingleMessage(int bufferSize)
         => new(bufferSize, [new KafkaProducerMessage<int, string>(1, "aboba")]);
 

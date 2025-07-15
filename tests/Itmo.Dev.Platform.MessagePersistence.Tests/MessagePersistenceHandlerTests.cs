@@ -1,6 +1,5 @@
 using FluentAssertions;
 using Itmo.Dev.Platform.Common.Lifetime;
-using Itmo.Dev.Platform.MessagePersistence.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Repositories;
@@ -50,6 +49,7 @@ public class MessagePersistenceHandlerTests
 
                         collection.AddPlatformMessagePersistence(
                             b => b
+                                .WithDefaultPublisherOptions(options => options.Bind(configuration.GetSection("Handler")))
                                 .UsePostgresPersistence(
                                     configurator => configurator.ConfigureOptions(
                                         options => options.Configure(o => o.SchemaName = "message_persistence")))
@@ -112,6 +112,7 @@ public class MessagePersistenceHandlerTests
 
                         collection.AddPlatformMessagePersistence(
                             b => b
+                                .WithDefaultPublisherOptions(options => options.Bind(configuration.GetSection("Handler")))
                                 .UsePostgresPersistence(
                                     configurator => configurator.ConfigureOptions(
                                         options => options.Configure(o => o.SchemaName = "message_persistence")))

@@ -9,10 +9,12 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
             persisted_message_state,
             persisted_message_key,
             persisted_message_value,
-            persisted_message_retry_count
+            persisted_message_retry_count,
+            persisted_message_buffering_step
     from {o.SchemaName}.persisted_messages
     where 
-        (persisted_message_name = :message_name)
+        (cardinality(:ids) = 0 or persisted_message_id = any(:ids))
+        and (cardinality(:message_names) = 0 or persisted_message_name = any(:message_names))
         and (cardinality(:states) = 0 or persisted_message_state = any (:states))
         and (:ignore_cursor or persisted_message_created_at >= :cursor)
     order by persisted_message_created_at
@@ -26,15 +28,17 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
         persisted_message_created_at,
         persisted_message_state,
         persisted_message_key,
-        persisted_message_value)
-    select * from unnest(:names, :created_at, :states, :keys, :values)
+        persisted_message_value,
+        persisted_message_buffering_step)
+    select * from unnest(:names, :created_at, :states, :keys, :values, :buffering_steps)
     """);
 
-    public MessagePersistenceQuery UpdateStates { get; } = factory.Create(o => $"""
+    public MessagePersistenceQuery Update { get; } = factory.Create(o => $"""
     update {o.SchemaName}.persisted_messages
     set persisted_message_state = source.state,
-        persisted_message_retry_count = source.retry_count
-    from (select * from unnest(:ids, :states, :retry_counts)) as source(id, state, retry_count)
+        persisted_message_retry_count = source.retry_count,
+        persisted_message_buffering_step = source.buffering_step
+    from (select * from unnest(:ids, :states, :retry_counts, :buffering_steps)) as source(id, state, retry_count, buffering_step)
     where persisted_message_id = source.id
     """);
 
@@ -42,6 +46,6 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
     {
         Query.Dispose();
         Add.Dispose();
-        UpdateStates.Dispose();
+        Update.Dispose();
     }
 }

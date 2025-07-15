@@ -1,10 +1,16 @@
-using Itmo.Dev.Platform.MessagePersistence.Configuration.Builders;
+using Itmo.Dev.Platform.MessagePersistence.Configuration.Buffering;
+using Itmo.Dev.Platform.MessagePersistence.Configuration.MessageHandlers;
+using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.MessagePersistence.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Configuration.General;
 
 internal class MessagePersistenceConfigurationBuilder :
+    IMessagePersistenceDefaultPublisherConfigurationSelector,
     IMessagePersistencePersistenceConfigurationSelector,
+    IMessagePersistenceBufferingGroupConfigurator,
     IMessagePersistenceConfigurationBuilder
 {
     private readonly IServiceCollection _collection;
@@ -14,10 +20,33 @@ internal class MessagePersistenceConfigurationBuilder :
         _collection = collection;
     }
 
-    public IMessagePersistenceConfigurationBuilder UsePersistenceConfigurator(
+    public IMessagePersistencePersistenceConfigurationSelector WithDefaultPublisherOptions(
+        Action<OptionsBuilder<MessagePersistencePublisherOptions>> action)
+    {
+        var builder = _collection
+            .AddOptions<MessagePersistencePublisherOptions>(MessagePersistenceConstants.DefaultPublisherName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart()
+            .Configure(options => options.IsInitialized = true);
+
+        action.Invoke(builder);
+
+        return this;
+    }
+
+    public IMessagePersistenceBufferingGroupConfigurator UsePersistenceConfigurator(
         IMessagePersistencePersistenceConfigurator configurator)
     {
         configurator.Apply(_collection);
+        return this;
+    }
+
+    public IMessagePersistenceBufferingGroupConfigurator AddBufferingGroup(
+        Func<IMessagePersistenceBufferingNameSelector, IMessagePersistenceBufferingBuilder> action)
+    {
+        var builder = new MessagePersistenceBufferingBuilder(_collection);
+        action.Invoke(builder);
+
         return this;
     }
 

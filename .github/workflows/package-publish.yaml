@@ -190,7 +190,6 @@ jobs:
           
           echo url="$url" >> "$GITHUB_OUTPUT"
 
-
       - name: format csproj path
         id: csproj
         run: |
@@ -201,6 +200,11 @@ jobs:
 
           echo path="$csproj_path" >> "$GITHUB_OUTPUT"
           echo dir="$csproj_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ vars.ACTIONS_DOTNET_VERSION }}
 
       - name: restore
         run: dotnet restore ${{ steps.csproj.outputs.path }}

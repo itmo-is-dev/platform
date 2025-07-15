@@ -6,8 +6,7 @@ using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Itmo.Dev.Platform.Testing.ApplicationFactories;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Xunit;
@@ -40,23 +39,19 @@ public class KafkaConsumerTests : IAsyncLifetime
         // Arrange
         var testContext = new TestContext<int, string>();
 
-        void ConfigureAppConfiguration(IConfigurationBuilder configuration)
-        {
-            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        await using var application = new PlatformWebApplicationBuilder<Program>()
+            .AddConfigurationJson(
+                $$"""
             {
-                [nameof(KafkaConsumerOptions.Topic)] = TopicName,
-                [nameof(KafkaConsumerOptions.Group)] = nameof(KafkaConsumerTests),
-                [nameof(KafkaConsumerOptions.InstanceId)] = nameof(KafkaConsumerTests),
-                [nameof(KafkaConsumerOptions.BufferWaitLimit)] = "00:00:00.200",
-                [nameof(KafkaConsumerOptions.BufferSize)] = bufferSize.ToString(),
-            });
-        }
-
-        void ConfigureServices(IServiceCollection collection, IConfiguration configuration)
-        {
-            collection.AddSingleton(testContext);
-
-            collection.AddPlatformKafka(builder => builder
+              "{{nameof(KafkaConsumerOptions.Topic)}}": "{{TopicName}}",
+              "{{nameof(KafkaConsumerOptions.Group)}}": "{{nameof(KafkaConsumerTests)}}",
+              "{{nameof(KafkaConsumerOptions.InstanceId)}}": "{{nameof(KafkaConsumerTests)}}",
+              "{{nameof(KafkaConsumerOptions.BufferWaitLimit)}}": "00:00:00.200",
+              "{{nameof(KafkaConsumerOptions.BufferSize)}}": "{{bufferSize.ToString()}}"
+            }                        
+            """)
+            .ConfigureServices(collection => collection.AddSingleton(testContext))
+            .ConfigureServices((collection, configuration) => collection.AddPlatformKafka(builder => builder
                 .ConfigureTestOptions(_kafkaFixture.Host)
                 .AddConsumer(b => b
                     .WithKey<int>()
@@ -64,15 +59,8 @@ public class KafkaConsumerTests : IAsyncLifetime
                     .WithConfiguration(configuration)
                     .DeserializeKeyWithNewtonsoft()
                     .DeserializeValueWithNewtonsoft()
-                    .HandleWith<CollectionConsumerHandler<int, string>>()));
-
-            collection.AddLogging(x => x.AddSerilog());
-            collection.AddOptions();
-        }
-
-        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(hostBuilder => hostBuilder
-            .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
-            .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
+                    .HandleWith<CollectionConsumerHandler<int, string>>())))
+            .Build();
 
         application.CreateClient();
 

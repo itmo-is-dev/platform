@@ -4,7 +4,8 @@ namespace Itmo.Dev.Platform.MessagePersistence.Models;
 
 [GenerateBuilder]
 internal partial record SerializedMessageQuery(
-    string Name,
+    long[] Ids,
+    string[] Names,
     MessageState[] States,
     DateTimeOffset? Cursor,
-    int PageSize);
+    [RequiredValue] int PageSize);

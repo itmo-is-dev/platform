@@ -6,11 +6,11 @@ using Itmo.Dev.Platform.Kafka.Tests.Extensions;
 using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
-using Itmo.Dev.Platform.MessagePersistence.Configuration;
-using Itmo.Dev.Platform.MessagePersistence.Extensions;
+using Itmo.Dev.Platform.MessagePersistence;
+using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Itmo.Dev.Platform.Testing.ApplicationFactories;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Xunit;
@@ -46,54 +46,45 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
         await using var fixtureScope = _databaseFixture.Scope;
         var testContext = new TestContext<int, string>();
 
-        void ConfigureAppConfiguration(IConfigurationBuilder configuration)
-        {
-            configuration.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["MessagePersistence:SchemaName"] = "message_persistence",
-                    [$"Consumer:{nameof(KafkaConsumerOptions.Topic)}"] = TopicName,
-                    [$"Consumer:{nameof(KafkaConsumerOptions.Group)}"] = nameof(KafkaInboxTests),
-                    [$"Consumer:{nameof(KafkaConsumerOptions.InstanceId)}"] = nameof(KafkaInboxTests),
-                    [$"Consumer:{nameof(KafkaConsumerOptions.BufferWaitLimit)}"] = "00:00:00.200",
-                    [$"Consumer:{nameof(KafkaConsumerOptions.BufferSize)}"] = bufferSize.ToString(),
-                    [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.BatchSize)}"] = bufferSize.ToString(),
-                    [$"Consumer:Inbox:{nameof(MessagePersistenceHandlerOptions.PollingDelay)}"] = "00:00:00.500",
-                });
-        }
-
-        void ConfigureServices(IServiceCollection collection, IConfiguration configuration)
-        {
-            collection.AddSingleton(testContext);
-
-            collection.AddPlatformMessagePersistence(
-                builder => builder
-                    .UsePostgresPersistence(
-                        configurator => configurator.ConfigureOptions(
-                            b => b.Bind(configuration.GetSection("MessagePersistence")))));
-
-            collection.AddPlatformKafka(
-                builder => builder
-                    .ConfigureTestOptions(_kafkaFixture.Host)
-                    .AddConsumer(
-                        b => b
-                            .WithKey<int>()
-                            .WithValue<string>()
-                            .WithConfiguration(configuration.GetSection("Consumer"))
-                            .DeserializeKeyWithNewtonsoft()
-                            .DeserializeValueWithNewtonsoft()
-                            .HandleInboxWith<CollectionInboxHandler<int, string>>()));
-
-            _databaseFixture.AddPlatformPersistence(collection);
-
-            collection.AddLogging(x => x.AddSerilog());
-            collection.AddOptions();
-        }
-
-        await using var application = new WebApplicationFactory<Program>().WithWebHostBuilder(
-            hb => hb
-                .ConfigureAppConfiguration((_, configuration) => ConfigureAppConfiguration(configuration))
-                .ConfigureServices((context, collection) => ConfigureServices(collection, context.Configuration)));
+        await using var application = new PlatformWebApplicationBuilder<Program>()
+            .AddConfigurationJson(
+                $$"""
+            {
+                "MessagePersistence": {
+                    "{{nameof(MessagePersistencePostgresOptions.SchemaName)}}": "message_persistence",
+                    "Publisher": {
+                        "Default": {
+                            "{{nameof(MessagePersistencePublisherOptions.BatchSize)}}": {{bufferSize}},
+                            "{{nameof(MessagePersistencePublisherOptions.PollingDelay)}}": "00:00:00.500"
+                        }
+                    }
+                },
+                "Consumer": {
+                    "{{nameof(KafkaConsumerOptions.Topic)}}": "{{TopicName}}",
+                    "{{nameof(KafkaConsumerOptions.Group)}}": "{{nameof(KafkaInboxTests)}}",
+                    "{{nameof(KafkaConsumerOptions.InstanceId)}}": "{{nameof(KafkaInboxTests)}}",
+                    "{{nameof(KafkaConsumerOptions.BufferWaitLimit)}}": "00:00:00.200",
+                    "{{nameof(KafkaConsumerOptions.BufferSize)}}": "{{bufferSize}}"
+                }
+            }
+            """)
+            .ConfigureServices(x => x.AddSingleton(testContext))
+            .ConfigureServices(collection => collection
+                .AddPlatformMessagePersistence(builder => builder
+                    .WithDefaultPublisherOptions("MessagePersistence:Publisher:Default")
+                    .UsePostgresPersistence(configurator => configurator.ConfigureOptions("MessagePersistence")))
+            )
+            .ConfigureServices((collection, configuration) => collection.AddPlatformKafka(builder => builder
+                .ConfigureTestOptions(_kafkaFixture.Host)
+                .AddConsumer(b => b
+                    .WithKey<int>()
+                    .WithValue<string>()
+                    .WithConfiguration(configuration.GetSection("Consumer"))
+                    .DeserializeKeyWithNewtonsoft()
+                    .DeserializeValueWithNewtonsoft()
+                    .HandleInboxWith<CollectionInboxHandler<int, string>>())))
+            .ConfigureServices(collection => _databaseFixture.AddPlatformPersistence(collection))
+            .Build();
 
         application.CreateClient();
 
@@ -114,9 +105,8 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
         }
 
         // Act
-
         using var cts = new CancellationTokenSource();
-        // cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
+        cts.CancelAfter(TimeSpan.FromSeconds(5 * messages.Length));
 
         while (testContext.Messages.Count != messages.Length && cts.IsCancellationRequested is false)
         {
@@ -129,14 +119,13 @@ public class KafkaInboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtur
         // Assert
         testContext.Messages.Zip(messages)
             .Should()
-            .AllSatisfy(
-                tuple => tuple.First
-                    .Should()
-                    .BeEquivalentTo(
-                        tuple.Second,
-                        opt => opt
-                            .Including(x => x.Key)
-                            .Including(x => x.Value)));
+            .AllSatisfy(tuple => tuple.First
+                .Should()
+                .BeEquivalentTo(
+                    tuple.Second,
+                    opt => opt
+                        .Including(x => x.Key)
+                        .Including(x => x.Value)));
     }
 
     public static IEnumerable<object[]> GetMessages()

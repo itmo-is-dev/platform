@@ -13,17 +13,20 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPersistenceTransactionProvider _transactionProvider;
     private readonly IMessagePersistenceInternalRepository _messagePersistenceRepository;
+    private readonly MessagePersistenceRegistry _registry;
 
     public MessagePersistenceConsumer(
         JsonSerializerSettings serializerSettings,
         IDateTimeProvider dateTimeProvider,
         IPersistenceTransactionProvider transactionProvider,
-        IMessagePersistenceInternalRepository messagePersistenceRepository)
+        IMessagePersistenceInternalRepository messagePersistenceRepository,
+        MessagePersistenceRegistry registry)
     {
         _serializerSettings = serializerSettings;
         _dateTimeProvider = dateTimeProvider;
         _transactionProvider = transactionProvider;
         _messagePersistenceRepository = messagePersistenceRepository;
+        _registry = registry;
     }
 
     public async ValueTask ConsumeAsync<TKey, TValue>(
@@ -36,6 +39,9 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
 
         var createdAt = _dateTimeProvider.Current;
 
+        var record = _registry.GetRecord(messageName);
+        var bufferingGroup = record.BufferGroup is null ? null : _registry.GetBufferingGroup(record.BufferGroup);
+
         var serializedMessages = messages
             .Select(message => new SerializedMessage(
                 Id: default,
@@ -44,7 +50,8 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
                 State: MessageState.Pending,
                 Key: JsonConvert.SerializeObject(message.Key, _serializerSettings),
                 Value: JsonConvert.SerializeObject(message.Value, _serializerSettings),
-                RetryCount: 0))
+                RetryCount: 0,
+                BufferingStep: bufferingGroup?.FindNextStepName(currentStepName: null)))
             .ToArray();
 
         await using var transaction = await _transactionProvider

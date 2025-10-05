@@ -1,6 +1,8 @@
-namespace Itmo.Dev.Platform.Common.Extensions;
+// ReSharper disable once CheckNamespace
 
-public static class EnumerableExtensions
+namespace System.Collections.Generic;
+
+public static partial class EnumerableExtensions
 {
     public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> enumerable)
     {

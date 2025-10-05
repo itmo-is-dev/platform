@@ -7,4 +7,5 @@ internal record SerializedMessage(
     MessageState State,
     string Key,
     string Value,
-    int RetryCount);
+    int RetryCount,
+    string? BufferingStep);

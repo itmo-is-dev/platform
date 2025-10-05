@@ -26,9 +26,9 @@ public interface IMessagePersistenceBufferingPublisherConfigurationSelector
 public interface IMessagePersistenceBufferingStepSelector : IMessagePersistenceBufferingBuilder
 {
     internal IServiceCollection Services { get; }
-    
+
     internal string BufferGroupName { get; }
-    
+
     internal IMessagePersistenceBufferingStepSelector WithStep(BufferStepOptions step);
 }
 

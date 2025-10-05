@@ -37,6 +37,8 @@ public class AddedBuffering : SqlMigration
 
         alter table {options.Value.SchemaName}.persisted_messages
         alter column persisted_message_state type persisted_message_state using persisted_message_state::text::persisted_message_state;
+
+        drop type persisted_message_state_old;
         """;
     }
 }

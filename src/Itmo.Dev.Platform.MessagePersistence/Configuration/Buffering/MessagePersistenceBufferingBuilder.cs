@@ -18,7 +18,7 @@ internal class MessagePersistenceBufferingBuilder :
 
     public IServiceCollection Services { get; }
 
-    public string? BufferGroupName { get; private set; }
+    public string BufferGroupName { get; private set; } = string.Empty;
 
     public IMessagePersistenceBufferingPublisherConfigurationSelector Called(string name)
     {

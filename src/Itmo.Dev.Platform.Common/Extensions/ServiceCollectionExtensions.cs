@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddUtcDateTimeProvider(this IServiceCollection collection)
         => collection.AddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
 
-    public static IServiceCollection AddHostedServiceUnsafe<THostedService>(
+    internal static IServiceCollection AddHostedServiceUnsafe<THostedService>(
         this IServiceCollection collection,
         Func<IServiceProvider, THostedService> factory)
         where THostedService : class, IHostedService

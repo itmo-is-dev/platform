@@ -22,6 +22,6 @@ public static class ServiceCollectionExtensions
     public static void ConfigureSerialization(this IServiceCollection collection)
     {
         collection.Configure<JsonSerializerSettings>(settings
-            => ConfigurationBuilder.Build(new SerializationConfiguration()).ApplyToSerializationSettings(settings));
+            => SerializationConfigurationFactory.Build(new SerializationConfiguration()).ApplyToSerializationSettings(settings));
     }
 }

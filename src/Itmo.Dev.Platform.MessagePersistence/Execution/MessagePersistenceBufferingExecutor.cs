@@ -36,7 +36,6 @@ internal class MessagePersistenceBufferingExecutor : IMessagePersistenceBufferin
 
         var bufferingGroup = _registry.GetBufferingGroup(record.BufferGroup);
         var step = bufferingGroup.FindStep(bufferingStepName);
-        var nextStepName = bufferingGroup.FindNextStepName(step?.Name);
 
         if (step is null)
             throw MessagePersistenceException.BufferingStepNotFound(record.BufferGroup, bufferingStepName);
@@ -47,13 +46,10 @@ internal class MessagePersistenceBufferingExecutor : IMessagePersistenceBufferin
 
         var messagesArray = messages.ToArray();
 
-        for (int i = 0; i < messagesArray.Length; i++)
+        foreach (SerializedMessage message in messagesArray)
         {
-            messagesArray[i] = messagesArray[i] with
-            {
-                State = MessageState.Published,
-                BufferingStep = nextStepName,
-            };
+            message.State = MessageState.Published;
+            message.BufferingStep = bufferingStepName;
         }
 
         await stepPublisher.PublishAsync(messagesArray, cancellationToken);

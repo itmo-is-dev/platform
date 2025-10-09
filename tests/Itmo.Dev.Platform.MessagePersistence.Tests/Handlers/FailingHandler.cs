@@ -16,7 +16,7 @@ public class FailingHandler<TKey, TValue> : IMessagePersistenceHandler<TKey, TVa
         foreach (IMessage<TKey, TValue> message in messages)
         {
             _context.Messages.Add(new TestMessage<TKey, TValue>(message.Key, message.Value));
-            message.SetResult(MessageHandleResult.Failure);
+            message.SetFailedResult();
         }
 
         return ValueTask.CompletedTask;

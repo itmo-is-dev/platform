@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.MessagePersistence.Buffering;
+using Itmo.Dev.Platform.MessagePersistence.Execution.FailureProcessors;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
@@ -13,6 +14,8 @@ internal class BufferStepOptions : IValidatableObject
     [NotNull]
     [Required]
     public Type? PublisherType { get; set; }
+    
+    public IMessageHandleFailureProcessor? FailureProcessor { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

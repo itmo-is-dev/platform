@@ -30,4 +30,10 @@ public class MessagePersistenceException : PlatformException
         string message = $"Could not find buffering step '{stepName}' in buffering group '{groupName}'";
         return new MessagePersistenceException(message);
     }
+
+    internal static MessagePersistenceException MessageHandleFailed(string messageName, long messageId)
+    {
+        string message = $"Failed to handle message {messageName} with id = {messageId}";
+        return new MessagePersistenceException(message);
+    }
 }

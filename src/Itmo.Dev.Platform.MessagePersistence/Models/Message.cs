@@ -10,7 +10,7 @@ internal class Message<TKey, TValue> : IMessage<TKey, TValue>
         Value = value;
         Result = result;
     }
-    
+
     public long Id { get; }
 
     public DateTimeOffset CreatedAt { get; }
@@ -21,8 +21,18 @@ internal class Message<TKey, TValue> : IMessage<TKey, TValue>
 
     public MessageHandleResult Result { get; private set; }
 
-    public void SetResult(MessageHandleResult result)
+    public void SetSuccessResult()
     {
-        Result = result;
+        Result = new MessageHandleResult.Success();
+    }
+
+    public void SetIgnoredResult()
+    {
+        Result = new MessageHandleResult.Ignored();
+    }
+
+    public void SetFailedResult(Exception? exception = null)
+    {
+        Result = new MessageHandleResult.Failure(exception);
     }
 }

@@ -40,18 +40,20 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new SerializedMessage(
-                Id: reader.GetInt64("persisted_message_id"),
-                Name: reader.GetString("persisted_message_name"),
-                CreatedAt: reader.GetFieldValue<DateTimeOffset>("persisted_message_created_at"),
-                State: reader.GetFieldValue<MessageState>("persisted_message_state"),
-                Key: reader.GetString("persisted_message_key"),
-                Value: reader.GetString("persisted_message_value"),
-                RetryCount: reader.GetInt32("persisted_message_retry_count"),
-                BufferingStep: reader.GetNullableString("persisted_message_buffering_step"));
+                id: reader.GetInt64("persisted_message_id"),
+                name: reader.GetString("persisted_message_name"),
+                createdAt: reader.GetFieldValue<DateTimeOffset>("persisted_message_created_at"),
+                state: reader.GetFieldValue<MessageState>("persisted_message_state"),
+                key: reader.GetString("persisted_message_key"),
+                value: reader.GetString("persisted_message_value"),
+                retryCount: reader.GetInt32("persisted_message_retry_count"),
+                bufferingStep: reader.GetNullableString("persisted_message_buffering_step"));
         }
     }
 
-    public async Task AddAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<long> AddAsync(
+        IReadOnlyCollection<SerializedMessage> messages,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await using var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
@@ -63,7 +65,12 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
             .AddJsonArrayParameter("values", messages.Select(message => message.Value))
             .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep));
 
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            yield return reader.GetInt64(0);
+        }
     }
 
     public async Task UpdateAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken)

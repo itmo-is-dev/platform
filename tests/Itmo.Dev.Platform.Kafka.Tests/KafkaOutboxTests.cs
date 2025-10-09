@@ -92,7 +92,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         var consumerConfig = new ConsumerConfig
         {
-            GroupId = nameof(KafkaProducerTests),
+            GroupId = TestConsumerGroup.GetName(testData.TestKey),
             BootstrapServers = _kafkaFixture.Host,
             AutoOffsetReset = AutoOffsetReset.Earliest,
         };
@@ -109,22 +109,32 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
         // Act
 
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5 * testData.Messages.Length));
+        cts.CancelAfter(TimeSpan.FromSeconds(5 * testData.Messages.Count));
 
         // Assert
         producer.Should().BeOfType(configData.ExpectedProducerType);
 
-        var consumedMessages = testData.Messages
-            .Select(_ =>
-            {
-                var result = consumer.Consume(cts.Token);
-                consumer.Commit(result);
+        var consumedMessages = new List<Confluent.Kafka.Message<int, string>>();
 
-                return result;
-            })
-            .OrderBy(x => x.Offset.Value)
-            .Select(x => x.Message)
-            .ToArray();
+        while (cts.IsCancellationRequested is false && consumedMessages.Count != testData.Messages.Count)
+        {
+            var result = consumer.Consume(cts.Token);
+
+            if (result.Message.Key == testData.TestKey)
+            {
+                consumedMessages.Add(result.Message);
+                Log.Information("Adding result with value = {Value}", result.Message.Value);
+            }
+            else
+            {
+                Log.Information("Skipping result with key = {Key}", result.Message.Key);
+            }
+        }
+
+        cts.IsCancellationRequested.Should().BeFalse("Failed to wait for all message consumption");
+
+        consumedMessages.Should().HaveCount(testData.Messages.Count);
+        consumedMessages = consumedMessages.OrderBy(x => x.Value).ToList();
 
         consumedMessages.Zip(testData.Messages)
             .Should()
@@ -136,21 +146,24 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
                         .Including(x => x.Key)
                         .Including(x => x.Value)));
 
+        // Delay so we do not intersect with FOR UPDATE SKIP LOCKED in initial publisher transaction
+        await Task.Delay(TimeSpan.FromMilliseconds(100), cts.Token);
+
         var outboxRepository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
 
         var query = SerializedMessageQuery.Build(builder => builder
             .WithPageSize(int.MaxValue)
             .WithName(KafkaOutboxMessageName.ForTopic(TopicName))
-            .WithCursor(DateTimeOffset.MinValue)
-            .WithState(MessageState.Completed));
+            .WithCursor(DateTimeOffset.MinValue));
 
         var outboxMessages = await outboxRepository
             .QueryAsync(query, default)
-            .ToArrayAsync(default);
+            .ToArrayAsync();
 
         if (configData.ShouldWriteOutboxMessages)
         {
-            outboxMessages.Should().HaveCount(testData.Messages.Length);
+            outboxMessages.Should().HaveCount(testData.Messages.Count);
+            outboxMessages.Should().AllSatisfy(x => x.State.Should().Be(MessageState.Completed));
         }
         else
         {
@@ -165,32 +178,41 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
     {
         KafkaOutboxConfigData[] configs =
         [
-            new(null, typeof(AlwaysOutboxMessageProducer<int, string>), true),
-            new(OutboxStrategy.Always, typeof(AlwaysOutboxMessageProducer<int, string>), true),
-            new(OutboxStrategy.Fallback, typeof(FallbackOutboxMessageProducer<int, string>), false),
+            new(OutboxStrategy: null,
+                typeof(AlwaysOutboxMessageProducer<int, string>),
+                ShouldWriteOutboxMessages: true),
+
+            new(OutboxStrategy.Always,
+                typeof(AlwaysOutboxMessageProducer<int, string>),
+                ShouldWriteOutboxMessages: true),
+
+            new(OutboxStrategy.Fallback,
+                typeof(FallbackOutboxMessageProducer<int, string>),
+                ShouldWriteOutboxMessages: false),
         ];
 
-        KafkaOutboxTestData[] data =
-        [
-            KafkaOutboxTestData.SingleMessage(1),
-            KafkaOutboxTestData.SingleMessage(10),
-            KafkaOutboxTestData.Many(1, 10),
-            KafkaOutboxTestData.Many(5, 10),
-            KafkaOutboxTestData.Many(10, 10),
-        ];
-
-        return data.SelectMany(_ => configs, static (data, config) => new object[] { data, config });
+        return configs.SelectMany(
+            _ => new[]
+            {
+                KafkaOutboxTestData.SingleMessage(1),
+                KafkaOutboxTestData.SingleMessage(10),
+                KafkaOutboxTestData.Many(1, 10),
+                KafkaOutboxTestData.Many(5, 10),
+                KafkaOutboxTestData.Many(10, 10),
+            },
+            static (config, data) => new object[] { data, config });
     }
 
     public async Task InitializeAsync()
     {
         await _kafkaFixture.CreateTopicsAsync(TopicName);
+        await _kafkaFixture.ClearTopicsAsync(TopicName);
     }
 
     public async Task DisposeAsync()
     {
         const string truncateSql = """
-        truncate table message_persistence.persisted_messages;
+        delete from message_persistence.persisted_messages;
         """;
 
         await using var command = _databaseFixture.Connection.CreateCommand();
@@ -204,5 +226,6 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
         await command.ExecuteNonQueryAsync();
 
         await _databaseFixture.ResetAsync();
+        await _kafkaFixture.ClearTopicsAsync(TopicName);
     }
 }

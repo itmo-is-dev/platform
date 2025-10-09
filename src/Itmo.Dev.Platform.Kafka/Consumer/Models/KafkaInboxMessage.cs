@@ -25,8 +25,18 @@ internal class KafkaInboxMessage<TKey, TValue> : IKafkaInboxMessage<TKey, TValue
 
     public Offset Offset => _message.Value.Offset;
 
-    public void SetResult(MessageHandleResult result)
+    public void SetSuccessResult()
     {
-        _message.SetResult(result);
+        _message.SetSuccessResult();
+    }
+
+    public void SetIgnoredResult()
+    {
+        _message.SetIgnoredResult();
+    }
+
+    public void SetFailedResult(Exception? exception = null)
+    {
+        _message.SetFailedResult(exception);
     }
 }

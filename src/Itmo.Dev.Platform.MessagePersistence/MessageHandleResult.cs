@@ -1,8 +1,12 @@
 namespace Itmo.Dev.Platform.MessagePersistence;
 
-public enum MessageHandleResult
+public abstract record MessageHandleResult
 {
-    Success,
-    Failure,
-    Ignored,
+    private MessageHandleResult() { }
+
+    public sealed record Success : MessageHandleResult;
+
+    public sealed record Ignored : MessageHandleResult;
+
+    public sealed record Failure(Exception? Exception) : MessageHandleResult;
 }

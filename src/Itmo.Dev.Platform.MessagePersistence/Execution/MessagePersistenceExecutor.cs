@@ -1,4 +1,4 @@
-using Itmo.Dev.Platform.MessagePersistence.Configuration;
+using Itmo.Dev.Platform.MessagePersistence.Execution.FailureProcessors;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Options;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Transactions;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Execution;
 
@@ -27,6 +28,7 @@ internal class MessagePersistenceExecutor : IMessagePersistenceExecutor
 
     public async Task ExecuteAsync(
         string messageName,
+        MessagePersistenceExecutionConfiguration configuration,
         IEnumerable<SerializedMessage> messages,
         CancellationToken cancellationToken)
     {
@@ -40,7 +42,7 @@ internal class MessagePersistenceExecutor : IMessagePersistenceExecutor
             _serviceProvider,
             executorType);
 
-        await executor.ExecuteAsync(messageName, messages.ToArray(), cancellationToken);
+        await executor.ExecuteAsync(messageName, configuration, messages.ToDictionary(x => x.Id), cancellationToken);
     }
 }
 
@@ -48,10 +50,12 @@ file interface ITypedMessagePersistenceExecutor
 {
     Task ExecuteAsync(
         string messageName,
-        SerializedMessage[] serializedMessages,
+        MessagePersistenceExecutionConfiguration configuration,
+        IReadOnlyDictionary<long, SerializedMessage> serializedMessages,
         CancellationToken cancellationToken);
 }
 
+[DebuggerDisplay("{ToString()}", Type = "MessagePersistenceExecutor")]
 file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersistenceExecutor
 {
     private readonly ILogger<TypedMessagePersistenceExecutor<TKey, TValue>> _logger;
@@ -76,20 +80,31 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
 
     public async Task ExecuteAsync(
         string messageName,
-        SerializedMessage[] serializedMessages,
+        MessagePersistenceExecutionConfiguration configuration,
+        IReadOnlyDictionary<long, SerializedMessage> serializedMessages,
         CancellationToken cancellationToken)
     {
         var handlerOptions = _handlerOptions.Get(messageName);
 
-        var messageStates = serializedMessages.ToDictionary(x => x.Id, x => x.State);
-        var messageRetryCounts = serializedMessages.ToDictionary(x => x.Id, x => x.RetryCount);
-
-        var messages = MapMessages(messageName, serializedMessages, messageStates, handlerOptions).ToArray();
+        var messages = MapMessages(
+                messageName,
+                serializedMessages.Values,
+                handlerOptions)
+            .ToArray();
 
         var handler = _serviceProvider.GetRequiredKeyedService<IMessagePersistenceHandler<TKey, TValue>>(messageName);
 
         try
         {
+            // Here we suppress parent transaction from our library/pipeline (if exists) so the changes commited
+            // in a handler would not be reverted if some other messages would produce throwing behaviour and cancel
+            // parent transaction (again, if exists).
+            // This allows package consumers to implement idempotency on their own as we do not interfere with their
+            // transactions.
+            using var _ = new TransactionScope(
+                TransactionScopeOption.Suppress,
+                TransactionScopeAsyncFlowOption.Enabled);
+
             await handler.HandleAsync(messages, cancellationToken);
         }
         catch (Exception e)
@@ -98,49 +113,52 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
 
             foreach (Message<TKey, TValue> message in messages)
             {
-                message.SetResult(MessageHandleResult.Failure);
+                message.SetFailedResult(e);
             }
         }
+
+        // Scoped using is here by design.
+        // We expect exceptions here only in buffering context, as FailureProcessor is configured on a
+        // per buffering step basis.
+        // We do not expect any DB transactions in a buffering context.
+        // We need to block buffer processing so it would retry on its own, not sending messages again through the
+        // pipeline.
+        // We don't need to retry already completed messages, buffering implementations are expected to skip messages
+        // that are not published (Completed/Pending in this context).
+        // We are using scoped using here to update message states (and other attributes) no matter if we block buffer
+        // or not.
+        using var failureProcessorContext = new MessageHandleFailureProcessorContext(handlerOptions);
 
         foreach (Message<TKey, TValue> message in messages)
         {
-            messageStates[message.Id] = message.Result switch
+            if (message.Result is MessageHandleResult.Success)
             {
-                MessageHandleResult.Success => MessageState.Completed,
-                MessageHandleResult.Failure => MessageState.Failed,
-                MessageHandleResult.Ignored => MessageState.Pending,
-                _ => throw new UnreachableException(),
-            };
-
-            if (message.Result is MessageHandleResult.Failure)
+                serializedMessages[message.Id].State = MessageState.Completed;
+            }
+            else if (message.Result is MessageHandleResult.Ignored)
             {
-                var retryCount = ++messageRetryCounts[message.Id];
-
-                if (retryCount < handlerOptions.RetryCount)
-                {
-                    messageStates[message.Id] = MessageState.Pending;
-                }
+                serializedMessages[message.Id].State = MessageState.Pending;
+            }
+            else if (message.Result is MessageHandleResult.Failure failure)
+            {
+                configuration.FailureProcessor.Process(
+                    failureProcessorContext,
+                    failure,
+                    serializedMessages[message.Id]);
             }
         }
 
-        for (var i = 0; i < serializedMessages.Length; i++)
-        {
-            SerializedMessage message = serializedMessages[i];
-
-            serializedMessages[i] = serializedMessages[i] with
-            {
-                State = messageStates[message.Id],
-                RetryCount = messageRetryCounts[message.Id],
-            };
-        }
-
-        await _repository.UpdateAsync(serializedMessages, cancellationToken);
+        // Caveat for future implementations of buffering that rely on DB:
+        // If FailureProcessor is configured to throw exceptions and DB buffering implementation opens transaction
+        // before calling the publisher, this call would not be commited.
+        // This means that buffering retries would retry messages that are effectively succeeded if they are processed
+        // in batch with failed messages.
+        await _repository.UpdateAsync(serializedMessages.Values.ToArray(), cancellationToken);
     }
 
     private IEnumerable<Message<TKey, TValue>> MapMessages(
         string messageName,
         IEnumerable<SerializedMessage> messages,
-        IDictionary<long, MessageState> states,
         MessagePersistenceHandlerOptions options)
     {
         foreach (SerializedMessage message in messages)
@@ -155,7 +173,7 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
                     message.Id,
                     message.Key);
 
-                states[message.Id] = MessageState.Failed;
+                message.State = MessageState.Failed;
 
                 continue;
             }
@@ -170,17 +188,25 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
                     message.Id,
                     message.Value);
 
-                states[message.Id] = MessageState.Failed;
+                message.State = MessageState.Failed;
 
                 continue;
             }
+
+            MessageHandleResult result = options.DefaultHandleResult switch
+            {
+                MessageHandleResultKind.Success => new MessageHandleResult.Success(),
+                MessageHandleResultKind.Failure => new MessageHandleResult.Failure(null),
+                MessageHandleResultKind.Ignored => new MessageHandleResult.Ignored(),
+                _ => throw new UnreachableException(),
+            };
 
             yield return new Message<TKey, TValue>(
                 message.Id,
                 message.CreatedAt,
                 key,
                 value,
-                options.DefaultHandleResult);
+                result);
         }
     }
 }

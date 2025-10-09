@@ -6,7 +6,7 @@ internal interface IMessagePersistenceInternalRepository
 {
     IAsyncEnumerable<SerializedMessage> QueryAsync(SerializedMessageQuery query, CancellationToken cancellationToken);
 
-    Task AddAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken);
+    IAsyncEnumerable<long> AddAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken);
 
     Task UpdateAsync(IReadOnlyCollection<SerializedMessage> messages, CancellationToken cancellationToken);
 }

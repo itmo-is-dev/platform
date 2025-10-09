@@ -13,9 +13,16 @@ public interface IKafkaBufferingProducerConfigurationSelector
 
 public interface IKafkaBufferingConsumerConfigurationSelector
 {
-    IKafkaBufferingBuilder WithConsumerConfiguration(
+    IKafkaBufferingFailureHandleBuilder WithConsumerConfiguration(
         IConfiguration configuration,
         Action<KafkaConsumerOptions>? action = null);
 }
 
-public interface IKafkaBufferingBuilder { }
+public interface IKafkaBufferingFailureHandleBuilder : IKafkaBufferingBuilder
+{
+    IKafkaBufferingBuilder WithFailureBlockingBehaviour();
+}
+
+public interface IKafkaBufferingBuilder
+{
+}

@@ -8,5 +8,9 @@ public interface IMessage<out TKey, out TValue>
 
     TValue Value { get; }
 
-    void SetResult(MessageHandleResult result);
+    void SetSuccessResult();
+
+    void SetIgnoredResult();
+
+    void SetFailedResult(Exception? exception = null);
 }

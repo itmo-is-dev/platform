@@ -42,6 +42,25 @@ public class KafkaFixture : IAsyncLifetime
         await _adminClient.CreateTopicsAsync(specifications);
     }
 
+    public async Task ClearTopicsAsync(params string[] names)
+    {
+        var topics = await _adminClient.DescribeTopicsAsync(
+            TopicCollection.OfTopicNames(names));
+
+        var topicPartitionsOffsetSpecs = topics.TopicDescriptions
+            .SelectMany(topic => topic.Partitions, (topic, topicPartition) => (topic, topicPartition))
+            .Select(tuple => new TopicPartitionOffsetSpec
+            {
+                TopicPartition = new TopicPartition(tuple.topic.Name, tuple.topicPartition.Partition),
+                OffsetSpec = OffsetSpec.Latest(),
+            });
+
+        var offsets = await _adminClient.ListOffsetsAsync(topicPartitionsOffsetSpecs);
+
+        await _adminClient.DeleteRecordsAsync(
+            offsets.ResultInfos.Select(x => x.TopicPartitionOffsetError.TopicPartitionOffset));
+    }
+
     public async Task InitializeAsync()
     {
         await Container.StartAsync();

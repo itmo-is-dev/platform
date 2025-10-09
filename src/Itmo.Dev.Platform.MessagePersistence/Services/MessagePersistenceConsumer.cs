@@ -4,6 +4,7 @@ using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Newtonsoft.Json;
 using System.Data;
+using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
 
@@ -13,20 +14,17 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPersistenceTransactionProvider _transactionProvider;
     private readonly IMessagePersistenceInternalRepository _messagePersistenceRepository;
-    private readonly MessagePersistenceRegistry _registry;
 
     public MessagePersistenceConsumer(
         JsonSerializerSettings serializerSettings,
         IDateTimeProvider dateTimeProvider,
         IPersistenceTransactionProvider transactionProvider,
-        IMessagePersistenceInternalRepository messagePersistenceRepository,
-        MessagePersistenceRegistry registry)
+        IMessagePersistenceInternalRepository messagePersistenceRepository)
     {
         _serializerSettings = serializerSettings;
         _dateTimeProvider = dateTimeProvider;
         _transactionProvider = transactionProvider;
         _messagePersistenceRepository = messagePersistenceRepository;
-        _registry = registry;
     }
 
     public async ValueTask ConsumeAsync<TKey, TValue>(
@@ -34,30 +32,40 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
         IReadOnlyCollection<PersistedMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken)
     {
+        await foreach (var _ in ConsumeInternalAsync(messageName, messages, cancellationToken)) { }
+    }
+
+    public async IAsyncEnumerable<long> ConsumeInternalAsync<TKey, TValue>(
+        string messageName,
+        IReadOnlyCollection<PersistedMessage<TKey, TValue>> messages,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
         if (messages.Count is 0)
-            return;
+            yield break;
 
         var createdAt = _dateTimeProvider.Current;
 
-        var record = _registry.GetRecord(messageName);
-        var bufferingGroup = record.BufferGroup is null ? null : _registry.GetBufferingGroup(record.BufferGroup);
-
         var serializedMessages = messages
             .Select(message => new SerializedMessage(
-                Id: default,
-                Name: messageName,
-                CreatedAt: createdAt,
-                State: MessageState.Pending,
-                Key: JsonConvert.SerializeObject(message.Key, _serializerSettings),
-                Value: JsonConvert.SerializeObject(message.Value, _serializerSettings),
-                RetryCount: 0,
-                BufferingStep: bufferingGroup?.FindNextStepName(currentStepName: null)))
+                id: default,
+                name: messageName,
+                createdAt: createdAt,
+                state: MessageState.Pending,
+                key: JsonConvert.SerializeObject(message.Key, _serializerSettings),
+                value: JsonConvert.SerializeObject(message.Value, _serializerSettings),
+                retryCount: 0,
+                bufferingStep: null))
             .ToArray();
 
         await using var transaction = await _transactionProvider
             .BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
-        await _messagePersistenceRepository.AddAsync(serializedMessages, cancellationToken);
+        var messageIds = _messagePersistenceRepository.AddAsync(serializedMessages, cancellationToken);
+
+        await foreach (var messageId in messageIds)
+        {
+            yield return messageId;
+        }
 
         await transaction.CommitAsync(cancellationToken);
     }

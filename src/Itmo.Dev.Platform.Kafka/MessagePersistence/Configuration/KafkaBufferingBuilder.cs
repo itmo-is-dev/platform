@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.Kafka.Extensions;
 using Itmo.Dev.Platform.Kafka.MessagePersistence.Models;
 using Itmo.Dev.Platform.Kafka.Producer;
 using Itmo.Dev.Platform.MessagePersistence;
+using Itmo.Dev.Platform.MessagePersistence.Execution.FailureProcessors;
 using Itmo.Dev.Platform.MessagePersistence.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,13 +13,15 @@ namespace Itmo.Dev.Platform.Kafka.MessagePersistence.Configuration;
 internal class KafkaBufferingBuilder :
     IKafkaBufferingProducerConfigurationSelector,
     IKafkaBufferingConsumerConfigurationSelector,
-    IKafkaBufferingBuilder
+    IKafkaBufferingFailureHandleBuilder
 {
     private readonly IMessagePersistenceBufferingStepSelector _stepSelector;
+    private readonly BufferStepOptions _stepOptions;
 
     public KafkaBufferingBuilder(IMessagePersistenceBufferingStepSelector stepSelector)
     {
         _stepSelector = stepSelector;
+        _stepOptions = new BufferStepOptions();
     }
 
     public IKafkaBufferingConsumerConfigurationSelector WithProducerConfiguration(
@@ -42,18 +45,15 @@ internal class KafkaBufferingBuilder :
             _stepSelector.BufferGroupName,
             (provider, _) => ActivatorUtilities.CreateInstance<KafkaBufferingStepPublisher>(provider, topicName));
 
-        var step = new BufferStepOptions
-        {
-            Name = topicName,
-            PublisherType = typeof(KafkaBufferingStepPublisher),
-        };
+        _stepOptions.Name = topicName;
+        _stepOptions.PublisherType = typeof(KafkaBufferingStepPublisher);
 
-        _stepSelector.WithStep(step);
+        _stepSelector.WithStep(_stepOptions);
 
         return this;
     }
 
-    public IKafkaBufferingBuilder WithConsumerConfiguration(
+    public IKafkaBufferingFailureHandleBuilder WithConsumerConfiguration(
         IConfiguration configuration,
         Action<KafkaConsumerOptions>? action = null)
     {
@@ -65,6 +65,12 @@ internal class KafkaBufferingBuilder :
             .DeserializeValueWithNewtonsoft()
             .HandleWith<KafkaBufferingStepConsumerHandler>());
 
+        return this;
+    }
+
+    public IKafkaBufferingBuilder WithFailureBlockingBehaviour()
+    {
+        _stepOptions.FailureProcessor = new ThrowMessageHandleFailureProcessor();
         return this;
     }
 }

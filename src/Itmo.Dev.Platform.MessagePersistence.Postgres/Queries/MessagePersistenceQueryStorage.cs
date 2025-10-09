@@ -31,6 +31,7 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
         persisted_message_value,
         persisted_message_buffering_step)
     select * from unnest(:names, :created_at, :states, :keys, :values, :buffering_steps)
+    returning persisted_message_id;
     """);
 
     public MessagePersistenceQuery Update { get; } = factory.Create(o => $"""

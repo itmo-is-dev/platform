@@ -11,7 +11,7 @@ using System.Data;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
 
-public class MessagePersistenceInitialPublishBackgroundService : BackgroundService
+internal class MessagePersistenceInitialPublishBackgroundService : BackgroundService
 {
     private readonly string _publisherName;
     private readonly MessagePersistencePublisherOptions _publisherOptions;
@@ -88,6 +88,7 @@ public class MessagePersistenceInitialPublishBackgroundService : BackgroundServi
 
             var serializedMessages = await repository
                 .QueryAsync(query, cancellationToken)
+                .Select(ProcessMessage)
                 .ToArrayAsync(cancellationToken);
 
             _logger.LogInformation(
@@ -106,5 +107,11 @@ public class MessagePersistenceInitialPublishBackgroundService : BackgroundServi
 
             await transaction.CommitAsync(cancellationToken);
         }
+    }
+
+    private SerializedMessage ProcessMessage(SerializedMessage message)
+    {
+        message.BufferingStep = null;
+        return message;
     }
 }

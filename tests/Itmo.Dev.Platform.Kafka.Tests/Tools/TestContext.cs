@@ -8,6 +8,8 @@ public class TestContext<TKey, TValue>
 
     public Task<TestMessage<TKey, TValue>> Message => _tcs.Task;
 
+    public int CallCount { get; set; }
+
     public ICollection<IKafkaConsumerMessage<TKey, TValue>> Messages { get; } =
         new List<IKafkaConsumerMessage<TKey, TValue>>();
 

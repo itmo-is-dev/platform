@@ -6,4 +6,9 @@ public interface IMessagePersistenceConsumer
         string messageName,
         IReadOnlyCollection<PersistedMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken);
+
+    internal IAsyncEnumerable<long> ConsumeInternalAsync<TKey, TValue>(
+        string messageName,
+        IReadOnlyCollection<PersistedMessage<TKey, TValue>> messages,
+        CancellationToken cancellationToken);
 }

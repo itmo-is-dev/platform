@@ -6,6 +6,7 @@ internal interface IMessagePersistenceExecutor
 {
     Task ExecuteAsync(
         string messageName,
+        MessagePersistenceExecutionConfiguration configuration,
         IEnumerable<SerializedMessage> messages,
         CancellationToken cancellationToken);
 }

@@ -4,7 +4,7 @@ namespace Itmo.Dev.Platform.MessagePersistence.Options;
 
 public class MessagePersistenceHandlerOptions : IValidatableObject
 {
-    public MessageHandleResult DefaultHandleResult { get; set; }
+    public MessageHandleResultKind DefaultHandleResult { get; set; }
 
     public int? RetryCount { get; set; }
 

@@ -75,7 +75,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         T value,
         JsonSerializerSettings? serializerSettings = null)
     {
-        var serialized = JsonConvert.SerializeObject(value, serializerSettings);
+        var serialized = JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
@@ -93,7 +93,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         JsonSerializerSettings? serializerSettings = null)
         where T : class
     {
-        object serialized = value is null ? DBNull.Value : JsonConvert.SerializeObject(value, serializerSettings);
+        object serialized = value is null ? DBNull.Value : JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
@@ -112,7 +112,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         JsonSerializerSettings? serializerSettings = null)
     {
         var serialized = values
-            .Select(value => JsonConvert.SerializeObject(value, serializerSettings))
+            .Select(value => JsonConvert.SerializeObject(value, typeof(T), serializerSettings))
             .ToArray();
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)

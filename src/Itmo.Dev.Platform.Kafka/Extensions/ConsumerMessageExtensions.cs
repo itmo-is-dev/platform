@@ -25,7 +25,7 @@ public static class ConsumerMessageExtensions
             int partition,
             IEnumerable<IKafkaConsumerMessage<TKey, TValue>> partitionGroup)
         {
-            return partitionGroup.MaxBy(x => x.Offset)!;
+            return partitionGroup.MaxBy(x => x.Offset.Value)!;
         }
     }
 

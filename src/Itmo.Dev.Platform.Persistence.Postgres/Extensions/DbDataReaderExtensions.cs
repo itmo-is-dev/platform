@@ -13,7 +13,17 @@ public static class DbDataReaderExtensions
     public static string? GetNullableString(this DbDataReader reader, string name)
         => reader.GetNullableString(reader.GetOrdinal(name));
 
-    public static T GetJsonFieldValue<T>(this DbDataReader reader, int ordinal, JsonSerializerSettings serializerSettings)where T : notnull
+    public static T[]? GetNullableArrayValue<T>(this DbDataReader reader, int ordinal)
+        => reader.IsDBNull(ordinal) ? null : reader.GetFieldValue<T[]>(ordinal);
+
+    public static T[]? GetNullableArrayValue<T>(this DbDataReader reader, string name)
+        => reader.IsDBNull(name) ? null : reader.GetFieldValue<T[]>(name);
+
+    public static T GetJsonFieldValue<T>(
+        this DbDataReader reader,
+        int ordinal,
+        JsonSerializerSettings serializerSettings)
+        where T : notnull
     {
         var serialized = reader.GetString(ordinal);
         var deserialized = JsonConvert.DeserializeObject<T>(serialized, serializerSettings);
@@ -24,7 +34,11 @@ public static class DbDataReaderExtensions
         return deserialized;
     }
 
-    public static T GetJsonFieldValue<T>(this DbDataReader reader, string name, JsonSerializerSettings serializerSettings) where T : notnull
+    public static T GetJsonFieldValue<T>(
+        this DbDataReader reader,
+        string name,
+        JsonSerializerSettings serializerSettings)
+        where T : notnull
     {
         var serialized = reader.GetString(name);
         var deserialized = JsonConvert.DeserializeObject<T>(serialized, serializerSettings);
@@ -38,7 +52,8 @@ public static class DbDataReaderExtensions
     public static T[] GetJsonArrayFieldValue<T>(
         this DbDataReader reader,
         int ordinal,
-        JsonSerializerSettings serializerSettings) where T : notnull
+        JsonSerializerSettings serializerSettings)
+        where T : notnull
     {
         var serialized = reader.GetFieldValue<string[]>(ordinal);
 
@@ -66,7 +81,8 @@ public static class DbDataReaderExtensions
     public static T[] GetJsonArrayFieldValue<T>(
         this DbDataReader reader,
         string name,
-        JsonSerializerSettings serializerSettings) where T : notnull
+        JsonSerializerSettings serializerSettings)
+        where T : notnull
     {
         var serialized = reader.GetFieldValue<string[]>(name);
 

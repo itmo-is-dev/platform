@@ -44,11 +44,12 @@ internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
                     .AddGrpcCoreInstrumentation()
+                    .AddGrpcClientInstrumentation()
                     .AddNpgsql();
 
                 tracing.AddHttpClientInstrumentation(options =>
                 {
-                    options.FilterHttpRequestMessage = message => message.Version.Major < 2;
+                    options.FilterHttpRequestMessage = message => message.Version.Major >= 1;
                     options.RecordException = true;
                 });
 

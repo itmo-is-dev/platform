@@ -48,7 +48,7 @@ internal class SerilogConfigurationPlugin : IObservabilityConfigurationPlugin
             configuration,
             (conf, plugin) => plugin.Configure(builder, conf));
 
-        Log.Logger = configuration.CreateLogger();
+        Log.Logger = configuration.WriteTo.Logger(Log.Logger).CreateLogger();
         builder.Host.UseSerilog();
 
         _logger.LogInformation("Serilog logging initialized");

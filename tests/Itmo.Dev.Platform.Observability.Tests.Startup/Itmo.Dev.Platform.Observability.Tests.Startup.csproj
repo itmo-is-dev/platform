@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    
+    <ItemGroup>
+        <PackageReference Include="Grpc.AspNetCore"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
+        <PackageReference Include="Grpc.Tools"/>
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="protos/*.proto" GrpcServices="Both"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Grpc\Itmo.Dev.Platform.Grpc.csproj" />
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Observability\Itmo.Dev.Platform.Observability.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,5 +1,7 @@
 using Itmo.Dev.Platform.Common.Options;
 using Itmo.Dev.Platform.Kafka.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
+using Itmo.Dev.Platform.Observability.Tracing.Processors;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using OpenTelemetry.Resources;
@@ -41,17 +43,21 @@ internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
                 tracing
                     .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
                     .AddSource(PlatformKafkaActivitySource.Name)
+                    .AddSource(PlatformMessagePersistenceActivitySource.Name)
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
                     .AddGrpcCoreInstrumentation()
                     .AddGrpcClientInstrumentation()
-                    .AddNpgsql();
+                    .AddNpgsql()
+                    .AddHttpClientInstrumentation(options =>
+                    {
+                        options.FilterHttpRequestMessage = message => message.Version.Major >= 1;
+                        options.RecordException = true;
+                    });
 
-                tracing.AddHttpClientInstrumentation(options =>
-                {
-                    options.FilterHttpRequestMessage = message => message.Version.Major >= 1;
-                    options.RecordException = true;
-                });
+                tracing
+                    .AddProcessor<DbStatementActivityFilter>()
+                    .AddProcessor<MetricsActivityFilter>();
 
                 foreach (string source in _options.Sources ?? [])
                 {

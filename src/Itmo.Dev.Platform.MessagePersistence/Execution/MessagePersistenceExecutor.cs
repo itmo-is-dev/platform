@@ -1,8 +1,11 @@
+using Itmo.Dev.Platform.Common.Extensions;
+using Itmo.Dev.Platform.MessagePersistence.Exceptions;
 using Itmo.Dev.Platform.MessagePersistence.Execution.FailureProcessors;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Options;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Services;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,6 +15,8 @@ using System.Diagnostics;
 using System.Transactions;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Execution;
+
+#pragma warning disable CA1506
 
 internal class MessagePersistenceExecutor : IMessagePersistenceExecutor
 {
@@ -84,6 +89,14 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
         IReadOnlyDictionary<long, SerializedMessage> serializedMessages,
         CancellationToken cancellationToken)
     {
+        using var activity = PlatformMessagePersistenceActivitySource.Value
+            .StartActivity(
+                name: PlatformMessagePersistenceConstants.SpanName,
+                ActivityKind.Internal,
+                parentContext: default,
+                links: serializedMessages.Values.SelectMany(message => message.GetActivityLinks()))
+            .WithDisplayName($"[handle] {messageName}");
+
         var handlerOptions = _handlerOptions.Get(messageName);
 
         var messages = MapMessages(
@@ -145,6 +158,14 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
                     failureProcessorContext,
                     failure,
                     serializedMessages[message.Id]);
+            }
+        }
+
+        foreach (SerializedMessage serializedMessage in serializedMessages.Values)
+        {
+            if (activity is { Id: not null })
+            {
+                serializedMessage.Headers[PlatformMessagePersistenceConstants.TraceParentHeaderName] = activity.Id;
             }
         }
 

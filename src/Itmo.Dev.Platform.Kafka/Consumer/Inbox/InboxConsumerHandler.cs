@@ -1,6 +1,9 @@
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Models;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.MessagePersistence;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
+using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Inbox;
 
@@ -26,6 +29,13 @@ internal class InboxConsumerHandler<TKey, TValue> : IKafkaConsumerHandler<TKey, 
             throw new InvalidOperationException(
                 $"Failed to write inbox message, invalid message type, expected = {expectedType}. You probably attempting some unaccounted platform tampering");
         }
+        
+        using var activity = PlatformMessagePersistenceActivitySource.Value
+            .StartActivity(
+                name: PlatformMessagePersistenceConstants.SpanName,
+                ActivityKind.Internal,
+                parentContext: default)
+            .WithDisplayName($"[inbox] {_messageName}");
 
         var persistedMessages = consumerMessages
             .Select(message => new PersistedMessage<Unit, KafkaConsumerMessage<TKey, TValue>>(Unit.Value, message))

@@ -47,7 +47,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
                 key: reader.GetString("persisted_message_key"),
                 value: reader.GetString("persisted_message_value"),
                 retryCount: reader.GetInt32("persisted_message_retry_count"),
-                bufferingStep: reader.GetNullableString("persisted_message_buffering_step"));
+                bufferingStep: reader.GetNullableString("persisted_message_buffering_step"),
+                headers: reader.GetJsonFieldValue<Dictionary<string, string>>("persisted_message_headers"));
         }
     }
 
@@ -63,7 +64,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
             .AddParameter("states", messages.Select(message => message.State))
             .AddJsonArrayParameter("keys", messages.Select(message => message.Key))
             .AddJsonArrayParameter("values", messages.Select(message => message.Value))
-            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep));
+            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep))
+            .AddJsonArrayParameter("headers", messages.Select(message => message.Headers));
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
@@ -81,7 +83,8 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
             .AddParameter("ids", messages.Select(message => message.Id))
             .AddParameter("states", messages.Select(message => message.State))
             .AddParameter("retry_counts", messages.Select(message => message.RetryCount))
-            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep));
+            .AddParameter("buffering_steps", messages.Select(message => message.BufferingStep))
+            .AddJsonArrayParameter("headers", messages.Select(message => message.Headers));
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

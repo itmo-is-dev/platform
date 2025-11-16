@@ -1,13 +1,13 @@
 using System.Diagnostics;
 
-namespace Itmo.Dev.Platform.Kafka.Tools;
+namespace Itmo.Dev.Platform.MessagePersistence.Tools;
 
-internal static class PlatformKafkaActivitySource
+public static class PlatformMessagePersistenceActivitySource
 {
     /// <summary>
     ///     Required to be const, as Observability package depends on compile-time const string inlining
     /// </summary>
-    public const string Name = "Itmo.Dev.Platform.Kafka";
+    public const string Name = "Itmo.Dev.Platform.MessagePersistence";
 
     public static readonly ActivitySource Value = new(Name);
 }

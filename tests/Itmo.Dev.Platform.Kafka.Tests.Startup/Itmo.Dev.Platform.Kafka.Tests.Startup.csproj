@@ -3,10 +3,12 @@
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="Serilog.Extensions.Logging" />
+        <PackageReference Include="OpenTelemetry.Exporter.Console" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Observability\Itmo.Dev.Platform.Observability.csproj" />
     </ItemGroup>
 
 </Project>

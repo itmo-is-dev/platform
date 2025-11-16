@@ -92,7 +92,8 @@ internal sealed class BatchingKafkaConsumerService<TKey, TValue> : RestartableBa
 
         var messageHandler = new ConsumerMessageHandler<TKey, TValue>(
             consumerOptions,
-            _scopeFactory);
+            _scopeFactory,
+            logger: _serviceProvider.GetRequiredService<ILogger<ConsumerMessageHandler<TKey, TValue>>>());
 
         await ParallelAction.ExecuteAsync(
             cancellationToken,

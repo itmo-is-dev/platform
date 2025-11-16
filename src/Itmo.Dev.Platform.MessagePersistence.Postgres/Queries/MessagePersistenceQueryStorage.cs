@@ -10,7 +10,8 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
             persisted_message_key,
             persisted_message_value,
             persisted_message_retry_count,
-            persisted_message_buffering_step
+            persisted_message_buffering_step,
+            persisted_message_headers
     from {o.SchemaName}.persisted_messages
     where 
         (cardinality(:ids) = 0 or persisted_message_id = any(:ids))
@@ -29,8 +30,9 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
         persisted_message_state,
         persisted_message_key,
         persisted_message_value,
-        persisted_message_buffering_step)
-    select * from unnest(:names, :created_at, :states, :keys, :values, :buffering_steps)
+        persisted_message_buffering_step,
+        persisted_message_headers)
+    select * from unnest(:names, :created_at, :states, :keys, :values, :buffering_steps, :headers)
     returning persisted_message_id;
     """);
 
@@ -38,8 +40,9 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
     update {o.SchemaName}.persisted_messages
     set persisted_message_state = source.state,
         persisted_message_retry_count = source.retry_count,
-        persisted_message_buffering_step = source.buffering_step
-    from (select * from unnest(:ids, :states, :retry_counts, :buffering_steps)) as source(id, state, retry_count, buffering_step)
+        persisted_message_buffering_step = source.buffering_step,
+        persisted_message_headers = source.headers
+    from (select * from unnest(:ids, :states, :retry_counts, :buffering_steps, :headers)) as source(id, state, retry_count, buffering_step, headers)
     where persisted_message_id = source.id
     """);
 

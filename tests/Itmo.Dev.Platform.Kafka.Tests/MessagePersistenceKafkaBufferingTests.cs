@@ -161,7 +161,9 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         kafkaConsumeResult.Message.Value.Message
             .Should()
-            .BeEquivalentTo(serializedMessage, options => options.Excluding(message => message.State));
+            .BeEquivalentTo(serializedMessage, options => options
+                .Excluding(message => message.State)
+                .Excluding(message => message.Headers));
     }
 
     [Fact]
@@ -284,13 +286,16 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
             .BeEquivalentTo(serializedMessage,
                 options => options
                     .Excluding(message => message.State)
-                    .Excluding(message => message.RetryCount));
+                    .Excluding(message => message.RetryCount)
+                    .Excluding(message => message.Headers));
 
         firstMessageConsumeResult.Message.Value.Message.RetryCount.Should().Be(0);
 
         secondMessageConsumeResult.Message.Value.Message
             .Should()
-            .BeEquivalentTo(serializedMessage, options => options.Excluding(message => message.State));
+            .BeEquivalentTo(serializedMessage, options => options
+                .Excluding(message => message.State)
+                .Excluding(message => message.Headers));
     }
 
     [Fact]
@@ -422,7 +427,8 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
             .BeEquivalentTo(serializedMessage,
                 options => options
                     .Excluding(message => message.State)
-                    .Excluding(message => message.RetryCount));
+                    .Excluding(message => message.RetryCount)
+                    .Excluding(message => message.Headers));
 
         firstMessageConsumeResult.Message.Value.Message.RetryCount.Should().Be(0);
     }

@@ -1,5 +1,8 @@
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Outbox;
 
@@ -21,13 +24,20 @@ internal class FallbackOutboxMessageProducer<TKey, TValue> : IKafkaMessageProduc
         CancellationToken cancellationToken)
     {
         var messagesArray = await messages.ToArrayAsync(cancellationToken);
-        
+
         try
         {
             await _producer.ProduceAsync(messagesArray.ToAsyncEnumerable(), cancellationToken);
         }
         catch
         {
+            using var activity = PlatformMessagePersistenceActivitySource.Value
+                .StartActivity(
+                    name: PlatformMessagePersistenceConstants.SpanName,
+                    ActivityKind.Internal,
+                    parentContext: default)
+                .WithDisplayName($"[outbox] {_topicName}");
+
             var persistedMessages = messagesArray
                 .Select(x => new PersistedMessage<TKey, TValue>(x.Key, x.Value))
                 .ToArray();

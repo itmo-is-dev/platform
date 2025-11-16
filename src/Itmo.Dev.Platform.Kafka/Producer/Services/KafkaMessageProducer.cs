@@ -1,10 +1,12 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Kafka.Configuration;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using System.Text;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Services;
 
@@ -52,9 +54,14 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
         IAsyncEnumerable<KafkaProducerMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken)
     {
-        using var activity = PlatformKafkaActivitySource.Value.StartActivity(
-            name: $"produce: {_options.Topic}",
-            ActivityKind.Producer);
+        using var activity = PlatformKafkaActivitySource.Value
+            .StartActivity(
+                name: "Kafka",
+                ActivityKind.Producer,
+                parentContext: default)
+            .WithDisplayName($"[produce] {_options.Topic}");
+
+        Headers headers = [..EnumerateHeaders()];
 
         try
         {
@@ -64,6 +71,7 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
                 {
                     Key = producerKafkaMessage.Key,
                     Value = producerKafkaMessage.Value,
+                    Headers = headers,
                 };
 
                 await _producer.ProduceAsync(_options.Topic, message, cancellationToken);
@@ -79,5 +87,13 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
     public void Dispose()
     {
         _producer.Dispose();
+    }
+
+    private static IEnumerable<Header> EnumerateHeaders()
+    {
+        if (Activity.Current is { Id: { } traceId })
+        {
+            yield return new Header(PlatformKafkaConstants.TraceParentHeaderName, Encoding.UTF8.GetBytes(traceId));
+        }
     }
 }

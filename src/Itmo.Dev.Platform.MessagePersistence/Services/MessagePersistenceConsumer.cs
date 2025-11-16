@@ -1,9 +1,12 @@
 using Itmo.Dev.Platform.Common.DateTime;
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Newtonsoft.Json;
 using System.Data;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
@@ -45,6 +48,13 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
 
         var createdAt = _dateTimeProvider.Current;
 
+        using var activity = PlatformMessagePersistenceActivitySource.Value
+            .StartActivity(
+                name: PlatformMessagePersistenceConstants.SpanName,
+                ActivityKind.Internal,
+                parentContext: default)
+            .WithDisplayName($"[persist] {messageName}");
+
         var serializedMessages = messages
             .Select(message => new SerializedMessage(
                 id: default,
@@ -54,7 +64,8 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
                 key: JsonConvert.SerializeObject(message.Key, _serializerSettings),
                 value: JsonConvert.SerializeObject(message.Value, _serializerSettings),
                 retryCount: 0,
-                bufferingStep: null))
+                bufferingStep: null,
+                headers: new Dictionary<string, string>(EnumerateHeaders())))
             .ToArray();
 
         await using var transaction = await _transactionProvider
@@ -68,5 +79,15 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
         }
 
         await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static IEnumerable<KeyValuePair<string, string>> EnumerateHeaders()
+    {
+        if (Activity.Current is { Id: { } traceId })
+        {
+            yield return new KeyValuePair<string, string>(
+                PlatformMessagePersistenceConstants.TraceParentHeaderName,
+                traceId);
+        }
     }
 }

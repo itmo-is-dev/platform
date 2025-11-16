@@ -10,6 +10,7 @@ internal class SerializedMessage
     public MessageState State { get; set; }
     public int RetryCount { get; set; }
     public string? BufferingStep { get; set; }
+    public IDictionary<string, string> Headers { get; }
 
     public SerializedMessage(
         long id,
@@ -19,7 +20,8 @@ internal class SerializedMessage
         string key,
         string value,
         int retryCount,
-        string? bufferingStep)
+        string? bufferingStep,
+        IDictionary<string, string> headers)
     {
         Id = id;
         Name = name;
@@ -29,5 +31,6 @@ internal class SerializedMessage
         Value = value;
         RetryCount = retryCount;
         BufferingStep = bufferingStep;
+        Headers = headers;
     }
 }

@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 
@@ -37,7 +36,7 @@ public static class DbDataReaderExtensions
     public static T GetJsonFieldValue<T>(
         this DbDataReader reader,
         string name,
-        JsonSerializerSettings serializerSettings)
+        JsonSerializerSettings? serializerSettings = null)
         where T : notnull
     {
         var serialized = reader.GetString(name);

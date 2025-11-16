@@ -21,6 +21,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj"/>
         <ProjectReference Include="..\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence.Postgres\Itmo.Dev.Platform.MessagePersistence.Postgres.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
     <ItemGroup>

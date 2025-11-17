@@ -2,11 +2,12 @@ namespace Itmo.Dev.Platform.Kafka.Tools;
 
 public static class PlatformKafkaConstants
 {
-    public const string TraceParentHeaderName = "traceparent";
+    public static class Tracing
+    {
+        public const string TraceParentHeader = "traceparent";
 
-    public const string TopicTagName = "topic";
-
-    public const string PartitionTagName = "partition";
-
-    public const string OffsetTagName = "offset";
+        public const string TopicTag = "kafka_topic";
+        public const string PartitionTag = "kafka_partition";
+        public const string OffsetTag = "kafka_offset";
+    }
 }

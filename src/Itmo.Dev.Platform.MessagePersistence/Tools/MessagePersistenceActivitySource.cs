@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Tools;
 
-public static class PlatformMessagePersistenceActivitySource
+public static class MessagePersistenceActivitySource
 {
     /// <summary>
     ///     Required to be const, as Observability package depends on compile-time const string inlining

@@ -49,27 +49,22 @@ internal class MessagePersistenceBufferingExecutor : IMessagePersistenceBufferin
 
         var messagesArray = messages.ToArray();
 
-        using var activity = PlatformMessagePersistenceActivitySource.Value
+        using var activity = MessagePersistenceActivitySource.Value
             .StartActivity(
-                name: PlatformMessagePersistenceConstants.SpanName,
+                name: MessagePersistenceConstants.Tracing.SpanName,
                 ActivityKind.Internal,
                 parentContext: default,
                 tags: new Dictionary<string, object?>
                 {
-                    [PlatformMessagePersistenceConstants.BufferingStepTagName] = bufferingStepName,
-                },
-                links: messagesArray.SelectMany(message => message.GetActivityLinks()))
+                    [MessagePersistenceConstants.Tracing.MessageNameTag] = messageName,
+                    [MessagePersistenceConstants.Tracing.MessageBufferingStepTag] = bufferingStepName,
+                })
             .WithDisplayName($"[buffer] {messageName}");
 
         foreach (SerializedMessage message in messagesArray)
         {
             message.State = MessageState.Published;
             message.BufferingStep = bufferingStepName;
-
-            if (activity is { Id : not null })
-            {
-                message.Headers[PlatformMessagePersistenceConstants.TraceParentHeaderName] = activity.Id;
-            }
         }
 
         await stepPublisher.PublishAsync(messagesArray, cancellationToken);

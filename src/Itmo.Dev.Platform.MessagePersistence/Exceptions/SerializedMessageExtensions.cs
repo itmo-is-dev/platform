@@ -10,11 +10,15 @@ internal static class SerializedMessageExtensions
     {
         var tags = new ActivityTagsCollection
         {
-            [PlatformMessagePersistenceConstants.MessageIdTagName] = message.Id,
+            [MessagePersistenceConstants.Tracing.MessageIdTag] = message.Id,
+            [MessagePersistenceConstants.Tracing.MessageNameTag] = message.Name,
+            [MessagePersistenceConstants.Tracing.MessageBufferingStepTag] = message.BufferingStep,
+            [MessagePersistenceConstants.Tracing.MessageStateTag] = message.State,
+            [MessagePersistenceConstants.Tracing.MessageRetryCountTag] = message.RetryCount,
         };
 
         var traceHeaders = message.Headers.Where(header => header.Key.Equals(
-            MessagePersistenceConstants.DefaultPublisherName,
+            MessagePersistenceConstants.Tracing.TraceParentHeader,
             StringComparison.OrdinalIgnoreCase));
 
         foreach (KeyValuePair<string, string> header in traceHeaders)

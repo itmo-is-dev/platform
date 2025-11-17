@@ -89,12 +89,16 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
         IReadOnlyDictionary<long, SerializedMessage> serializedMessages,
         CancellationToken cancellationToken)
     {
-        using var activity = PlatformMessagePersistenceActivitySource.Value
+        // Do not add activity links here, it is assumed that the caller propagated links/traces at this point.
+        // Responsibility to "connect" span links is not designated to this service, as trace parent that may be stored
+        // in messages could be way before than the current spans.
+        // So we intentionally "propagate" span links at transport roots (such as initial publish service), and
+        // propagate them further via transport (such as kafka).
+        using var activity = MessagePersistenceActivitySource.Value
             .StartActivity(
-                name: PlatformMessagePersistenceConstants.SpanName,
+                name: MessagePersistenceConstants.Tracing.SpanName,
                 ActivityKind.Internal,
-                parentContext: default,
-                links: serializedMessages.Values.SelectMany(message => message.GetActivityLinks()))
+                parentContext: default)
             .WithDisplayName($"[handle] {messageName}");
 
         var handlerOptions = _handlerOptions.Get(messageName);
@@ -158,14 +162,6 @@ file class TypedMessagePersistenceExecutor<TKey, TValue> : ITypedMessagePersiste
                     failureProcessorContext,
                     failure,
                     serializedMessages[message.Id]);
-            }
-        }
-
-        foreach (SerializedMessage serializedMessage in serializedMessages.Values)
-        {
-            if (activity is { Id: not null })
-            {
-                serializedMessage.Headers[PlatformMessagePersistenceConstants.TraceParentHeaderName] = activity.Id;
             }
         }
 

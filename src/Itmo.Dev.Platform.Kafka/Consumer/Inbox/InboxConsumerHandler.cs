@@ -30,9 +30,9 @@ internal class InboxConsumerHandler<TKey, TValue> : IKafkaConsumerHandler<TKey, 
                 $"Failed to write inbox message, invalid message type, expected = {expectedType}. You probably attempting some unaccounted platform tampering");
         }
         
-        using var activity = PlatformMessagePersistenceActivitySource.Value
+        using var activity = MessagePersistenceActivitySource.Value
             .StartActivity(
-                name: PlatformMessagePersistenceConstants.SpanName,
+                name: MessagePersistenceConstants.Tracing.SpanName,
                 ActivityKind.Internal,
                 parentContext: default)
             .WithDisplayName($"[inbox] {_messageName}");

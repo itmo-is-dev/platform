@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

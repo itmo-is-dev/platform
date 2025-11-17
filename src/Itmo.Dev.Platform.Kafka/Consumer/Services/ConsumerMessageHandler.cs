@@ -65,30 +65,41 @@ internal class ConsumerMessageHandler<TKey, TValue>
     private IEnumerable<ActivityLink> EnumerateActivityLinks(
         IEnumerable<KafkaConsumerMessage<TKey, TValue>> messages)
     {
-        var traceParentHeaders = messages
-            .SelectMany(message => message.Headers, (message, header) => (message, header))
-            .Where(tuple => tuple.header.Key.Equals(
-                PlatformKafkaConstants.TraceParentHeaderName,
+        foreach (KafkaConsumerMessage<TKey, TValue> message in messages)
+        {
+            var traceParentIndex = message.Headers.FindLastIndex(kvp => kvp.Key.Equals(
+                PlatformKafkaConstants.Tracing.TraceParentHeader,
                 StringComparison.OrdinalIgnoreCase));
 
-        foreach (var (message, header) in traceParentHeaders)
-        {
-            if (ActivityContext.TryParse(header.Value, null, out var context))
+            if (traceParentIndex < 0)
+                continue;
+
+            (_, string traceParentId) = message.Headers[traceParentIndex];
+
+            if (ActivityContext.TryParse(traceParentId, traceState: null, out var context))
             {
-                var tags = new ActivityTagsCollection
+                var tags = new ActivityTagsCollection();
+
+                for (int i = message.Headers.Count - 1; i >= 0; i--)
                 {
-                    [PlatformKafkaConstants.TopicTagName] = message.Topic,
-                    [PlatformKafkaConstants.PartitionTagName] = message.Partition.Value,
-                    [PlatformKafkaConstants.OffsetTagName] = message.Offset.Value,
-                };
+                    var (key, value) = message.Headers[i];
+
+                    if (key == PlatformKafkaConstants.Tracing.TraceParentHeader)
+                        continue;
+
+                    tags.TryAdd(key, value);
+                }
 
                 yield return new ActivityLink(context, tags);
             }
             else
             {
                 _logger.LogWarning(
-                    "Failed to parse activity context = '{TraceParent}'",
-                    header.Value);
+                    "Failed to parse activity context = '{TraceParent}' for message in topic '{TopicName}', partition = '{Partition}', offset = '{Offset}'",
+                    traceParentId,
+                    message.Topic,
+                    message.Partition.Value,
+                    message.Offset.Value);
             }
         }
     }

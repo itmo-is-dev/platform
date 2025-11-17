@@ -2,6 +2,7 @@ using Itmo.Dev.Platform.MessagePersistence.Configuration.Buffering;
 using Itmo.Dev.Platform.MessagePersistence.Configuration.MessageHandlers;
 using Itmo.Dev.Platform.MessagePersistence.Options;
 using Itmo.Dev.Platform.MessagePersistence.Services;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

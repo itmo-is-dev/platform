@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Kafka.Tools;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -21,9 +22,11 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
         Partition = result.Partition;
         Offset = result.Offset;
 
-        Headers = result.Message.Headers.ToDictionary(
-            header => header.Key,
-            header => Encoding.UTF8.GetString(header.GetValueBytes()));
+        Headers = result.Message.Headers
+            .Select(header => new KeyValuePair<string, string>(
+                header.Key,
+                Encoding.UTF8.GetString(header.GetValueBytes())))
+            .ToList();
     }
 
     /// <summary>
@@ -37,7 +40,7 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
         TKey key,
         TValue value,
         string topic,
-        Dictionary<string, string> headers)
+        List<KeyValuePair<string, string>> headers)
     {
         _consumer = consumer;
         _result = result;
@@ -59,7 +62,7 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
 
     public Offset Offset { get; }
 
-    public Dictionary<string, string> Headers { get; }
+    public List<KeyValuePair<string, string>> Headers { get; }
 
     public void Commit()
     {

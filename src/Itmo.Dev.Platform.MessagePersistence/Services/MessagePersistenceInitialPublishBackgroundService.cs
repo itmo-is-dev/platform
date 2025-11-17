@@ -1,13 +1,17 @@
+using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Lifetime;
+using Itmo.Dev.Platform.MessagePersistence.Exceptions;
 using Itmo.Dev.Platform.MessagePersistence.Models;
 using Itmo.Dev.Platform.MessagePersistence.Options;
 using Itmo.Dev.Platform.MessagePersistence.Persistence;
+using Itmo.Dev.Platform.MessagePersistence.Tools;
 using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Data;
+using System.Diagnostics;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Services;
 
@@ -98,6 +102,14 @@ internal class MessagePersistenceInitialPublishBackgroundService : BackgroundSer
 
             if (serializedMessages is not [])
             {
+                using var activity = MessagePersistenceActivitySource.Value
+                    .StartActivity(
+                        name: MessagePersistenceConstants.Tracing.SpanName,
+                        ActivityKind.Internal,
+                        parentContext: default,
+                        links: serializedMessages.SelectMany(message => message.GetActivityLinks()))
+                    .WithDisplayName("[publish]");
+                
                 await publisher.PublishAsync(serializedMessages, cancellationToken);
             }
             else

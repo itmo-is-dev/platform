@@ -61,17 +61,21 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
                 parentContext: default)
             .WithDisplayName($"[produce] {_options.Topic}");
 
-        Headers headers = [..EnumerateHeaders()];
+        Header[] defaultHeaders = GetDefaultHeaders().ToArray();
 
         try
         {
             await foreach (var producerKafkaMessage in messages.WithCancellation(cancellationToken))
             {
+                var headers = defaultHeaders
+                    .Concat(GetMessageHeaders(producerKafkaMessage))
+                    .DistinctBy(x => x.Key);
+
                 var message = new Message<TKey, TValue>
                 {
                     Key = producerKafkaMessage.Key,
                     Value = producerKafkaMessage.Value,
-                    Headers = headers,
+                    Headers = [..headers],
                 };
 
                 await _producer.ProduceAsync(_options.Topic, message, cancellationToken);
@@ -89,11 +93,22 @@ internal class KafkaMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, 
         _producer.Dispose();
     }
 
-    private static IEnumerable<Header> EnumerateHeaders()
+    private static IEnumerable<Header> GetDefaultHeaders()
     {
         if (Activity.Current is { Id: { } traceId })
         {
-            yield return new Header(PlatformKafkaConstants.TraceParentHeaderName, Encoding.UTF8.GetBytes(traceId));
+            yield return new Header(PlatformKafkaConstants.Tracing.TraceParentHeader, Encoding.UTF8.GetBytes(traceId));
+        }
+    }
+
+    private static IEnumerable<Header> GetMessageHeaders(KafkaProducerMessage<TKey, TValue> message)
+    {
+        if (message.Headers is not null)
+        {
+            foreach (var (key, value) in message.Headers)
+            {
+                yield return new Header(key, Encoding.UTF8.GetBytes(value));
+            }
         }
     }
 }

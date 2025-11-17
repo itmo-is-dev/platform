@@ -48,9 +48,9 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
 
         var createdAt = _dateTimeProvider.Current;
 
-        using var activity = PlatformMessagePersistenceActivitySource.Value
+        using var activity = MessagePersistenceActivitySource.Value
             .StartActivity(
-                name: PlatformMessagePersistenceConstants.SpanName,
+                name: MessagePersistenceConstants.Tracing.SpanName,
                 ActivityKind.Internal,
                 parentContext: default)
             .WithDisplayName($"[persist] {messageName}");
@@ -86,7 +86,7 @@ internal class MessagePersistenceConsumer : IMessagePersistenceConsumer
         if (Activity.Current is { Id: { } traceId })
         {
             yield return new KeyValuePair<string, string>(
-                PlatformMessagePersistenceConstants.TraceParentHeaderName,
+                MessagePersistenceConstants.Tracing.TraceParentHeader,
                 traceId);
         }
     }

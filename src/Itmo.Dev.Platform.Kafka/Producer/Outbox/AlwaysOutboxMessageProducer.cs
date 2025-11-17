@@ -2,6 +2,7 @@ using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence;
 using Itmo.Dev.Platform.MessagePersistence.Tools;
 using System.Diagnostics;
+using MessagePersistenceConstants = Itmo.Dev.Platform.MessagePersistence.Tools.MessagePersistenceConstants;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Outbox;
 
@@ -20,9 +21,9 @@ internal class AlwaysOutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer
         IAsyncEnumerable<KafkaProducerMessage<TKey, TValue>> messages,
         CancellationToken cancellationToken)
     {
-        using var activity = PlatformMessagePersistenceActivitySource.Value
+        using var activity = MessagePersistenceActivitySource.Value
             .StartActivity(
-                name: PlatformMessagePersistenceConstants.SpanName,
+                name: MessagePersistenceConstants.Tracing.SpanName,
                 ActivityKind.Internal,
                 parentContext: default)
             .WithDisplayName($"[outbox] {_topicName}");

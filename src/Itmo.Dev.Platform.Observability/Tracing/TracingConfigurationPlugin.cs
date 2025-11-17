@@ -43,7 +43,7 @@ internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
                 tracing
                     .ConfigureResource(x => x.AddService(_platformOptions.ServiceName))
                     .AddSource(PlatformKafkaActivitySource.Name)
-                    .AddSource(PlatformMessagePersistenceActivitySource.Name)
+                    .AddSource(MessagePersistenceActivitySource.Name)
                     .SetSampler(new AlwaysOnSampler())
                     .AddAspNetCoreInstrumentation(x => x.RecordException = true)
                     .AddGrpcCoreInstrumentation()

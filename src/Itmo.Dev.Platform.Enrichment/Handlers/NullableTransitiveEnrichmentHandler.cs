@@ -1,5 +1,3 @@
-using Itmo.Dev.Platform.Common.Extensions;
-
 namespace Itmo.Dev.Platform.Enrichment.Handlers;
 
 public class NullableTransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, TTransitiveModel, TState>
@@ -26,7 +24,10 @@ public class NullableTransitiveEnrichmentHandler<TKey, TModel, TTransitiveKey, T
 
         await _enrichmentFactory
             .Create<TTransitiveKey, TTransitiveModel, TState>()
-            .EnrichAsync(context.State, transitiveModels.WhereNotNull(), cancellationToken)
+            .EnrichAsync(
+                context.State,
+                transitiveModels.Where(x => x is not null).Cast<TTransitiveModel>(),
+                cancellationToken)
             .AsTask(cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Persistence.Abstractions.Commands;
+using Itmo.Dev.Platform.Persistence.Postgres.Exceptions;
 using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
@@ -40,7 +41,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
     public IPersistenceCommand AddParameter<T>(string parameterName, T value)
     {
         var parameter = new NpgsqlParameter<T>(parameterName: parameterName, value: value);
-        _command.Parameters.Add(parameter);
+        AddParameterCore(parameter);
 
         return this;
     }
@@ -50,7 +51,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         var value = values is List<T> or T[] ? values : values.ToArray();
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: value);
-        _command.Parameters.Add(parameter);
+        AddParameterCore(parameter);
 
         return this;
     }
@@ -82,8 +83,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
             NpgsqlDbType = NpgsqlDbType.Jsonb,
         };
 
-        _command.Parameters.Add(parameter);
-
+        AddParameterCore(parameter);
         return this;
     }
 
@@ -93,7 +93,8 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         JsonSerializerSettings? serializerSettings = null)
         where T : class
     {
-        object serialized = value is null ? DBNull.Value : JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
+        object serialized =
+            value is null ? DBNull.Value : JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
@@ -101,8 +102,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
             IsNullable = true,
         };
 
-        _command.Parameters.Add(parameter);
-
+        AddParameterCore(parameter);
         return this;
     }
 
@@ -121,8 +121,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
             NpgsqlDbType = NpgsqlDbType.Jsonb | NpgsqlDbType.Array,
         };
 
-        _command.Parameters.Add(parameter);
-
+        AddParameterCore(parameter);
         return this;
     }
 
@@ -136,8 +135,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
             NpgsqlDbType = NpgsqlDbType.Jsonb | NpgsqlDbType.Array,
         };
 
-        _command.Parameters.Add(parameter);
-
+        AddParameterCore(parameter);
         return this;
     }
 
@@ -160,7 +158,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
             NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text,
         };
 
-        _command.Parameters.Add(parameter);
+        AddParameterCore(parameter);
         return;
 
         static string Serialize(IEnumerable<T> values)
@@ -171,5 +169,16 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
 
             return builder.ToString();
         }
+    }
+
+    private void AddParameterCore(NpgsqlParameter parameter)
+    {
+        if (string.IsNullOrEmpty(parameter.ParameterName) is false
+            && _command.Parameters.Any(x => x.ParameterName == parameter.ParameterName))
+        {
+            throw PlatformPersistencePostgresException.DuplicateParameter(parameter.ParameterName);
+        }
+
+        _command.Parameters.Add(parameter);
     }
 }

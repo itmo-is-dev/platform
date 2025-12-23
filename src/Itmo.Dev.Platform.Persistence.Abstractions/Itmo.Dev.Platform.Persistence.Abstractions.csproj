@@ -25,5 +25,9 @@
         <PackageReference Include="Newtonsoft.Json"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
     </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.Persistence.Postgres"/>
+    </ItemGroup>
 
 </Project>

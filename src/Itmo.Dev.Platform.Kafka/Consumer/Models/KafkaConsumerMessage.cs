@@ -1,12 +1,11 @@
 using Confluent.Kafka;
-using Newtonsoft.Json;
 using System.Text;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Models;
 
 internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, TValue>
 {
-    private readonly IConsumer<TKey, TValue>? _consumer;
+    private readonly IConsumer<TKey, TValue> _consumer;
     private readonly ConsumeResult<TKey, TValue> _result;
 
     public KafkaConsumerMessage(IConsumer<TKey, TValue> consumer, ConsumeResult<TKey, TValue> result)
@@ -28,25 +27,6 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
             .ToList();
     }
 
-    /// <summary>
-    ///     Needed for inbox message deserialization.
-    ///     Main constructor causes NRE from accessing result parameter.
-    /// </summary>
-    [JsonConstructor]
-    private KafkaConsumerMessage(
-        ConsumeResult<TKey, TValue> result,
-        TKey key,
-        TValue value,
-        string topic,
-        List<KeyValuePair<string, string>> headers)
-    {
-        _result = result;
-        Key = key;
-        Value = value;
-        Topic = topic;
-        Headers = headers;
-    }
-
     public TKey Key { get; }
 
     public TValue Value { get; }
@@ -63,6 +43,6 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
 
     public void Commit()
     {
-        _consumer?.Commit(_result);
+        _consumer.Commit(_result);
     }
 }

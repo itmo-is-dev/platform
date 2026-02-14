@@ -45,7 +45,7 @@ public sealed class PlatformImplementationOnlyAnalyzer : DiagnosticAnalyzer
             var diagnostic = Diagnostic.Create(
                 Descriptor,
                 symbol.Locations.First(),
-                argument);
+                argument.Value);
 
             context.ReportDiagnostic(diagnostic);
         }

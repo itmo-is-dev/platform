@@ -11,8 +11,8 @@
     </PropertyGroup>
 
     <PropertyGroup Label="PlatformVersion">
-        <MajorVersion>2</MajorVersion>
-        <MinorVersion>2</MinorVersion>
+        <MajorVersion>3</MajorVersion>
+        <MinorVersion>0</MinorVersion>
         <PatchVersion>326</PatchVersion>
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>
@@ -21,6 +21,8 @@
         <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka"/>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.Kafka.Tests"/>
         <InternalsVisibleTo Include="Itmo.Dev.Platform.MessagePersistence.Postgres"/>
+        <InternalsVisibleTo Include="Itmo.Dev.Platform.Observability"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
     <ItemGroup>

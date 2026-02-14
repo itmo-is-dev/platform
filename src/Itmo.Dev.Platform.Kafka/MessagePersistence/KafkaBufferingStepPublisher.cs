@@ -1,8 +1,8 @@
 using Itmo.Dev.Platform.Kafka.MessagePersistence.Models;
 using Itmo.Dev.Platform.Kafka.Producer;
-using Itmo.Dev.Platform.MessagePersistence.Buffering;
-using Itmo.Dev.Platform.MessagePersistence.Models;
-using Itmo.Dev.Platform.MessagePersistence.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Buffering;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Dev.Platform.Kafka.MessagePersistence;
@@ -17,7 +17,7 @@ internal class KafkaBufferingStepPublisher : IBufferingStepPublisher
             topicName);
     }
 
-    public async Task PublishAsync(IEnumerable<SerializedMessage> messages, CancellationToken cancellationToken)
+    public async Task PublishAsync(IEnumerable<PersistedMessageModel> messages, CancellationToken cancellationToken)
     {
         var producerMessages = messages
             .Select(message =>

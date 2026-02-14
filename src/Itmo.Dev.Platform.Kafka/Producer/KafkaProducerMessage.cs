@@ -1,6 +1,9 @@
 namespace Itmo.Dev.Platform.Kafka.Producer;
 
-public record KafkaProducerMessage<TKey, TValue>(TKey Key, TValue Value, IDictionary<string, string>? Headers = null);
+public record KafkaProducerMessage<TKey, TValue>(
+    TKey Key,
+    TValue Value,
+    IDictionary<string, string>? Headers = null);
 
 public static class KafkaProducerMessage
 {

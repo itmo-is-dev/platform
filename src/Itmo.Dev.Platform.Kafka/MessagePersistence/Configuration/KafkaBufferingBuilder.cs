@@ -3,28 +3,29 @@ using Itmo.Dev.Platform.Kafka.Extensions;
 using Itmo.Dev.Platform.Kafka.MessagePersistence.Models;
 using Itmo.Dev.Platform.Kafka.Producer;
 using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Execution.FailureProcessors;
-using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Execution.FailureProcessors;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using static Itmo.Dev.Platform.Kafka.MessagePersistence.Configuration.IKafkaBufferingBuilder;
 
 namespace Itmo.Dev.Platform.Kafka.MessagePersistence.Configuration;
 
 internal class KafkaBufferingBuilder :
-    IKafkaBufferingProducerConfigurationSelector,
-    IKafkaBufferingConsumerConfigurationSelector,
-    IKafkaBufferingFailureHandleBuilder
+    IConfigurationStep,
+    IConsumerStep,
+    IFailureStep
 {
-    private readonly IMessagePersistenceBufferingStepSelector _stepSelector;
+    private readonly MessagePersistenceConfiguration.Buffering.IBufferingStepStep _stepSelector;
     private readonly BufferStepOptions _stepOptions;
 
-    public KafkaBufferingBuilder(IMessagePersistenceBufferingStepSelector stepSelector)
+    public KafkaBufferingBuilder(MessagePersistenceConfiguration.Buffering.IBufferingStepStep stepSelector)
     {
         _stepSelector = stepSelector;
         _stepOptions = new BufferStepOptions();
     }
 
-    public IKafkaBufferingConsumerConfigurationSelector WithProducerConfiguration(
+    public IConsumerStep WithProducerConfiguration(
         IConfiguration configuration,
         Action<KafkaProducerOptions>? action = null)
     {
@@ -53,7 +54,7 @@ internal class KafkaBufferingBuilder :
         return this;
     }
 
-    public IKafkaBufferingFailureHandleBuilder WithConsumerConfiguration(
+    public IFailureStep WithConsumerConfiguration(
         IConfiguration configuration,
         Action<KafkaConsumerOptions>? action = null)
     {

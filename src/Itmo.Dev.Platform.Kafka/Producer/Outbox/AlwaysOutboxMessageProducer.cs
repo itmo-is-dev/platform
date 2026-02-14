@@ -1,20 +1,20 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Tools;
 using System.Diagnostics;
-using MessagePersistenceConstants = Itmo.Dev.Platform.MessagePersistence.Tools.MessagePersistenceConstants;
+using MessagePersistenceConstants = Itmo.Dev.Platform.MessagePersistence.Internal.Tools.MessagePersistenceConstants;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Outbox;
 
 internal class AlwaysOutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>
 {
     private readonly string _topicName;
-    private readonly IMessagePersistenceConsumer _consumer;
+    private readonly IMessagePersistenceService _service;
 
-    public AlwaysOutboxMessageProducer(string topicName, IMessagePersistenceConsumer consumer)
+    public AlwaysOutboxMessageProducer(string topicName, IMessagePersistenceService service)
     {
         _topicName = topicName;
-        _consumer = consumer;
+        _service = service;
     }
 
     public async Task ProduceAsync(
@@ -27,11 +27,16 @@ internal class AlwaysOutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer
                 ActivityKind.Internal,
                 parentContext: default)
             .WithDisplayName($"[outbox] {_topicName}");
-        
-        var persistedMessages = await messages
-            .Select(x => new PersistedMessage<TKey, TValue>(x.Key, x.Value))
+
+        var outboxMessages = await messages
+            .Select(message => new OutboxPersistedMessage<TKey, TValue>
+            {
+                Key = message.Key,
+                Value = message.Value,
+                Headers = message.Headers,
+            })
             .ToArrayAsync(cancellationToken);
 
-        await _consumer.ConsumeAsync(KafkaOutboxMessageName.ForTopic(_topicName), persistedMessages, cancellationToken);
+        await _service.PersistAsync(outboxMessages, cancellationToken);
     }
 }

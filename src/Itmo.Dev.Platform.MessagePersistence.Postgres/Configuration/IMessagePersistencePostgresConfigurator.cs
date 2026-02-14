@@ -3,15 +3,16 @@ using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 
-public interface IMessagePersistencePostgresOptionsConfigurator
+public static partial class MessagePersistencePostgresConfiguration
 {
-    IMessagePersistencePostgresConfigurator ConfigureOptions(
-        Action<OptionsBuilder<MessagePersistencePostgresOptions>> action);
-
-    IMessagePersistencePostgresConfigurator ConfigureOptions(string sectionPath)
+    public interface IOptionsStep
     {
-        return ConfigureOptions(builder => builder.BindConfiguration(sectionPath));
-    }
-}
+        IFinalStep ConfigureOptions(
+            Action<OptionsBuilder<MessagePersistencePostgresOptions>> action);
 
-public interface IMessagePersistencePostgresConfigurator { }
+        IFinalStep ConfigureOptions(string sectionPath)
+            => ConfigureOptions(builder => builder.BindConfiguration(sectionPath));
+    }
+
+    public interface IFinalStep;
+}

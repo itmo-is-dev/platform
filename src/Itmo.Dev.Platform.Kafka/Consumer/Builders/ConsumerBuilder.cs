@@ -1,7 +1,5 @@
 using Confluent.Kafka;
-using Itmo.Dev.Platform.Common.Models;
 using Itmo.Dev.Platform.Kafka.Consumer.Inbox;
-using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.Consumer.Services;
 using Itmo.Dev.Platform.MessagePersistence;
 using Microsoft.Extensions.Configuration;
@@ -134,10 +132,9 @@ internal class ConsumerBuilder<TKey, TValue> :
         _collection.AddPlatformMessagePersistenceHandler(builder => builder
             .Called(messageName)
             .WithConfiguration(_configuration.GetSection("Inbox"))
-            .WithKey<Unit>()
-            .WithValue<KafkaConsumerMessage<TKey, TValue>>()
-            .HandleBy<InboxMessagePersistenceHandler<TKey, TValue>>((p, _) =>
-                ActivatorUtilities.CreateInstance<InboxMessagePersistenceHandler<TKey, TValue>>(p, _topicName)));
+            .WithMessage<InboxPersistedMessage<TKey, TValue>>()
+            .HandleBy<InboxPersistedMessageHandler<TKey, TValue>>((p, _) =>
+                ActivatorUtilities.CreateInstance<InboxPersistedMessageHandler<TKey, TValue>>(p, _topicName)));
 
         return this;
     }

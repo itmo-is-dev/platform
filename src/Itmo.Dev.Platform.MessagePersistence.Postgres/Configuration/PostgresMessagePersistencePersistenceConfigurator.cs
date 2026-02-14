@@ -1,6 +1,5 @@
 using Itmo.Dev.Platform.Common.Lifetime.Extensions;
-using Itmo.Dev.Platform.MessagePersistence.Configuration.General;
-using Itmo.Dev.Platform.MessagePersistence.Persistence;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Migrations;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Plugins;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Queries;

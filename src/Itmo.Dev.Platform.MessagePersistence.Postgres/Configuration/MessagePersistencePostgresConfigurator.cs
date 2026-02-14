@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 
 internal class MessagePersistencePostgresConfigurator :
-    IMessagePersistencePostgresOptionsConfigurator,
-    IMessagePersistencePostgresConfigurator
+    PostgresConfig.IOptionsStep,
+    PostgresConfig.IFinalStep
 {
     private readonly IServiceCollection _collection;
 
@@ -14,7 +14,7 @@ internal class MessagePersistencePostgresConfigurator :
         _collection = collection;
     }
 
-    public IMessagePersistencePostgresConfigurator ConfigureOptions(
+    public PostgresConfig.IFinalStep ConfigureOptions(
         Action<OptionsBuilder<MessagePersistencePostgresOptions>> action)
     {
         var builder = _collection

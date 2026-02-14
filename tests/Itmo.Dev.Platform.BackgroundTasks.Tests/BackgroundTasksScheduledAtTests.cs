@@ -91,7 +91,7 @@ public class BackgroundTasksScheduledAtTests : TestBase
 
         var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
 
-        var delay = TimeSpan.FromSeconds(60);
+        var delay = TimeSpan.FromSeconds(10);
         var scheduledAt = dateTimeProvider.Current.Add(delay);
 
         var metadata = new ScheduledAtMetadata(scheduledAt);
@@ -131,7 +131,7 @@ public class BackgroundTasksScheduledAtTests : TestBase
     [Fact]
     public async Task SuspendedUntil_ShouldProceedOnItsOwn_WhenScheduleTimeArrives()
     {
-                // Arrange
+        // Arrange
         await using var fixtureScope = _backgroundTasksFixture.Scope;
 
         await using var application = new WebApplicationFactory<Program>()
@@ -179,7 +179,7 @@ public class BackgroundTasksScheduledAtTests : TestBase
 
         var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
 
-        var delay = TimeSpan.FromSeconds(60);
+        var delay = TimeSpan.FromSeconds(10);
         var scheduledAt = dateTimeProvider.Current.Add(delay);
 
         var metadata = new SuspendedUntilMetadata(scheduledAt);

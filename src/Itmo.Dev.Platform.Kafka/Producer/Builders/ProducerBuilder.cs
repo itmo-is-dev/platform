@@ -138,10 +138,9 @@ internal class ProducerBuilder<TKey, TValue> :
         _collection.AddPlatformMessagePersistenceHandler(builder => builder
             .Called(KafkaOutboxMessageName.ForTopic(_topicName))
             .WithConfiguration(outboxSection)
-            .WithKey<TKey>()
-            .WithValue<TValue>()
-            .HandleBy<OutboxMessagePersistenceHandler<TKey, TValue>>(
-                (provider, _) => new OutboxMessagePersistenceHandler<TKey, TValue>(_topicName, provider)));
+            .WithMessage<OutboxPersistedMessage<TKey, TValue>>()
+            .HandleBy<OutboxPersistedMessageHandler<TKey, TValue>>((provider, _)
+                => new OutboxPersistedMessageHandler<TKey, TValue>(_topicName, provider)));
 
         return this;
     }
@@ -152,7 +151,7 @@ internal class ProducerBuilder<TKey, TValue> :
             _topicName,
             (p, _) => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
 
-        _collection.TryAddScoped<IKafkaMessageProducer<TKey, TValue>>(
-            p => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
+        _collection.TryAddScoped<IKafkaMessageProducer<TKey, TValue>>(p
+            => ActivatorUtilities.CreateInstance<KafkaMessageProducer<TKey, TValue>>(p, _topicName));
     }
 }

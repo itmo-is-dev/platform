@@ -125,7 +125,7 @@ csharp_style_prefer_local_over_anonymous_function = true:suggestion
 
 # IDE0040
 dotnet_diagnostic.ide0040.severity = warning
-dotnet_style_require_accessibility_modifiers = always:warning
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
 
 # IDE0041
 dotnet_diagnostic.ide0041.severity = warning

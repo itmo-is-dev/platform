@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynAnalyzers": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../Itmo.Dev.Platform.Common.Analyzers.Sample/Itmo.Dev.Platform.Common.Analyzers.Sample.csproj"
+      "targetProject": "../../samples/Itmo.Dev.Platform.Common.Samples/Itmo.Dev.Platform.Common.Samples.csproj"
     }
   }
 }

@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Common.Analyzers\Itmo.Dev.Platform.Common.Analyzers.csproj" OutputItemType="Analyzer"/>
+    <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Common\Itmo.Dev.Platform.Common.csproj" />
+  </ItemGroup>
+</Project>

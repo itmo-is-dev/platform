@@ -15,25 +15,14 @@ public sealed class PlatformImplementationOnlyAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
-        = ImmutableArray.Create(Descriptor);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Descriptor];
 
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
 
-        context.RegisterCompilationStartAction(ctx =>
-        {
-            var globalOptions = ctx.Options.AnalyzerConfigOptionsProvider.GlobalOptions;
-
-            if (globalOptions.TryGetValue("build_property.IsPlatformPackage", out string? value) is false
-                || bool.TryParse(value, out var isPlatformPackage) is false
-                || isPlatformPackage is false)
-            {
-                ctx.RegisterSymbolAction(AnalyzeTypeDeclaration, SymbolKind.NamedType);
-            }
-        });
+        context.RegisterSymbolAction(AnalyzeTypeDeclaration, SymbolKind.NamedType);
     }
 
     private static void AnalyzeTypeDeclaration(SymbolAnalysisContext context)
@@ -47,7 +36,7 @@ public sealed class PlatformImplementationOnlyAnalyzer : DiagnosticAnalyzer
         foreach (INamedTypeSymbol baseType in baseTypes)
         {
             var attribute = HasPlatformImplementationOnlyAttribute(baseType.GetAttributes());
-            
+
             if (attribute is null)
                 continue;
 
@@ -72,12 +61,6 @@ public sealed class PlatformImplementationOnlyAnalyzer : DiagnosticAnalyzer
             var name = attributeData.AttributeClass.Name;
 
             if (name != "PlatformImplementationOnlyAttribute")
-                return false;
-
-            var ns = attributeData.AttributeClass.ContainingNamespace
-                .ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-
-            if (ns != "Itmo.Dev.Platform.Common.Attributes")
                 return false;
 
             return true;

@@ -2,6 +2,6 @@
 
 ### New Rules
 
-| Rule ID | Category | Severity | Notes                                                         |
-|---------|----------|----------|---------------------------------------------------------------|
-| IID0001 | Usage    | Error    | Interface should not be implemented outside platform packages |
+ Rule ID | Category | Severity | Notes                                                         
+---------|----------|----------|---------------------------------------------------------------
+ IID0001 | Usage    | Error    | Interface should not be implemented outside platform packages 

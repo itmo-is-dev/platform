@@ -4,25 +4,24 @@ using Microsoft.Extensions.Configuration;
 
 namespace Itmo.Dev.Platform.Kafka.MessagePersistence.Configuration;
 
-public interface IKafkaBufferingProducerConfigurationSelector
-{
-    IKafkaBufferingConsumerConfigurationSelector WithProducerConfiguration(
-        IConfiguration configuration,
-        Action<KafkaProducerOptions>? action = null);
-}
-
-public interface IKafkaBufferingConsumerConfigurationSelector
-{
-    IKafkaBufferingFailureHandleBuilder WithConsumerConfiguration(
-        IConfiguration configuration,
-        Action<KafkaConsumerOptions>? action = null);
-}
-
-public interface IKafkaBufferingFailureHandleBuilder : IKafkaBufferingBuilder
-{
-    IKafkaBufferingBuilder WithFailureBlockingBehaviour();
-}
-
 public interface IKafkaBufferingBuilder
 {
+    interface IConfigurationStep
+    {
+        IConsumerStep WithProducerConfiguration(
+            IConfiguration configuration,
+            Action<KafkaProducerOptions>? action = null);
+    }
+
+    interface IConsumerStep
+    {
+        IFailureStep WithConsumerConfiguration(
+            IConfiguration configuration,
+            Action<KafkaConsumerOptions>? action = null);
+    }
+
+    interface IFailureStep : IKafkaBufferingBuilder
+    {
+        IKafkaBufferingBuilder WithFailureBlockingBehaviour();
+    }
 }

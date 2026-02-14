@@ -1,6 +1,6 @@
 using Itmo.Dev.Platform.Common.Options;
 using Itmo.Dev.Platform.Kafka.Tools;
-using Itmo.Dev.Platform.MessagePersistence.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Tools;
 using Itmo.Dev.Platform.Observability.Tracing.Processors;
 using Microsoft.Extensions.Options;
 using Npgsql;

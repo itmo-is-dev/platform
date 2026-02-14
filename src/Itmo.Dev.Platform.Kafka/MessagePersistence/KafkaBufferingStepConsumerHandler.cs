@@ -1,9 +1,8 @@
 using Itmo.Dev.Platform.Kafka.Consumer;
 using Itmo.Dev.Platform.Kafka.MessagePersistence.Models;
-using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Models;
-using Itmo.Dev.Platform.MessagePersistence.Persistence;
-using Itmo.Dev.Platform.MessagePersistence.Services;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Itmo.Dev.Platform.Kafka.MessagePersistence;
@@ -34,7 +33,7 @@ internal class KafkaBufferingStepConsumerHandler : IKafkaConsumerHandler<Buffere
             "Handling buffered messages, count = {MessageCount}",
             messageIds.Length);
 
-        var query = SerializedMessageQuery.Build(builder => builder
+        var query = PersistedMessageQuery.Build(builder => builder
             .WithIds(messageIds)
             .WithPageSize(messageIds.Length));
 
@@ -53,9 +52,9 @@ internal class KafkaBufferingStepConsumerHandler : IKafkaConsumerHandler<Buffere
         await _publisher.PublishAsync(serializedMessages, cancellationToken);
     }
 
-    private IEnumerable<SerializedMessage> FilterMessages(IEnumerable<SerializedMessage> messages)
+    private IEnumerable<PersistedMessageModel> FilterMessages(IEnumerable<PersistedMessageModel> messages)
     {
-        foreach (SerializedMessage message in messages)
+        foreach (PersistedMessageModel message in messages)
         {
             if (message.State is MessageState.Published)
             {

@@ -1,10 +1,10 @@
-using Itmo.Dev.Platform.MessagePersistence.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
 
 namespace Itmo.Dev.Platform.Kafka.MessagePersistence.Models;
 
-internal record BufferedMessageValue(SerializedMessage Message)
+internal record BufferedMessageValue(PersistedMessageModel Message)
 {
-    public static BufferedMessageValue FromSerializedMessage(SerializedMessage message)
+    public static BufferedMessageValue FromSerializedMessage(PersistedMessageModel message)
     {
         return new BufferedMessageValue(message);
     }

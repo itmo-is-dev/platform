@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Itmo.Dev.Platform.Common.Extensions;
 using System.Collections;
 using Xunit;
 

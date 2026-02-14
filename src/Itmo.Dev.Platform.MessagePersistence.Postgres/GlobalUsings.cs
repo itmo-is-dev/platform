@@ -1,0 +1,2 @@
+global using Config = Itmo.Dev.Platform.MessagePersistence.MessagePersistenceConfiguration;
+global using PostgresConfig = Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration.MessagePersistencePostgresConfiguration;

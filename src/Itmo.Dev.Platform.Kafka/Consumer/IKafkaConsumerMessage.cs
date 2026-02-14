@@ -4,10 +4,10 @@ namespace Itmo.Dev.Platform.Kafka.Consumer;
 
 public interface IKafkaConsumerMessage<out TKey, out TValue>
 {
-    public TKey Key { get; }
-    public TValue Value { get; }
-    public DateTimeOffset Timestamp { get; }
-    public string Topic { get; }
-    public Partition Partition { get; }
-    public Offset Offset { get; }
+    TKey Key { get; }
+    TValue Value { get; }
+    DateTimeOffset Timestamp { get; }
+    string Topic { get; }
+    Partition Partition { get; }
+    Offset Offset { get; }
 }

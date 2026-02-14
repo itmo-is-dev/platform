@@ -8,9 +8,9 @@ using Itmo.Dev.Platform.Kafka.Tests.Fixtures;
 using Itmo.Dev.Platform.Kafka.Tests.Outbox;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Options;
-using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Testing.ApplicationFactories;
 using Microsoft.Extensions.DependencyInjection;
@@ -151,7 +151,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         var outboxRepository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
 
-        var query = SerializedMessageQuery.Build(builder => builder
+        var query = PersistedMessageQuery.Build(builder => builder
             .WithPageSize(int.MaxValue)
             .WithName(KafkaOutboxMessageName.ForTopic(TopicName))
             .WithCursor(DateTimeOffset.MinValue));

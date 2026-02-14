@@ -1,5 +1,4 @@
 using FluentMigrator;
-using Itmo.Dev.Platform.MessagePersistence.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 using Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 using Microsoft.Extensions.DependencyInjection;

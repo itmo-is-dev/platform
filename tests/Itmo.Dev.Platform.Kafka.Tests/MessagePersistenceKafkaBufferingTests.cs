@@ -10,9 +10,9 @@ using Itmo.Dev.Platform.Kafka.Tests.MessagePersistenceBuffering;
 using Itmo.Dev.Platform.Kafka.Tests.Tools;
 using Itmo.Dev.Platform.Kafka.Tools;
 using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Options;
-using Itmo.Dev.Platform.MessagePersistence.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Testing.ApplicationFactories;
@@ -97,8 +97,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
                     .AddMessage(message => message
                         .Called(nameof(MessagePersistenceKafkaBufferingTests))
                         .WithConfiguration("MessagePersistence:Handler")
-                        .WithKey<int>()
-                        .WithValue<int>()
+                        .WithMessage<TestPersistenceMessage<int, int>>()
                         .HandleBy<TestPersistenceHandler<int, int>>()
                         .WithBufferingGroup(nameof(MessagePersistenceKafkaBufferingTests))))
             )
@@ -123,10 +122,10 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         consumer.Subscribe(TopicName);
 
-        var persistedMessage = PersistedMessage.Create(1, 1);
+        var persistedMessage = TestPersistenceMessage.Create(1, 1);
 
         await using var scope = application.Services.CreateAsyncScope();
-        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceConsumer>();
+        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceService>();
 
         var messagePersistenceRepository = scope.ServiceProvider
             .GetRequiredService<IMessagePersistenceInternalRepository>();
@@ -136,8 +135,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
         cts.CancelAfterDebug(TimeSpan.FromSeconds(15));
 
         var messageId = await persistedMessageConsumer
-            .ConsumeInternalAsync(
-                nameof(MessagePersistenceKafkaBufferingTests),
+            .PersistInternalAsync(
                 [persistedMessage],
                 cts.Token)
             .SingleAsync(cts.Token);
@@ -161,9 +159,10 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         kafkaConsumeResult.Message.Value.Message
             .Should()
-            .BeEquivalentTo(serializedMessage, options => options
-                .Excluding(message => message.State)
-                .Excluding(message => message.Headers));
+            .BeEquivalentTo(serializedMessage,
+                options => options
+                    .Excluding(message => message.State)
+                    .Excluding(message => message.Headers));
     }
 
     [Fact]
@@ -215,8 +214,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
                     .AddMessage(message => message
                         .Called(nameof(MessagePersistenceKafkaBufferingTests))
                         .WithConfiguration("MessagePersistence:Handler")
-                        .WithKey<int>()
-                        .WithValue<int>()
+                        .WithMessage<TestPersistenceMessage<int, int>>()
                         .HandleBy<FailingTestPersistenceHandler<int, int>>()
                         .WithBufferingGroup(nameof(MessagePersistenceKafkaBufferingTests))))
             )
@@ -241,10 +239,10 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         consumer.Subscribe(TopicName);
 
-        var persistedMessage = PersistedMessage.Create(1, 1);
+        var persistedMessage = TestPersistenceMessage.Create(1, 1);
 
         await using var scope = application.Services.CreateAsyncScope();
-        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceConsumer>();
+        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceService>();
 
         var messagePersistenceRepository = scope.ServiceProvider
             .GetRequiredService<IMessagePersistenceInternalRepository>();
@@ -254,8 +252,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
         cts.CancelAfterDebug(TimeSpan.FromSeconds(15));
 
         var messageId = await persistedMessageConsumer
-            .ConsumeInternalAsync(
-                nameof(MessagePersistenceKafkaBufferingTests),
+            .PersistInternalAsync(
                 [persistedMessage],
                 cts.Token)
             .SingleAsync(cts.Token);
@@ -293,9 +290,10 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         secondMessageConsumeResult.Message.Value.Message
             .Should()
-            .BeEquivalentTo(serializedMessage, options => options
-                .Excluding(message => message.State)
-                .Excluding(message => message.Headers));
+            .BeEquivalentTo(serializedMessage,
+                options => options
+                    .Excluding(message => message.State)
+                    .Excluding(message => message.Headers));
     }
 
     [Fact]
@@ -348,8 +346,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
                     .AddMessage(message => message
                         .Called(nameof(MessagePersistenceKafkaBufferingTests))
                         .WithConfiguration("MessagePersistence:Handler")
-                        .WithKey<int>()
-                        .WithValue<int>()
+                        .WithMessage<TestPersistenceMessage<int, int>>()
                         .HandleBy<FailingTestPersistenceHandler<int, int>>()
                         .WithBufferingGroup(nameof(MessagePersistenceKafkaBufferingTests))))
             )
@@ -374,10 +371,10 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
         consumer.Subscribe(TopicName);
 
-        var persistedMessage = PersistedMessage.Create(1, 1);
+        var persistedMessage = TestPersistenceMessage.Create(1, 1);
 
         await using var scope = application.Services.CreateAsyncScope();
-        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceConsumer>();
+        var persistedMessageConsumer = scope.ServiceProvider.GetRequiredService<IMessagePersistenceService>();
 
         var messagePersistenceRepository = scope.ServiceProvider
             .GetRequiredService<IMessagePersistenceInternalRepository>();
@@ -388,8 +385,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
         cts.CancelAfterDebug(TimeSpan.FromSeconds(15));
 
         var messageId = await persistedMessageConsumer
-            .ConsumeInternalAsync(
-                nameof(MessagePersistenceKafkaBufferingTests),
+            .PersistInternalAsync(
                 [persistedMessage],
                 cts.Token)
             .SingleAsync(cts.Token);
@@ -447,7 +443,7 @@ public class MessagePersistenceKafkaBufferingTests : IAsyncLifetime, IClassFixtu
 
 static file class MessagePersistenceRepositoryExtensions
 {
-    public static async Task<SerializedMessage> PollMessageAsync(
+    public static async Task<PersistedMessageModel> PollMessageAsync(
         this IMessagePersistenceInternalRepository repository,
         long messageId,
         MessageState state,
@@ -457,7 +453,7 @@ static file class MessagePersistenceRepositoryExtensions
         {
             var message = await repository
                 .QueryAsync(
-                    SerializedMessageQuery.Build(builder => builder
+                    PersistedMessageQuery.Build(builder => builder
                         .WithPageSize(1)
                         .WithId(messageId)
                         .WithState(state)),

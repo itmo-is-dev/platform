@@ -1,0 +1,1 @@
+global using Config = Itmo.Dev.Platform.MessagePersistence.MessagePersistenceConfiguration;

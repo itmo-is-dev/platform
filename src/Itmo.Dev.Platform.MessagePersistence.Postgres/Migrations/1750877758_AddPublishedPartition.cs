@@ -12,7 +12,7 @@ public class RemoveOldTable : SqlMigration
     protected override string GetUpSql(IServiceProvider serviceProvider)
     {
         var options = serviceProvider.GetRequiredService<IOptions<MessagePersistencePostgresOptions>>();
-        
+                                
         return $"""
         drop table {options.Value.SchemaName}.persisted_messages_old;
 

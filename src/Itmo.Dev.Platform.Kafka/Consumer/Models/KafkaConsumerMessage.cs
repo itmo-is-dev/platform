@@ -1,6 +1,4 @@
 using Confluent.Kafka;
-using Itmo.Dev.Platform.Kafka.Tools;
-using Newtonsoft.Json;
 using System.Text;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer.Models;
@@ -27,27 +25,6 @@ internal class KafkaConsumerMessage<TKey, TValue> : IKafkaConsumerMessage<TKey, 
                 header.Key,
                 Encoding.UTF8.GetString(header.GetValueBytes())))
             .ToList();
-    }
-
-    /// <summary>
-    ///     Needed for inbox message deserialization.
-    ///     Main constructor causes NRE from accessing result parameter.
-    /// </summary>
-    [JsonConstructor]
-    private KafkaConsumerMessage(
-        IConsumer<TKey, TValue> consumer,
-        ConsumeResult<TKey, TValue> result,
-        TKey key,
-        TValue value,
-        string topic,
-        List<KeyValuePair<string, string>> headers)
-    {
-        _consumer = consumer;
-        _result = result;
-        Key = key;
-        Value = value;
-        Topic = topic;
-        Headers = headers;
     }
 
     public TKey Key { get; }

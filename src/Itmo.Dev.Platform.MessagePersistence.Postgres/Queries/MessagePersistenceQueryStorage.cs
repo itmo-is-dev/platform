@@ -5,6 +5,7 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
     public MessagePersistenceQuery Query { get; } = factory.Create(o => $"""
     select  persisted_message_id,
             persisted_message_name,
+            persisted_message_version,
             persisted_message_created_at,
             persisted_message_state,
             persisted_message_key,
@@ -26,23 +27,25 @@ internal class MessagePersistenceQueryStorage(MessagePersistenceQueryFactory fac
     public MessagePersistenceQuery Add { get; } = factory.Create(o => $"""
     insert into {o.SchemaName}.persisted_messages
         (persisted_message_name,
-        persisted_message_created_at,
-        persisted_message_state,
-        persisted_message_key,
-        persisted_message_value,
-        persisted_message_buffering_step,
-        persisted_message_headers)
-    select * from unnest(:names, :created_at, :states, :keys, :values, :buffering_steps, :headers)
+         persisted_message_version,
+         persisted_message_created_at,
+         persisted_message_state,
+         persisted_message_key,
+         persisted_message_value,
+         persisted_message_headers)
+    select * from unnest(:names, :versions, :created_at, :states, :keys, :values, :headers)
     returning persisted_message_id;
     """);
 
     public MessagePersistenceQuery Update { get; } = factory.Create(o => $"""
     update {o.SchemaName}.persisted_messages
-    set persisted_message_state = source.state,
+    set persisted_message_version = source.version,
+        persisted_message_state = source.state,
         persisted_message_retry_count = source.retry_count,
         persisted_message_buffering_step = source.buffering_step,
         persisted_message_headers = source.headers
-    from (select * from unnest(:ids, :states, :retry_counts, :buffering_steps, :headers)) as source(id, state, retry_count, buffering_step, headers)
+    from (select * from unnest(:ids, :versions, :states, :retry_counts, :buffering_steps, :headers)) 
+            as source(id, version, state, retry_count, buffering_step, headers)
     where persisted_message_id = source.id
     """);
 

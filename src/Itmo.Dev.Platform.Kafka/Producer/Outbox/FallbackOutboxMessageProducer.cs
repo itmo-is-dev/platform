@@ -1,22 +1,22 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.MessagePersistence;
-using Itmo.Dev.Platform.MessagePersistence.Tools;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
-using MessagePersistenceConstants = Itmo.Dev.Platform.MessagePersistence.Tools.MessagePersistenceConstants;
+using MessagePersistenceConstants = Itmo.Dev.Platform.MessagePersistence.Internal.Tools.MessagePersistenceConstants;
 
 namespace Itmo.Dev.Platform.Kafka.Producer.Outbox;
 
 internal class FallbackOutboxMessageProducer<TKey, TValue> : IKafkaMessageProducer<TKey, TValue>
 {
     private readonly string _topicName;
-    private readonly IMessagePersistenceConsumer _consumer;
+    private readonly IMessagePersistenceService _service;
     private readonly IKafkaMessageProducer<TKey, TValue> _producer;
 
     public FallbackOutboxMessageProducer(string topicName, IServiceProvider serviceProvider)
     {
         _topicName = topicName;
-        _consumer = serviceProvider.GetRequiredService<IMessagePersistenceConsumer>();
+        _service = serviceProvider.GetRequiredService<IMessagePersistenceService>();
         _producer = serviceProvider.GetRequiredKeyedService<IKafkaMessageProducer<TKey, TValue>>(topicName);
     }
 
@@ -39,14 +39,16 @@ internal class FallbackOutboxMessageProducer<TKey, TValue> : IKafkaMessageProduc
                     parentContext: default)
                 .WithDisplayName($"[outbox] {_topicName}");
 
-            var persistedMessages = messagesArray
-                .Select(x => new PersistedMessage<TKey, TValue>(x.Key, x.Value))
+            var outboxMessages = messagesArray
+                .Select(message => new OutboxPersistedMessage<TKey, TValue>
+                {
+                    Key = message.Key,
+                    Value = message.Value,
+                    Headers = message.Headers,
+                })
                 .ToArray();
 
-            await _consumer.ConsumeAsync(
-                KafkaOutboxMessageName.ForTopic(_topicName),
-                persistedMessages,
-                cancellationToken);
+            await _service.PersistAsync(outboxMessages, cancellationToken);
         }
     }
 }

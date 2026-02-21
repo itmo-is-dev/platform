@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Itmo.Dev.Platform.Kafka.Tools;
 
-internal class NewtonsoftJsonValueSerializer<T> : ISerializer<T>, IDeserializer<T>
+public class NewtonsoftJsonValueSerializer<T> : ISerializer<T>, IDeserializer<T>
 {
     private readonly JsonSerializerSettings? _serializerSettings;
 

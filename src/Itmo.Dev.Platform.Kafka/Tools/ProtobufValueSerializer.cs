@@ -3,9 +3,9 @@ using Google.Protobuf;
 
 namespace Itmo.Dev.Platform.Kafka.Tools;
 
-internal class ProtobufValueSerializer<T> : ISerializer<T>, IDeserializer<T> where T : IMessage<T>, new()
+public class ProtobufValueSerializer<T> : ISerializer<T>, IDeserializer<T> where T : IMessage<T>, new()
 {
-    private static readonly MessageParser<T> Parser = new MessageParser<T>(() => new T());
+    private static readonly MessageParser<T> Parser = new(() => new T());
 
     public byte[] Serialize(T data, SerializationContext context)
     {

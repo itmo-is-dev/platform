@@ -53,7 +53,22 @@ internal class ConsumerMessageHandler<TKey, TValue>
                     links: [..EnumerateActivityLinks(chunk)])
                 .WithDisplayName($"[consume] {_consumerOptions.Topic}");
 
-            await handler.HandleAsync(consumerMessages, cancellationToken);
+            try
+            {
+                
+                await handler.HandleAsync(consumerMessages, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    e,
+                    "Error while processing messages in topic '{TopicName}', offset = {Offset}, partition = {Partition}",
+                    _consumerOptions.Topic,
+                    chunk[0].Offset.Value,
+                    chunk[0].Partition.Value);
+                
+                throw;
+            }
 
             foreach (var consumerMessage in consumerMessages)
             {

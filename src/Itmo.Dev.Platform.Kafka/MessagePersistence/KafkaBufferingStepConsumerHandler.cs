@@ -33,7 +33,7 @@ internal class KafkaBufferingStepConsumerHandler : IKafkaConsumerHandler<Buffere
             "Handling buffered messages, count = {MessageCount}",
             messageIds.Length);
 
-        var query = PersistedMessageQuery.Build(builder => builder
+        var query = InternalPersistedMessageQuery.Build(builder => builder
             .WithIds(messageIds)
             .WithPageSize(messageIds.Length));
 

@@ -151,7 +151,7 @@ public class KafkaOutboxTests : IAsyncLifetime, IClassFixture<KafkaDatabaseFixtu
 
         var outboxRepository = provider.GetRequiredService<IMessagePersistenceInternalRepository>();
 
-        var query = PersistedMessageQuery.Build(builder => builder
+        var query = InternalPersistedMessageQuery.Build(builder => builder
             .WithPageSize(int.MaxValue)
             .WithName(KafkaOutboxMessageName.ForTopic(TopicName))
             .WithCursor(DateTimeOffset.MinValue));

@@ -60,7 +60,7 @@ internal class MessagePersistenceInitialPublishBackgroundService : BackgroundSer
         if (_publisherOptions.MessageNames is [])
             await Task.Delay(Timeout.Infinite, cancellationToken);
 
-        var query = PersistedMessageQuery.Build(builder => builder
+        var query = InternalPersistedMessageQuery.Build(builder => builder
             .WithNames(_publisherOptions.MessageNames)
             .WithState(MessageState.Pending)
             .WithCursor(DateTimeOffset.MinValue)

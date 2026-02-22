@@ -22,7 +22,7 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
     }
 
     public async IAsyncEnumerable<PersistedMessageModel> QueryAsync(
-        PersistedMessageQuery query,
+        InternalPersistedMessageQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await using var connection = await _connectionProvider.GetConnectionAsync(cancellationToken);

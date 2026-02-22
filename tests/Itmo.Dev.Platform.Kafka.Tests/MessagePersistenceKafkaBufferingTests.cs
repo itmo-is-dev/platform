@@ -453,7 +453,7 @@ static file class MessagePersistenceRepositoryExtensions
         {
             var message = await repository
                 .QueryAsync(
-                    PersistedMessageQuery.Build(builder => builder
+                    InternalPersistedMessageQuery.Build(builder => builder
                         .WithPageSize(1)
                         .WithId(messageId)
                         .WithState(state)),

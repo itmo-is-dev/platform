@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Common.DateTime;
 using Itmo.Dev.Platform.Common.Extensions;
+using Itmo.Dev.Platform.MessagePersistence.Internal.Factory;
 using Itmo.Dev.Platform.MessagePersistence.Internal.Metrics;
 using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
 using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
@@ -19,7 +20,8 @@ internal class MessagePersistenceService(
     IPersistenceTransactionProvider transactionProvider,
     IMessagePersistenceInternalRepository messagePersistenceRepository,
     MessagePersistenceRegistry registry,
-    IMessagePersistenceMetrics metrics
+    IMessagePersistenceMetrics metrics,
+    IPersistedMessageFactory persistedMessageFactory
 )
     : IMessagePersistenceService
 {
@@ -30,6 +32,27 @@ internal class MessagePersistenceService(
         where TMessage : IPersistedMessage
     {
         await foreach (var _ in PersistInternalAsync(messages, cancellationToken)) { }
+    }
+
+    public async IAsyncEnumerable<TMessage> QueryAsync<TMessage>(
+        PersistedMessageQuery query,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+        where TMessage : IPersistedMessage
+    {
+        var messageName = registry.GetMessageName(typeof(TMessage));
+
+        var internalQuery = InternalPersistedMessageQuery.Build(builder => builder
+            .WithName(messageName)
+            .WithCursor(query.MinCreatedAt)
+            .WithPageSize(int.MaxValue));
+
+        var messages = messagePersistenceRepository
+            .QueryAsync(internalQuery, cancellationToken);
+
+        await foreach (var message in messages)
+        {
+            yield return (TMessage)await persistedMessageFactory.CreateAsync(message, cancellationToken);
+        }
     }
 
     public async IAsyncEnumerable<long> PersistInternalAsync<TMessage>(

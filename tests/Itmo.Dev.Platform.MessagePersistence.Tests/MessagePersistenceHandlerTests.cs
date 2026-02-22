@@ -151,7 +151,7 @@ public class MessagePersistenceHandlerTests
 
         var repository = scope.ServiceProvider.GetRequiredService<MessagePersistenceRepository>();
 
-        var query = PersistedMessageQuery.Build(x => x
+        var query = InternalPersistedMessageQuery.Build(x => x
             .WithName(nameof(PersistAsync_ShouldFailMessage_WhenRetryCountExceeded))
             .WithState(MessageState.Failed)
             .WithPageSize(1));

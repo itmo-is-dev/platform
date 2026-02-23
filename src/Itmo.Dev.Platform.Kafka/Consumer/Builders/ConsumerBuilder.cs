@@ -82,7 +82,8 @@ internal class ConsumerBuilder<TKey, TValue> :
         _configuration = configuration;
     }
 
-    public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith<T>() where T : class, IDeserializer<TKey>
+    public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyWith<T>()
+        where T : class, IDeserializer<TKey>
     {
         _collection.AddKeyedSingleton<IDeserializer<TKey>, T>(_topicName);
         return this;
@@ -97,7 +98,8 @@ internal class ConsumerBuilder<TKey, TValue> :
     public IConsumerValueDeserializerSelector<TKey, TValue> DeserializeKeyByDefault()
         => this;
 
-    public IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith<T>() where T : class, IDeserializer<TValue>
+    public IConsumerHandlerSelector<TKey, TValue> DeserializeValueWith<T>()
+        where T : class, IDeserializer<TValue>
     {
         _collection.AddKeyedSingleton<IDeserializer<TValue>, T>(_topicName);
         return this;
@@ -119,7 +121,18 @@ internal class ConsumerBuilder<TKey, TValue> :
         return this;
     }
 
-    public IConsumerBuilder HandleInboxWith<T>() where T : class, IKafkaInboxHandler<TKey, TValue>
+    public IConsumerBuilder HandleWith<T>(Func<IServiceProvider, T> factory)
+        where T : class, IKafkaConsumerHandler<TKey, TValue>
+    {
+        _collection.AddKeyedScoped<IKafkaConsumerHandler<TKey, TValue>, T>(
+            _topicName,
+            (provider, _) => factory(provider));
+
+        return this;
+    }
+
+    public IConsumerBuilder HandleInboxWith<T>()
+        where T : class, IKafkaInboxHandler<TKey, TValue>
     {
         var messageName = $"_platform_kafka_inbox_{_topicName}";
 

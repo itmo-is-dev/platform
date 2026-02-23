@@ -45,6 +45,9 @@ public interface IConsumerHandlerSelector<out TKey, out TValue>
     IConsumerBuilder HandleWith<T>()
         where T : class, IKafkaConsumerHandler<TKey, TValue>;
 
+    IConsumerBuilder HandleWith<T>(Func<IServiceProvider, T> factory)
+        where T : class, IKafkaConsumerHandler<TKey, TValue>;
+
     IConsumerBuilder HandleInboxWith<T>()
         where T : class, IKafkaInboxHandler<TKey, TValue>;
 }

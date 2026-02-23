@@ -58,7 +58,7 @@ internal class KafkaBufferingBuilder :
         IConfiguration configuration,
         Action<KafkaConsumerOptions>? action = null)
     {
-        _stepSelector.Services.AddConsumerInternal(consumer => consumer
+        _stepSelector.Services.AddConsumerUnsafe(consumer => consumer
             .WithKey<BufferedMessageKey>()
             .WithValue<BufferedMessageValue>()
             .WithConfiguration(configuration, action)

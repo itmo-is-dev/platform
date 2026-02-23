@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         this IKafkaConfigurationBuilder builder,
         Func<IConsumerKeySelector, IConsumerBuilder> configuration)
     {
-        builder.Services.AddConsumerInternal(configuration);
+        builder.Services.AddConsumerUnsafe(configuration);
         return builder;
     }
 
@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    internal static void AddConsumerInternal(
+    public static IServiceCollection AddConsumerUnsafe(
         this IServiceCollection collection,
         Func<IConsumerKeySelector, IConsumerBuilder> configuration)
     {
@@ -44,6 +44,8 @@ public static class ServiceCollectionExtensions
         IConsumerBuilder consumerBuilder = configuration.Invoke(selector);
 
         consumerBuilder.Build();
+
+        return collection;
     }
 
     internal static void AddProducerInternal(

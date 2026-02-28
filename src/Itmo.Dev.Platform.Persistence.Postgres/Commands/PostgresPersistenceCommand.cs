@@ -5,6 +5,7 @@ using Npgsql;
 using NpgsqlTypes;
 using System.Data.Common;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Itmo.Dev.Platform.Persistence.Postgres.Commands;
@@ -46,6 +47,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         return this;
     }
 
+    [OverloadResolutionPriority(int.MaxValue)]
     public IPersistenceCommand AddParameter<T>(string parameterName, IEnumerable<T> values)
     {
         var value = values is List<T> or T[] ? values : values.ToArray();

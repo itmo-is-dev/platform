@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System.Data.Common;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Platform.Persistence.Abstractions.Commands;
 
@@ -14,6 +15,7 @@ public interface IPersistenceCommand : IAsyncDisposable
     
     IPersistenceCommand AddParameter<T>(string parameterName, T value);
 
+    [OverloadResolutionPriority(int.MaxValue)]
     IPersistenceCommand AddParameter<T>(string parameterName, IEnumerable<T> values);
 
     IPersistenceCommand AddMultiArrayStringParameter<T>(

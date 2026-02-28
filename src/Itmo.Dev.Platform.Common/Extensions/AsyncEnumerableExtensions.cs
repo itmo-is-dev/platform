@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Common.Extensions.Iterators;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
@@ -7,173 +8,99 @@ namespace System.Collections.Generic;
 
 public static class AsyncEnumerableExtensions
 {
-    public static async Task AsTask<T>(this IAsyncEnumerable<T> enumerable, CancellationToken cancellationToken)
-    {
-        await foreach (T value in enumerable.WithCancellation(cancellationToken)) { }
-    }
-
-    /// <summary>
-    ///     Chunks an async enumerable
-    /// </summary>
     /// <param name="enumerable">Chunked async enumerable</param>
-    /// <param name="count">Chunk max size (>1)</param>
-    /// <param name="timeout">
-    ///     Wait time for when enumerator is not completed.
-    ///     If enumerator would not complete before that time span,
-    ///     existing values for current chunk are yielded. 
-    /// </param>
     /// <typeparam name="T">Type of chunked values</typeparam>
-    /// <returns>Async enumerable of chunks</returns>
-    /// <exception cref="ArgumentOutOfRangeException">
-    ///     Thrown when <see cref="count"/> is less than or equal to 1,
-    ///     or <see cref="timeout"/> is less than <see cref="timeoutChunkSpan"/>
-    /// </exception>
-    public static IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync<T>(
-        this IAsyncEnumerable<T> enumerable,
-        int count,
-        TimeSpan timeout)
+    extension<T>(IAsyncEnumerable<T> enumerable)
     {
-        if (count is 1)
-            return enumerable.Select(x => new[] { x });
-
-        return enumerable.ChunkAsync(count, timeout, timeoutChunkSpan: timeout);
-    }
-
-    /// <inheritdoc cref="ChunkAsync{T}(System.Collections.Generic.IAsyncEnumerable{T},int,System.TimeSpan)"/>
-    /// <param name="timeoutChunkSpan">
-    ///     Time span that <see cref="timeout"/> are split into.
-    ///     When enumerator completes in any of  <see cref="timeoutChunkSpan"/> spans, its result 
-    ///     continues to process.
-    /// </param>
-    public static IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync<T>(
-        this IAsyncEnumerable<T> enumerable,
-        int count,
-        TimeSpan timeout,
-        TimeSpan timeoutChunkSpan)
-    {
-        if (count < 1)
-            throw new ArgumentOutOfRangeException(nameof(count));
-
-        if (count is 1)
-            return enumerable.Select(x => new[] { x });
-
-        if (timeout < timeoutChunkSpan)
+        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+        public async Task AsTask(CancellationToken cancellationToken)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(timeoutChunkSpan),
-                "Timeout chunk span cannot be greater than timeout");
-        }
-
-        return AsyncEnumerable.Create(ChunkInternal);
-
-        async IAsyncEnumerator<IReadOnlyList<T>> ChunkInternal(CancellationToken cancellationToken)
-        {
-            var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, default);
-
-            var enumerator = enumerable
-                .WithCancellation(cancellationSource.Token)
-                .ConfigureAwait(false)
-                .GetAsyncEnumerator();
-
-            var enumeratorTask = default(ConfiguredValueTaskAwaitable<bool>);
-            var buffer = new List<T>();
-
-            try
+            await foreach (T value in enumerable.WithCancellation(cancellationToken))
             {
-                while (true)
-                {
-                    enumeratorTask = enumerator.MoveNextAsync();
-                    var awaiter = enumeratorTask.GetAwaiter();
-
-                    var remainingDelay = timeout;
-
-                    while (awaiter.IsCompleted is false && remainingDelay > TimeSpan.Zero)
-                    {
-                        var delay = remainingDelay <= timeoutChunkSpan
-                            ? remainingDelay
-                            : timeoutChunkSpan;
-
-                        await Task.Delay(delay, cancellationToken);
-
-                        remainingDelay -= delay;
-                    }
-
-                    if (awaiter.IsCompleted is false && buffer.Count > 0)
-                    {
-                        yield return buffer.ToArray();
-                        buffer.Clear();
-                    }
-
-                    var hasNext = awaiter.IsCompleted
-                        ? awaiter.GetResult()
-                        : await enumeratorTask;
-
-                    if (hasNext is false)
-                    {
-                        if (buffer.Count > 0)
-                            yield return buffer;
-
-                        yield break;
-                    }
-
-                    buffer.Add(enumerator.Current);
-
-                    if (buffer.Count < count)
-                        continue;
-
-                    yield return buffer.ToArray();
-                    buffer.Clear();
-                }
-            }
-            finally
-            {
-                try
-                {
-                    cancellationSource.Cancel();
-                    await enumeratorTask;
-                }
-                catch
-                {
-                    // We are not interested in any exceptions here
-                    // because the fetch operation was scheduled while
-                    // no one expects it.
-                }
-
-                cancellationSource.Dispose();
-                await enumerator.DisposeAsync();
+                _ = value;
             }
         }
-    }
 
-    public static async IAsyncEnumerable<T2> SelectAwaitParallel<T1, T2>(
-        this IAsyncEnumerable<T1> enumerable,
-        ParallelOptions options,
-        Func<T1, CancellationToken, ValueTask<T2>> selector)
-    {
-        var channel = Channel.CreateUnbounded<T2>();
+        /// <summary>
+        ///     Chunks an async enumerable
+        /// </summary>
+        /// <param name="count">Chunk max size (>1)</param>
+        /// <param name="timeout">
+        ///     Wait time for when enumerator is not completed.
+        ///     If enumerator would not complete before that time span,
+        ///     existing values for current chunk are yielded. 
+        /// </param>
+        /// <returns>Async enumerable of chunks</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown when <see cref="count"/> is less than or equal to 1,
+        ///     or <see cref="timeout"/> is less than <see cref="timeoutChunkSpan"/>
+        /// </exception>
+        public IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync(
+            int count,
+            TimeSpan timeout)
+        {
+            if (count is 1)
+                return enumerable.Select(x => new[] { x });
 
-        var parallelTask = Parallel.ForEachAsync(
-            enumerable,
-            options,
-            async (element, cancellationToken) =>
+            return enumerable.ChunkAsync(count, timeout, timeoutChunkSpan: timeout);
+        }
+
+        /// <inheritdoc cref="ChunkAsync{T}(System.Collections.Generic.IAsyncEnumerable{T},int,System.TimeSpan)"/>
+        /// <param name="timeoutChunkSpan">
+        ///     Time span that <see cref="timeout"/> are split into.
+        ///     When enumerator completes in any of  <see cref="timeoutChunkSpan"/> spans, its result 
+        ///     continues to process.
+        /// </param>
+        public IAsyncEnumerable<IReadOnlyList<T>> ChunkAsync(
+            int count,
+            TimeSpan timeout,
+            TimeSpan timeoutChunkSpan)
+        {
+            if (count < 1)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            if (count is 1)
+                return enumerable.Select(x => new[] { x });
+
+            if (timeout < timeoutChunkSpan)
             {
-                var selected = await selector.Invoke(element, cancellationToken);
-                await channel.Writer.WriteAsync(selected, cancellationToken);
-            });
+                throw new ArgumentOutOfRangeException(
+                    nameof(timeoutChunkSpan),
+                    "Timeout chunk span cannot be greater than timeout");
+            }
 
-        var completionTask = parallelTask.ContinueWith(_ => channel.Writer.Complete(), options.CancellationToken);
-
-        await foreach (var element in channel.Reader.ReadAllAsync(options.CancellationToken))
-        {
-            yield return element;
+            return new ChunkedAsyncEnumerable<T>(enumerable, count, timeout, timeoutChunkSpan);
         }
 
-        if (parallelTask.Exception is not null)
+        public async IAsyncEnumerable<T2> SelectAwaitParallel<T2>(
+            ParallelOptions options,
+            Func<T, CancellationToken, ValueTask<T2>> selector)
         {
-            ExceptionDispatchInfo.Throw(parallelTask.Exception);
-        }
+            var channel = Channel.CreateUnbounded<T2>();
 
-        await parallelTask;
-        await completionTask;
+            var parallelTask = Parallel.ForEachAsync(
+                enumerable,
+                options,
+                async (element, cancellationToken) =>
+                {
+                    var selected = await selector.Invoke(element, cancellationToken);
+                    await channel.Writer.WriteAsync(selected, cancellationToken);
+                });
+
+            var completionTask = parallelTask.ContinueWith(_ => channel.Writer.Complete(), options.CancellationToken);
+
+            await foreach (var element in channel.Reader.ReadAllAsync(options.CancellationToken))
+            {
+                yield return element;
+            }
+
+            if (parallelTask.Exception is not null)
+            {
+                ExceptionDispatchInfo.Throw(parallelTask.Exception);
+            }
+
+            await parallelTask;
+            await completionTask;
+        }
     }
 }

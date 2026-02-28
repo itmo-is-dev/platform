@@ -19,6 +19,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoBogus"/>
+        <PackageReference Include="Confluent.Kafka" />
         <PackageReference Include="FluentAssertions"/>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
@@ -27,7 +28,9 @@
         <PackageReference Include="Respawn"/>
         <PackageReference Include="Serilog.Extensions.Logging"/>
         <PackageReference Include="Serilog.Sinks.XUnit"/>
+        <PackageReference Include="Testcontainers.Kafka" />
         <PackageReference Include="Testcontainers.PostgreSql"/>
+        <PackageReference Include="Google.Protobuf"/>
     </ItemGroup>
 
 </Project>

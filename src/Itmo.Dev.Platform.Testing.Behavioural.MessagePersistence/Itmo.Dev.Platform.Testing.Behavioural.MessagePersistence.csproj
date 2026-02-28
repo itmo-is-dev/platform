@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPlatformPackage>true</IsPlatformPackage>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageReleaseNotes>
+            Added behavioural testing frameword
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <PropertyGroup Label="PlatformVersion">
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>0</MinorVersion>
+        <PatchVersion>316</PatchVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Platform.MessagePersistence\Itmo.Dev.Platform.MessagePersistence.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Testing.Behavioural\Itmo.Dev.Platform.Testing.Behavioural.csproj"/>
+    </ItemGroup>
+</Project>

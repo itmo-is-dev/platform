@@ -19,7 +19,7 @@ public abstract class DatabaseFixture : IAsyncLifetime
     // ReSharper disable once ConvertConstructorToMemberInitializers
     protected DatabaseFixture()
     {
-        var containerBuilder = new PostgreSqlBuilder()
+        var containerBuilder = new PostgreSqlBuilder("postgres:latest")
             .WithUsername(User)
             .WithPassword(Password)
             .WithDatabase(Database);

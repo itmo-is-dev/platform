@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPlatformPackage>true</IsPlatformPackage>
+        <NoWarn>$(NoWarn);CA1716;SA1009;CA1721</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageReleaseNotes>
+            Added behavioural testing frameword
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <PropertyGroup Label="PlatformVersion">
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>0</MinorVersion>
+        <PatchVersion>316</PatchVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="Serilog.Sinks.XUnit"/>
+        <PackageReference Include="xunit"/>
+        <PackageReference Include="FluentAssertions"/>
+        <PackageReference Remove="StyleCop.Analyzers"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Platform.Testing.Behavioural.Analyzers\Itmo.Dev.Platform.Testing.Behavioural.Analyzers.csproj" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj" />
+    </ItemGroup>
+
+</Project>

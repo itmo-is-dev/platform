@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "Debug": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../Itmo.Dev.Asap.Points.Tests.Component/Itmo.Dev.Asap.Points.Tests.Component.csproj"
+    }
+  }
+}

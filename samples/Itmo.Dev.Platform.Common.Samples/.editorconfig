@@ -1,2 +1,2 @@
 [*.cs]
-dotnet_diagnostic.IID0001.severity = warning
+dotnet_diagnostic.IID0001.severity = suggestion

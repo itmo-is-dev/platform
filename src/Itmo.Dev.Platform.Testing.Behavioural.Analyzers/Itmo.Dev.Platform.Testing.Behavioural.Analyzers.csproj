@@ -5,6 +5,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
         <NoWarn>$(NoWarn);IDE0008;CA1506;SA1009;SA1111;SA1202</NoWarn>
     </PropertyGroup>
 

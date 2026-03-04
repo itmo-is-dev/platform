@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 
 namespace Itmo.Dev.Platform.Testing.Behavioural.Tools;
 
-internal sealed class MockKafkaHandler<TKey, TValue> : IKafkaConsumerHandler<TKey, TValue>
+public sealed class MockKafkaHandler<TKey, TValue> : IKafkaConsumerHandler<TKey, TValue>
 {
     private readonly ConcurrentBag<MockKafkaMessage<TKey, TValue>> _messages;
     private readonly ILogger<MockKafkaHandler<TKey, TValue>> _logger;

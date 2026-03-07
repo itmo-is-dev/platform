@@ -114,6 +114,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Testing.B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Testing.Behavioural.MessagePersistence", "src\Itmo.Dev.Platform.Testing.Behavioural.MessagePersistence\Itmo.Dev.Platform.Testing.Behavioural.MessagePersistence.csproj", "{769371D9-527B-4C23-B45A-04CFC0C653B6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18C776DA-A728-44D2-96B1-C79CD8312D9D}"
+	ProjectSection(SolutionItems) = preProject
+		docs\persistence.md = docs\persistence.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

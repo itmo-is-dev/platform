@@ -38,6 +38,12 @@ public sealed class AsyncCheck
         return this;
     }
 
+    public AsyncCheck WithAssert(Action assert) => WithAssert(_ =>
+    {
+        assert();
+        return Task.CompletedTask;
+    });
+
     private async Task CheckAsync()
     {
         using var cts = new CancellationTokenSource(_timeout);

@@ -13,7 +13,7 @@
 ```csharp
 collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgres => postgres
     .WithConnectionOptions(static builder => builder
-        .BindConfiguration("Infrastructure:DataAccess:PostgresConfiguration"))
+        .BindConfiguration("Infrastructure:Persistence:Postgres"))
     .WithMigrationsFrom(typeof(IAssemblyMarker).Assembly)
     .WithDataSourcePlugin<MappingPlugin>()));
 ```
@@ -23,8 +23,10 @@ collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgre
 
 - `WithConnectionOptions` - настройка конфигурации подключения к БД.
 - `WithMigrationsFrom` - указание сборки(-ок) с миграциями. Также можно использовать `WithMigrationsFromItems` для указания конкретных типов
-с миграциями.
-- `WithDataSourcePlugin` - подключение плагинов для `NpgsqlDataSource` (например, кастомный маппинг enum-ов).
+  с миграциями.
+- `WithDataSourcePlugin` - подключение плагинов для `NpgsqlDataSource`. Используемые плагины 
+  должны реализовывать `IPostgresDataSourcePlugin`, и фактически позволяют дополнительно настроить `NpgsqlDataSourceBuilder` 
+  перед созданием data source.
 
 ## Конфигурация
 
@@ -73,7 +75,7 @@ collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgre
 ```json
 {
   "Infrastructure": {
-    "DataAccess": {
+    "Persistence": {
       "PostgresConfiguration": {
         "Host": "localhost",
         "Database": "test-db",
@@ -94,7 +96,7 @@ collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgre
 
 ### Получение соединения
 
-Для взаимодействия с БД используется `IPersistenceConnectionProvider`. 
+Для получения соединений с БД используется `IPersistenceConnectionProvider`.  с БД используется `IPersistenceConnectionProvider`. 
 Провайдер зарегистрирован в DI как Scoped, поэтому сервисы использующие его должны быть зарегистрированы как Scoped или Transient.
 
 Чтобы получить объект соединения, необходимо вызвать метод провайдера `GetConnectionAsync`, который возвращает 
@@ -118,21 +120,23 @@ await using IPersistenceCommand command = connection.CreateCommand(sql)
 
 - `AddParameter(DbParameter parameter)` - добавляет сырой `DbParameter`, фактически параметр должен быть типа `NpgsqlParameter`.
 - `AddParameter<T>(string parameterName, T value)` - добавляет именованный параметр произвольного типа.
-- `AddParameter<T>(string parameterName, IEnumerable<T> values)` - добавляет именованный параметр-коллекцию, используется для параметров-списков. 
-  В sql коде удобно подставлять в `= any(...)` или `in (...)`.
+- `AddParameter<T>(string parameterName, IEnumerable<T> values)` - добавляет именованный параметр-список. 
+  Несмотря на ограничение Npgsql в передаваемом типе коллекции для параметра (`List<T>` или `T[]`), в данный метод можно передавать 
+  любой тип, реализующий `IEnumerable<T>`. В sql коде удобно подставлять в `= any(...)` или `in (...)`.
 - `AddJsonParameter<T>(string parameterName, T value, JsonSerializerSettings? serializerSettings = null)` - сериализует переданное значение в json и добавляет как параметр с типом `jsonb`.
 - `AddNullableJsonParameter<T>(string parameterName, T? value, JsonSerializerSettings? serializerSettings = null)` - аналогично `AddJsonParameter`, но поддерживает `null` значения.
 - `AddJsonArrayParameter<T>(string parameterName, IEnumerable<T> values, JsonSerializerSettings? serializerSettings = null)` - сериализует каждый элемент коллекции в json и добавляет как параметр с типом `jsonb[]`.
 - `AddJsonArrayParameter(string parameterName, IEnumerable<string> values)` - добавляет коллекцию строк (уже сериализованных объектов) как параметр с типом `jsonb[]`.
 - `AddMultiArrayStringParameter<T>(string parameterName, IEnumerable<IEnumerable<T>> values)` - позволяет добавлять многомерные массивы в качестве параметров. 
-  Каждый элемент коллекции 1-го уровня преобразуется в postgres-массив, затем итоговый массив добавляется как параметр с типом `text[]`.
+  Каждый элемент коллекции 1-го уровня преобразуется в postgres-массив, затем итоговый список добавляется как параметр с типом `text[]`.
+  Для корректной работы в sql, необходимо явно привести каждый элемент списка к ожидаемому postgres-типу (например, `integer[]` или `bigint[]`).
 - `AddMultiArrayStringParameter(string parameterName, IEnumerable<IEnumerable<string>> values)` - аналогично `AddMultiArrayStringParameter`, но для строковых значений коллекции.
 
 > При попытке добавить параметр с уже существующим названием будет выброшен `PlatformPersistencePostgresException`.
 
 ### Выполнение запросов
 
-Чтение данных через реализовано через метод команды `ExecuteReaderAsync`, аналогично `NpgsqlCommand`:
+Чтение данных реализовано через метод команды `ExecuteReaderAsync`, аналогично `NpgsqlCommand`:
 
 ```csharp
 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -206,5 +210,3 @@ public class Initial : SqlMigration
 ```
 
 Миграции запускаются автоматически при старте приложения. Сборка с миграциями указывается при регистрации в DI, методе `WithMigrationsFrom`.
-
-// TODO: возможно что-то написать про WithMigrationsFromItems 

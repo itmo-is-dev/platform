@@ -7,7 +7,8 @@
 Библиотека состоит из двух Nuget пакетов: `Itmo.Dev.Platform.Persistence.Abstractions` с абстракциями и
 `Itmo.Dev.Platform.Persistence.Postgres` с реализациями для БД Postgres.
 
-Для регистрации в DI-контейнере необходимо вызвать метод `AddPlatformPersistence`. 
+Для регистрации в DI-контейнере необходимо вызвать метод `AddPlatformPersistence`, предварительно зарегистрировав саму 
+платформу (метод `AddPlatform`). 
 Метод принимает делегат, в котором происходит конфигурация Persistence слоя.
 
 ```csharp
@@ -66,7 +67,9 @@ collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgre
 - **MaximumPoolSize**  
   Максимальный размер пула соединений. Необязательный параметр, по умолчанию `10`, должен быть >= `1`.
 - **EnableConnectionProviderLogging**  
-  Включение логирования. Необязательный параметр, по умолчанию `false`.
+  Включение логирования. Необязательный параметр, по умолчанию `false`. 
+  Для корректной работы необходимо также добавить платфморменный observability - в DI контейнере 
+  вызвать метод `.AddPlatformObservability`
 
 > Валидация значений происходит при старте сервиса. При невалидных значениях сервис не запустится.
 

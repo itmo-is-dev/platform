@@ -79,7 +79,7 @@ collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgre
 {
   "Infrastructure": {
     "Persistence": {
-      "PostgresConfiguration": {
+      "Postgres": {
         "Host": "localhost",
         "Database": "test-db",
         "Port": 6432,

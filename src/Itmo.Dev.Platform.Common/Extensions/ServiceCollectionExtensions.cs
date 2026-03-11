@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Common.Configurations;
 using Itmo.Dev.Platform.Common.DateTime;
 using Itmo.Dev.Platform.Common.Lifetime.Extensions;
 using Itmo.Dev.Platform.Common.Options;
@@ -11,9 +12,12 @@ namespace Itmo.Dev.Platform.Common.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPlatform(this IServiceCollection collection)
+    public static IServiceCollection AddPlatform(
+        this IServiceCollection collection,
+        Func<PlatformCommonConfiguration.ISerializerStep, PlatformCommonConfiguration.IFinalStep> configuration)
     {
         collection.AddPlatformLifetimes();
+        collection.AddUtcDateTimeProvider();
 
         collection
             .AddOptions<PlatformOptions>()
@@ -28,12 +32,18 @@ public static class ServiceCollectionExtensions
 
         collection.RemoveAll(typeof(IOptionsFactory<>));
         collection.AddTransient(typeof(IOptionsFactory<>), typeof(PlatformOptionsFactory<>));
-        
+
+        var configurator = new PlatformCommonBuilder(collection);
+        configuration(configurator);
+
         return collection;
     }
 
     public static IServiceCollection AddUtcDateTimeProvider(this IServiceCollection collection)
-        => collection.AddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
+    {
+        collection.TryAddSingleton<IDateTimeProvider, UtcDateTimeProvider>();
+        return collection;
+    }
 
     internal static IServiceCollection AddHostedServiceUnsafe<THostedService>(
         this IServiceCollection collection,

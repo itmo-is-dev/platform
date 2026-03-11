@@ -7,9 +7,9 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.Common.Models;
+using Itmo.Dev.Platform.Common.Serialization;
 using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
-using Newtonsoft.Json;
 using System.Data;
 using System.Runtime.CompilerServices;
 
@@ -18,20 +18,20 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Postgres.Repositories;
 internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepository
 {
     private readonly BackgroundTaskQueryStorage _queryStorage;
-    private readonly JsonSerializerSettings _serializerSettings;
     private readonly IBackgroundTaskRegistry _backgroundTaskRegistry;
     private readonly IPersistenceConnectionProvider _connectionProvider;
+    private readonly IPlatformSerializer _serializer;
 
     public BackgroundTaskRepository(
         BackgroundTaskQueryStorage queryStorage,
         IPersistenceConnectionProvider connectionProvider,
-        JsonSerializerSettings serializerSettings,
-        IBackgroundTaskRegistry backgroundTaskRegistry)
+        IBackgroundTaskRegistry backgroundTaskRegistry,
+        IPlatformSerializer serializer)
     {
         _queryStorage = queryStorage;
         _connectionProvider = connectionProvider;
-        _serializerSettings = serializerSettings;
         _backgroundTaskRegistry = backgroundTaskRegistry;
+        _serializer = serializer;
     }
 
     public async IAsyncEnumerable<BackgroundTask> QueryAsync(
@@ -48,8 +48,8 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("ids", query.Ids.Select(x => x.Value).ToArray())
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
-            .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
-            .AddJsonArrayParameter("execution_metadata", query.ExecutionMetadatas, _serializerSettings)
+            .AddJsonArrayParameter("metadata", query.Metadatas)
+            .AddJsonArrayParameter("execution_metadata", query.ExecutionMetadatas)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("max_scheduled_at", query.MaxScheduledAt)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
@@ -99,7 +99,7 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("ids", query.Ids.Select(x => x.Value).ToArray())
             .AddParameter("names", query.Names)
             .AddParameter("states", query.States)
-            .AddJsonArrayParameter("metadata", query.Metadatas, _serializerSettings)
+            .AddJsonArrayParameter("metadata", query.Metadatas)
             .AddParameter("max_scheduled_at", query.MaxScheduledAt)
             .AddParameter("cursor", query.Cursor)
             .AddParameter("page_size", query.PageSize ?? int.MaxValue);
@@ -123,8 +123,8 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("types", tasks.Select(x => x.Type.AssemblyQualifiedName).ToArray())
             .AddParameter("scheduled_at", tasks.Select(x => x.ScheduledAt))
             .AddParameter("created_at", tasks.Select(x => x.CreatedAt).ToArray())
-            .AddJsonArrayParameter("metadata", tasks.Select(x => x.Metadata), _serializerSettings)
-            .AddJsonArrayParameter("execution_metadata", tasks.Select(x => x.ExecutionMetadata), _serializerSettings);
+            .AddJsonArrayParameter("metadata", tasks.Select(x => x.Metadata))
+            .AddJsonArrayParameter("execution_metadata", tasks.Select(x => x.ExecutionMetadata));
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
@@ -156,9 +156,9 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
             .AddParameter("id", backgroundTask.Id.Value)
             .AddParameter("state", backgroundTask.State)
             .AddParameter("retry_number", backgroundTask.RetryNumber)
-            .AddJsonParameter("execution_metadata", backgroundTask.ExecutionMetadata, _serializerSettings)
-            .AddNullableJsonParameter("result", backgroundTask.Result, _serializerSettings)
-            .AddNullableJsonParameter("error", backgroundTask.Error, _serializerSettings)
+            .AddJsonParameter("execution_metadata", backgroundTask.ExecutionMetadata)
+            .AddNullableJsonParameter("result", backgroundTask.Result)
+            .AddNullableJsonParameter("error", backgroundTask.Error)
             .AddParameter("scheduled_at", backgroundTask.ScheduledAt);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
@@ -170,6 +170,6 @@ internal class BackgroundTaskRepository : IBackgroundTaskInfrastructureRepositor
         if (value is null)
             return null;
 
-        return JsonConvert.DeserializeObject(value, type, _serializerSettings) as T;
+        return _serializer.Deserialize<T>(value, type);
     }
 }

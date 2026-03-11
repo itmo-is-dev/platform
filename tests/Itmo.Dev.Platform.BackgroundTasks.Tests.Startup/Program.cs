@@ -3,13 +3,8 @@ using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddUtcDateTimeProvider();
-builder.Services.AddSingleton(new JsonSerializerSettings
-{
-    TypeNameHandling = TypeNameHandling.Auto,
-});
-
-builder.Services.AddPlatform();
+builder.Services.AddPlatform(x => x
+    .WithNewtonsoftSerialization(options => options.TypeNameHandling = TypeNameHandling.Auto));
 
 var app = builder.Build();
 

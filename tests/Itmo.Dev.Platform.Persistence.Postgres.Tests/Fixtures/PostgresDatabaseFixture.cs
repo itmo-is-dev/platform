@@ -30,7 +30,7 @@ public class PostgresDatabaseFixture : DatabaseFixture
 
         collection.AddSingleton<IConfiguration>(configuration);
 
-        collection.AddPlatform();
+        collection.AddPlatform(x => x.WithNewtonsoftSerialization());
 
         collection.AddPlatformPersistence(
             persistence => persistence

@@ -49,7 +49,7 @@ public class KafkaDatabaseFixture : DatabaseFixture
 
         collection.AddSingleton<IConfiguration>(configuration);
 
-        collection.AddPlatform();
+        collection.AddPlatform(x => x.WithNewtonsoftSerialization());
 
         collection.AddPlatformPersistence(
             persistence => persistence.UsePostgres(

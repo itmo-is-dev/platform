@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddUtcDateTimeProvider();
 builder.Services.AddSingleton(new JsonSerializerSettings());
 
-builder.Services.AddPlatform();
+builder.Services.AddPlatform(x => x.WithNewtonsoftSerialization());
 
 var app = builder.Build();
 

@@ -16,14 +16,10 @@ builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 builder.AddPlatformObservability();
 builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddConsoleExporter());
 
-builder.Services.AddUtcDateTimeProvider();
-builder.Services.AddSingleton(new JsonSerializerSettings());
 builder.Services.AddLogging(x => x.AddSerilog());
 builder.Services.AddOptions();
 
-builder.Services.AddSingleton(p => p.GetRequiredService<IOptions<JsonSerializerSettings>>().Value);
-
-builder.Services.AddPlatform();
+builder.Services.AddPlatform(x => x.WithNewtonsoftSerialization());
 
 var app = builder.Build();
 

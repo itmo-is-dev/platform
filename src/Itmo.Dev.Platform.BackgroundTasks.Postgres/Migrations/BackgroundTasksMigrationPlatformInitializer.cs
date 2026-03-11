@@ -33,7 +33,7 @@ public class BackgroundTasksMigrationPlatformInitializer : PlatformLifetimeIniti
             .AddOptions<BackgroundTaskPersistenceOptions>()
             .Configure(o => persistenceOptions.Value.ApplyTo(o));
 
-        collection.AddPlatform();
+        collection.AddPlatform(config => config.WithSystemTextJsonConfiguration());
 
         collection.AddPlatformPersistence(
             persistence => persistence.UsePostgres(

@@ -1,6 +1,6 @@
+using Itmo.Dev.Platform.Common.Serialization;
 using Itmo.Dev.Platform.Persistence.Abstractions.Commands;
 using Itmo.Dev.Platform.Persistence.Postgres.Exceptions;
-using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
 using System.Data.Common;
@@ -13,10 +13,12 @@ namespace Itmo.Dev.Platform.Persistence.Postgres.Commands;
 internal class PostgresPersistenceCommand : IPersistenceCommand
 {
     private readonly NpgsqlCommand _command;
+    private readonly IPlatformSerializer _serializer;
 
-    public PostgresPersistenceCommand(NpgsqlCommand command)
+    public PostgresPersistenceCommand(NpgsqlCommand command, IPlatformSerializer serializer)
     {
         _command = command;
+        _serializer = serializer;
     }
 
     public async ValueTask<DbDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
@@ -73,12 +75,9 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         return this;
     }
 
-    public IPersistenceCommand AddJsonParameter<T>(
-        string parameterName,
-        T value,
-        JsonSerializerSettings? serializerSettings = null)
+    public IPersistenceCommand AddJsonParameter<T>(string parameterName, T value)
     {
-        var serialized = JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
+        var serialized = _serializer.Serialize(value, typeof(T)); 
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
@@ -89,14 +88,12 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         return this;
     }
 
-    public IPersistenceCommand AddNullableJsonParameter<T>(
-        string parameterName,
-        T? value,
-        JsonSerializerSettings? serializerSettings = null)
+    public IPersistenceCommand AddNullableJsonParameter<T>(string parameterName, T? value)
         where T : class
     {
-        object serialized =
-            value is null ? DBNull.Value : JsonConvert.SerializeObject(value, typeof(T), serializerSettings);
+        object serialized = value is null
+            ? DBNull.Value
+            : _serializer.Serialize(value, typeof(T));
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {
@@ -108,13 +105,10 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
         return this;
     }
 
-    public IPersistenceCommand AddJsonArrayParameter<T>(
-        string parameterName,
-        IEnumerable<T> values,
-        JsonSerializerSettings? serializerSettings = null)
+    public IPersistenceCommand AddJsonArrayParameter<T>(string parameterName, IEnumerable<T> values)
     {
         var serialized = values
-            .Select(value => JsonConvert.SerializeObject(value, typeof(T), serializerSettings))
+            .Select(value => _serializer.Serialize(value, typeof(T)))
             .ToArray();
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)

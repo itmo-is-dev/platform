@@ -27,7 +27,7 @@ public static class WebApplicationBuilderExtensions
             configuration.Invoke(configurator);
         }
 
-        collection.AddPlatform();
+        collection.AddPlatform(x => x.WithSystemTextJsonConfiguration());
         collection.AddLogging(x => x.AddConsole().SetMinimumLevel(LogLevel.Trace));
 
         collection.AddSentryPlugins();

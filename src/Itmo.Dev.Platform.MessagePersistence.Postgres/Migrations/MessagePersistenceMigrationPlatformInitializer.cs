@@ -35,7 +35,7 @@ public class MessagePersistenceMigrationPlatformInitializer : PlatformLifetimeIn
             .AddOptions<MessagePersistencePostgresOptions>()
             .Configure(o => persistenceOptions.Value.ApplyTo(o));
 
-        collection.AddPlatform();
+        collection.AddPlatform(x => x.WithSystemTextJsonConfiguration());
 
         collection.AddPlatformPersistence(
             persistence => persistence.UsePostgres(

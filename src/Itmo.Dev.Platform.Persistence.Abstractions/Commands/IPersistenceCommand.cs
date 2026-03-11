@@ -8,11 +8,11 @@ namespace Itmo.Dev.Platform.Persistence.Abstractions.Commands;
 public interface IPersistenceCommand : IAsyncDisposable
 {
     ValueTask<DbDataReader> ExecuteReaderAsync(CancellationToken cancellationToken);
-    
+
     ValueTask<int> ExecuteNonQueryAsync(CancellationToken cancellationToken);
-    
+
     IPersistenceCommand AddParameter(DbParameter parameter);
-    
+
     IPersistenceCommand AddParameter<T>(string parameterName, T value);
 
     [OverloadResolutionPriority(int.MaxValue)]
@@ -27,24 +27,12 @@ public interface IPersistenceCommand : IAsyncDisposable
         string parameterName,
         IEnumerable<IEnumerable<string>> values);
 
-    IPersistenceCommand AddJsonParameter<T>(
-        string parameterName,
-        T value,
-        JsonSerializerSettings? serializerSettings = null);
+    IPersistenceCommand AddJsonParameter<T>(string parameterName, T value);
 
-    IPersistenceCommand AddNullableJsonParameter<T>(
-        string parameterName,
-        T? value,
-        JsonSerializerSettings? serializerSettings = null)
+    IPersistenceCommand AddNullableJsonParameter<T>(string parameterName, T? value)
         where T : class;
 
-    IPersistenceCommand AddJsonArrayParameter<T>(
-        string parameterName,
-        IEnumerable<T> values,
-        JsonSerializerSettings? serializerSettings = null);
+    IPersistenceCommand AddJsonArrayParameter<T>(string parameterName, IEnumerable<T> values);
 
-    IPersistenceCommand AddJsonArrayParameter(
-        string parameterName,
-        IEnumerable<string> values);
-
+    IPersistenceCommand AddJsonArrayParameter(string parameterName, IEnumerable<string> values);
 }

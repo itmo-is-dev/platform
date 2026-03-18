@@ -30,7 +30,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj" />
-        <ProjectReference Include="..\Itmo.Dev.Platform.Testing.Behavioural.Analyzers\Itmo.Dev.Platform.Testing.Behavioural.Analyzers.csproj" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Testing.Behavioural.Analyzers\Itmo.Dev.Platform.Testing.Behavioural.Analyzers.csproj"/>
         <ProjectReference Include="..\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj" />
     </ItemGroup>
 

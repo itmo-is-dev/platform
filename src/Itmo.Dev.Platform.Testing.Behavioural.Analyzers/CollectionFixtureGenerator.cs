@@ -24,7 +24,7 @@ public sealed class CollectionFixtureGenerator : IIncrementalGenerator
             .Select(static (tuple, _) => (details: tuple.Left, testContextType: tuple.Right))
             .Where(static tuple =>
             {
-                return tuple.details.TestContextSymbol.Interfaces.Any(i
+                return tuple.details.TestContextSymbol.AllInterfaces.Any(i
                     => i.Equals(tuple.testContextType, SymbolEqualityComparer.Default));
             })
             .Select((tuple, _) => tuple.details.TestContextSymbol);
@@ -73,7 +73,7 @@ public sealed class CollectionFixtureGenerator : IIncrementalGenerator
         return classDeclaration.BaseList.Types
             .Select(x => x.Type)
             .OfType<IdentifierNameSyntax>()
-            .Any(type => type.Identifier.Text.Contains("ITestContext"));
+            .Any(type => type.Identifier.Text.Contains("TestContext"));
     }
 
     private static TestContextDetails MapTestContextDetails(

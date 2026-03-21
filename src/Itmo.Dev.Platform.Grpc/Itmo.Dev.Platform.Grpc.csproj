@@ -6,7 +6,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            fixed grpc services interceptor registration
+            Added error logging interceptor
         </PackageReleaseNotes>
     </PropertyGroup>
 

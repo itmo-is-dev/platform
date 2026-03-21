@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Grpc.Services.Builders;
+using Itmo.Dev.Platform.Grpc.Services.Interceptors;
 using Itmo.Dev.Platform.Grpc.Services.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -19,6 +20,8 @@ public static class ServiceCollectionExtensions
         {
             builder.ConfigureOptions(options);
             options.Interceptors.Add<ServerTracingInterceptor>();
+            options.Interceptors.Add<PlatformHeaderServerInterceptor>();
+            options.Interceptors.Add<GrpcErrorLoggingInterceptor>();
         });
 
         collection.AddSingleton<ServerTracingInterceptorOptions>(sp =>

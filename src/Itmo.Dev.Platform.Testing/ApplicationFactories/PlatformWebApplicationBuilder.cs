@@ -85,10 +85,8 @@ public class PlatformWebApplicationBuilder<TStartup>
     public WebApplicationFactory<TStartup> Build()
     {
         var factory = new WebApplicationFactory<TStartup>();
-        
-        _webApplicationFactoryConfigurations.ForEach(action => action(factory));
-        
-        return factory.WithWebHostBuilder(builder =>
+
+        factory = factory.WithWebHostBuilder(builder =>
         {
             _webHostConfigurations.ForEach(action => action(builder));
 
@@ -100,5 +98,9 @@ public class PlatformWebApplicationBuilder<TStartup>
                 .ConfigureAppConfiguration((_, configurationBuilder)
                     => _configurationConfigurations.ForEach(action => action(configurationBuilder)));
         });
+
+        _webApplicationFactoryConfigurations.ForEach(action => action(factory));
+
+        return factory;
     }
 }

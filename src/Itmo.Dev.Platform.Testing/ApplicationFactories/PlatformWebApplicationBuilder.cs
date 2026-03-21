@@ -14,6 +14,7 @@ public class PlatformWebApplicationBuilder<TStartup>
     private readonly List<Action<IConfigurationBuilder>> _configurationConfigurations = [];
     private readonly List<Action<WebHostBuilderContext, IApplicationBuilder>> _applicationConfigurations = [];
     private readonly List<Action<IWebHostBuilder>> _webHostConfigurations = [];
+    private readonly List<Action<WebApplicationFactory<TStartup>>> _webApplicationFactoryConfigurations = [];
 
     public PlatformWebApplicationBuilder<TStartup> ConfigureServices(Action<IServiceCollection, IConfiguration> action)
     {
@@ -49,6 +50,13 @@ public class PlatformWebApplicationBuilder<TStartup>
         return this;
     }
 
+    public PlatformWebApplicationBuilder<TStartup> ConfigureWebApplicationFactory(
+        Action<WebApplicationFactory<TStartup>> configuration)
+    {
+        _webApplicationFactoryConfigurations.Add(configuration);
+        return this;
+    }
+
     public PlatformWebApplicationBuilder<TStartup> AddConfigurationEntry(string key, object value)
     {
         _configurationConfigurations.Add(builder => builder.AddInMemoryCollection(
@@ -76,10 +84,14 @@ public class PlatformWebApplicationBuilder<TStartup>
 
     public WebApplicationFactory<TStartup> Build()
     {
-        return new WebApplicationFactory<TStartup>().WithWebHostBuilder(builder =>
+        var factory = new WebApplicationFactory<TStartup>();
+        
+        _webApplicationFactoryConfigurations.ForEach(action => action(factory));
+        
+        return factory.WithWebHostBuilder(builder =>
         {
             _webHostConfigurations.ForEach(action => action(builder));
-            
+
             builder
                 .Configure((context, app)
                     => _applicationConfigurations.ForEach(action => action(context, app)))

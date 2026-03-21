@@ -90,13 +90,24 @@ public class PlatformWebApplicationBuilder<TStartup>
         {
             _webHostConfigurations.ForEach(action => action(builder));
 
-            builder
-                .Configure((context, app)
-                    => _applicationConfigurations.ForEach(action => action(context, app)))
-                .ConfigureServices((context, services)
-                    => _serviceConfigurations.ForEach(action => action(services, context.Configuration)))
-                .ConfigureAppConfiguration((_, configurationBuilder)
-                    => _configurationConfigurations.ForEach(action => action(configurationBuilder)));
+            if (_applicationConfigurations is not [])
+            {
+                builder = builder.Configure((context, app)
+                    => _applicationConfigurations.ForEach(action => action(context, app)));
+            }
+
+            if (_serviceConfigurations is not [])
+            {
+                builder = builder.ConfigureServices((context, services)
+                    => _serviceConfigurations.ForEach(action => action(services, context.Configuration)));
+            }
+
+            if (_configurationConfigurations is not [])
+            {
+                builder = builder
+                    .ConfigureAppConfiguration((_, configurationBuilder)
+                        => _configurationConfigurations.ForEach(action => action(configurationBuilder)));
+            }
         });
 
         _webApplicationFactoryConfigurations.ForEach(action => action(factory));

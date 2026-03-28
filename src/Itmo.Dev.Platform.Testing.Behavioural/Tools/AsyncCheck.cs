@@ -47,6 +47,7 @@ public sealed class AsyncCheck
     private async Task CheckAsync()
     {
         using var cts = new CancellationTokenSource(_timeout);
+        Exception? lastException = null;
 
         while (cts.IsCancellationRequested is false)
         {
@@ -55,12 +56,13 @@ public sealed class AsyncCheck
                 await _assert(cts.Token);
                 return;
             }
-            catch
+            catch (Exception e)
             {
+                lastException = e;
                 await Task.Delay(TimeSpan.FromMilliseconds(100), CancellationToken.None);
             }
         }
 
-        throw new FailedCheckException(_errorMessage);
+        throw new FailedCheckException(_errorMessage, lastException);
     }
 }

@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Grpc.Core.Api" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="Serilog.Sinks.XUnit"/>

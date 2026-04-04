@@ -1,7 +1,5 @@
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Observability;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using OpenTelemetry.Trace;
 using Serilog;
 

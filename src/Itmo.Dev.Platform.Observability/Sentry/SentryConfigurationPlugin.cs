@@ -39,6 +39,8 @@ internal class SentryConfigurationPlugin : IObservabilityConfigurationPlugin
                 options.TracesSampleRate = 1.0;
                 options.Environment = _platformOptions.Environment ?? builder.Environment.EnvironmentName;
 
+                options.EnableLogs = true;
+
                 options.DiagnosticLogger = new ConsoleAndTraceDiagnosticLogger(options.DiagnosticLevel);
 
                 _options.Configuration?.Bind(options);

@@ -114,8 +114,14 @@ public sealed class UnitTestGenerator : IIncrementalGenerator
                 .AddMembers(testMethods)
                 .AddMembers(RunnerAccessorSyntax.Declaration);
 
+            var sourceUsings = node.SyntaxTree
+                .GetRoot()
+                .DescendantNodes()
+                .OfType<UsingDirectiveSyntax>()
+                .ToArray();
+
             var ns = NamespaceDeclaration(generatedNamespaceName).AddMembers(generatedClassDeclaration);
-            var unit = CompilationUnit().AddMembers(ns);
+            var unit = CompilationUnit().AddUsings(sourceUsings).AddMembers(ns);
 
             return new GeneratedTest(sourceTestSymbol, unit);
         }

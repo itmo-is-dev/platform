@@ -11,12 +11,12 @@ namespace Itmo.Dev.Platform.Testing.Behavioural;
     assemblyName: "Itmo.Dev.Platform.Testing.Behavioural")]
 public sealed class ScenarioSampleAttribute : Attribute
 {
-    public ScenarioSampleAttribute(params object[] parameters)
+    public ScenarioSampleAttribute(params object?[] parameters)
     {
         Parameters = parameters;
     }
 
-    public object[] Parameters { get; }
+    public object?[] Parameters { get; }
 
-    public IEnumerable<object[]> GetData(MethodInfo testMethod) => [Parameters];
+    public IEnumerable<object?[]> GetData(MethodInfo testMethod) => [Parameters];
 }

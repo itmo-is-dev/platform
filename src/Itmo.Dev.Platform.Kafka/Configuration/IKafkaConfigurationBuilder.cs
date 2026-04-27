@@ -34,5 +34,5 @@ public interface IKafkaConfigurationOptionsSelector
 
 public interface IKafkaConfigurationBuilder
 {
-    IServiceCollection Services { get; }
+    IKafkaConfigurationBuilder ConfigureServices(Action<IServiceCollection> action);
 }

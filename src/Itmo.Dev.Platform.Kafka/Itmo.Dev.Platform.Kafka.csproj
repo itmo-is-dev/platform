@@ -6,7 +6,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Fixed GetLatestBy
+            Added ConfigureServices to kafka builder
         </PackageReleaseNotes>
     </PropertyGroup>
 

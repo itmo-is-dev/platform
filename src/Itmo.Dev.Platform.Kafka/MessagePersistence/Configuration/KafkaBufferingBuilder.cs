@@ -35,7 +35,7 @@ internal class KafkaBufferingBuilder :
         if (string.IsNullOrEmpty(topicName))
             throw new InvalidOperationException("Topic name is not specified");
 
-        _stepSelector.Services.AddProducerInternal(producer => producer
+        _stepSelector.Services.AddProducerUnsafe(producer => producer
             .WithKey<BufferedMessageKey>()
             .WithValue<BufferedMessageValue>()
             .WithConfiguration(configuration, action)

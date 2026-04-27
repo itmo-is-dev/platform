@@ -7,22 +7,28 @@ internal class KafkaConfigurationBuilder :
     IKafkaConfigurationOptionsSelector,
     IKafkaConfigurationBuilder
 {
+    private readonly IServiceCollection _services;
+
     public KafkaConfigurationBuilder(IServiceCollection services)
     {
-        Services = services;
+        _services = services;
     }
-
-    public IServiceCollection Services { get; }
 
     public IKafkaConfigurationBuilder ConfigureOptions(Action<OptionsBuilder<PlatformKafkaOptions>> action)
     {
-        var builder = Services
+        var builder = _services
             .AddOptions<PlatformKafkaOptions>()
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
         action.Invoke(builder);
 
+        return this;
+    }
+
+    public IKafkaConfigurationBuilder ConfigureServices(Action<IServiceCollection> action)
+    {
+        action(_services);
         return this;
     }
 }

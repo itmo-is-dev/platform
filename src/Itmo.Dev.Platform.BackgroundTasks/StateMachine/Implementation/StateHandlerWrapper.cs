@@ -17,22 +17,43 @@ internal class StateHandlerWrapper<TState, THandler, TStateBase, TMetadata, TExe
     where TError : IBackgroundTaskError
 {
     private readonly IServiceProvider _serviceProvider;
+    private IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError>? _next;
 
     public StateHandlerWrapper(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public async ValueTask<StateHandleResult<TStateBase, TResult, TError>?> TryHandleAsync(
+    public async ValueTask<StateHandleResult<TStateBase, TResult, TError>> HandleAsync(
         TStateBase state,
         BackgroundTaskExecutionContext<TMetadata, TExecutionMetadata> context,
         CancellationToken cancellationToken)
     {
-        if (state is not TState concreteState)
-            return null;
+        if (state is TState concreteState)
+        {
+            return await ActivatorUtilities
+                .CreateInstance<THandler>(_serviceProvider)
+                .HandleAsync(concreteState, context, cancellationToken);
+        }
 
-        return await ActivatorUtilities
-            .CreateInstance<THandler>(_serviceProvider)
-            .HandleAsync(concreteState, context, cancellationToken);
+        if (_next is null)
+        {
+            throw new InvalidOperationException(
+                $"Could not find handler for state = {context.ExecutionMetadata.State}");
+        }
+
+        return await _next.HandleAsync(state, context, cancellationToken);
+    }
+
+    public void SetNext(IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError> wrapper)
+    {
+        if (_next is null)
+        {
+            _next = wrapper;
+        }
+        else
+        {
+            _next.SetNext(wrapper);
+        }
     }
 }

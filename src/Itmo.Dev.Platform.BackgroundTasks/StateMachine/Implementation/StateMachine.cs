@@ -17,57 +17,52 @@ internal class StateMachine<TStateBase, TMetadata, TExecutionMetadata, TResult, 
     where TResult : IBackgroundTaskResult
     where TError : IBackgroundTaskError
 {
-    private readonly
-        IReadOnlyCollection<IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError>> _wrappers;
+    private readonly IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError> _wrapper;
 
-    public StateMachine(
-        IReadOnlyCollection<IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError>> wrappers)
+    public StateMachine(IStateHandlerWrapper<TStateBase, TMetadata, TExecutionMetadata, TResult, TError> wrapper)
     {
-        _wrappers = wrappers;
+        _wrapper = wrapper;
     }
 
     public async ValueTask<BackgroundTaskExecutionResult<TResult, TError>> RunAsync(
         BackgroundTaskExecutionContext<TMetadata, TExecutionMetadata> context,
         CancellationToken cancellationToken)
     {
+        var visitedStates = new HashSet<IState>();
+
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var handled = false;
-
-            foreach (var wrapper in _wrappers)
+            if (visitedStates.Add(context.ExecutionMetadata.State) is false)
             {
-                var result = await wrapper.TryHandleAsync(
-                    context.ExecutionMetadata.State,
-                    context,
-                    cancellationToken);
+                throw new InvalidOperationException(
+                    $"Detected cycle, state = '{context.ExecutionMetadata.State}' visited multiple times in a single execution run");
+            }
 
-                if (result is null)
-                    continue;
+            var result = await _wrapper.HandleAsync(
+                context.ExecutionMetadata.State,
+                context,
+                cancellationToken);
 
-                if (result is StateHandleResult<TStateBase, TResult, TError>.Finished finished)
+            switch (result)
+            {
+                case StateHandleResult<TStateBase, TResult, TError>.Finished finished:
                 {
-                    handled = true;
-
                     context.ExecutionMetadata.UpdateState(finished.State);
+                    await context.PersistAsync(cancellationToken);
 
                     break;
                 }
-
-                if (result is StateHandleResult<TStateBase, TResult, TError>.FinishedWithResult finishedWithResult)
+                case StateHandleResult<TStateBase, TResult, TError>.FinishedWithResult finishedWithResult:
                 {
                     context.ExecutionMetadata.UpdateState(finishedWithResult.State);
                     return finishedWithResult.Result;
                 }
-
-                throw new InvalidOperationException($"Invalid state handler result = {result}");
-            }
-
-            if (handled is false)
-            {
-                throw new InvalidOperationException(
-                    $"Could not find handler for state = {context.ExecutionMetadata.State}");
+                default:
+                {
+                    throw new InvalidOperationException($"Invalid state handler result = {result}");
+                }
             }
         }
     }

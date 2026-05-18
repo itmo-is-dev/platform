@@ -200,6 +200,35 @@ collection.AddPlatformKafka(builder => builder
 
 > Перед настройкой Kafka инбокса небходимо настроить `Itmo.Dev.Platform.MessagePersistence`.
 
+Для настройки MessagePersistense необходимо вызвать метод расширения
+`AddPlatformMessagePersistence`, куда передается билдер. У этого билдера необходимо вызвать методы `WithDefaultPublisherOptions` и  `UsePostgresPersistence`, передав параметры конфигурации
+для настройки MessagePersistense. Пример настройки:
+
+```csharp
+collection.AddPlatformMessagePersistence(persistence => persistence
+    .WithDefaultPublisherOptions("Infrastructure:MessagePersistence:Publishers:Default")
+    .UsePostgresPersistence(postgres => postgres
+        .ConfigureOptions(options => options.BindConfiguration("Infrastructure:MessagePersistence:Persistence")));
+```
+
+Пример конфигурации для MessagePersistense:
+
+```json
+{
+  "MessagePersistence": {
+    "Persistence": {
+      "SchemaName": "message_persistence"
+    },
+    "Publishers": {
+      "Default": {
+        "BatchSize": 100,
+        "PollingDelay": "00:00:00.500"
+      }
+    }
+  }
+}
+```
+
 Чтобы использовать инбокс с Kafka консьюмером, необходимо использовать метод `HandleInboxWith<>` вместо `HandleWith<>` 
 и передать тип, реализующий `IKafkaInboxHandler<,>`, в его generic-параметр.
 
@@ -345,7 +374,7 @@ collection.AddPlatformKafka(builder => builder
 
 ## Outbox продюсер
 
-> Перед настройкой Kafka аутбокса небходимо настроить `Itmo.Dev.Platform.MessagePersistence`.
+> Перед настройкой Kafka аутбокса небходимо настроить `Itmo.Dev.Platform.MessagePersistence`. Как это сделать описано [тут](#inbox-консьюмер)
 
 Чтобы использовать аутбокс с Kafka консьюмером, необходимо использовать метод `WithOutbox` в билдере для продюсера.
 

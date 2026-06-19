@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Common.Serialization;
 using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
 using Itmo.Dev.Platform.MessagePersistence.Internal.Persistence;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Queries;
@@ -12,13 +13,16 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
 {
     private readonly IPersistenceConnectionProvider _connectionProvider;
     private readonly MessagePersistenceQueryStorage _queryStorage;
+    private readonly IPlatformSerializer _serializer;
 
     public MessagePersistenceRepository(
         IPersistenceConnectionProvider connectionProvider,
-        MessagePersistenceQueryStorage queryStorage)
+        MessagePersistenceQueryStorage queryStorage,
+        IPlatformSerializer serializer)
     {
         _connectionProvider = connectionProvider;
         _queryStorage = queryStorage;
+        _serializer = serializer;
     }
 
     public async IAsyncEnumerable<PersistedMessageModel> QueryAsync(
@@ -50,7 +54,10 @@ internal class MessagePersistenceRepository : IMessagePersistenceInternalReposit
                 Value = reader.GetString("persisted_message_value"),
                 RetryCount = reader.GetInt32("persisted_message_retry_count"),
                 BufferingStep = reader.GetNullableString("persisted_message_buffering_step"),
-                Headers = reader.GetJsonFieldValue<Dictionary<string, string>>("persisted_message_headers"),
+
+                Headers = reader.GetJsonFieldValue<Dictionary<string, string>>(
+                    "persisted_message_headers",
+                    _serializer),
             };
         }
     }

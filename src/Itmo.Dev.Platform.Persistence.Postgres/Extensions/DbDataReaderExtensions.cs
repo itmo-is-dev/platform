@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using Itmo.Dev.Platform.Common.Serialization;
 using System.Data;
 using System.Data.Common;
 
@@ -21,11 +21,11 @@ public static class DbDataReaderExtensions
     public static T GetJsonFieldValue<T>(
         this DbDataReader reader,
         int ordinal,
-        JsonSerializerSettings serializerSettings)
+        IPlatformSerializer serializer)
         where T : notnull
     {
         var serialized = reader.GetString(ordinal);
-        var deserialized = JsonConvert.DeserializeObject<T>(serialized, serializerSettings);
+        var deserialized = serializer.Deserialize<T>(serialized);
 
         if (deserialized is null)
             throw new ArgumentException($"Value at position {ordinal} is not a valid {typeof(T)} json");
@@ -36,38 +36,27 @@ public static class DbDataReaderExtensions
     public static T GetJsonFieldValue<T>(
         this DbDataReader reader,
         string name,
-        JsonSerializerSettings? serializerSettings = null)
+        IPlatformSerializer serializer)
         where T : notnull
     {
-        var serialized = reader.GetString(name);
-        var deserialized = JsonConvert.DeserializeObject<T>(serialized, serializerSettings);
-
-        if (deserialized is null)
-            throw new ArgumentException($"Value at position {name} is not a valid {typeof(T)} json");
-
-        return deserialized;
+        return reader.GetJsonFieldValue<T>(reader.GetOrdinal(name), serializer);
     }
 
     public static T[] GetJsonArrayFieldValue<T>(
         this DbDataReader reader,
         int ordinal,
-        JsonSerializerSettings serializerSettings)
+        IPlatformSerializer serializer)
         where T : notnull
     {
         var serialized = reader.GetFieldValue<string[]>(ordinal);
 
-        return Deserialize(serialized, serializerSettings).ToArray();
+        return Deserialize(serialized, serializer).ToArray();
 
-        static IEnumerable<T> Deserialize(string[] serialized, JsonSerializerSettings serializerSettings)
+        static IEnumerable<T> Deserialize(string[] serialized, IPlatformSerializer serializer)
         {
-            serializerSettings = new JsonSerializerSettings(serializerSettings)
-            {
-                StringEscapeHandling = StringEscapeHandling.EscapeHtml,
-            };
-
             foreach (string s in serialized)
             {
-                var deserialized = JsonConvert.DeserializeObject<T>(s, serializerSettings);
+                var deserialized = serializer.Deserialize<T>(s);
 
                 if (deserialized is null)
                     throw new ArgumentException($"Invalid json for type {typeof(T)} found");
@@ -80,29 +69,9 @@ public static class DbDataReaderExtensions
     public static T[] GetJsonArrayFieldValue<T>(
         this DbDataReader reader,
         string name,
-        JsonSerializerSettings serializerSettings)
+        IPlatformSerializer serializer)
         where T : notnull
     {
-        var serialized = reader.GetFieldValue<string[]>(name);
-
-        return Deserialize(serialized, serializerSettings).ToArray();
-
-        static IEnumerable<T> Deserialize(string[] serialized, JsonSerializerSettings serializerSettings)
-        {
-            serializerSettings = new JsonSerializerSettings(serializerSettings)
-            {
-                StringEscapeHandling = StringEscapeHandling.EscapeHtml,
-            };
-
-            foreach (string s in serialized)
-            {
-                var deserialized = JsonConvert.DeserializeObject<T>(s, serializerSettings);
-
-                if (deserialized is null)
-                    throw new ArgumentException($"Invalid json for type {typeof(T)} found");
-
-                yield return deserialized;
-            }
-        }
+        return reader.GetJsonArrayFieldValue<T>(reader.GetOrdinal(name), serializer);
     }
 }

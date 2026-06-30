@@ -14,11 +14,15 @@ public abstract class DatabaseFixture : IAsyncLifetime
     private const string Password = "postgres";
     private const string Database = "postgres";
 
+    private readonly bool _createRespawnerOnInitialization;
+
     private Respawner _respawn;
 
     // ReSharper disable once ConvertConstructorToMemberInitializers
-    protected DatabaseFixture()
+    protected DatabaseFixture(bool createRespawnerOnInitialization = true)
     {
+        _createRespawnerOnInitialization = createRespawnerOnInitialization;
+
         var containerBuilder = new PostgreSqlBuilder("postgres:latest")
             .WithUsername(User)
             .WithPassword(Password)
@@ -69,19 +73,10 @@ public abstract class DatabaseFixture : IAsyncLifetime
         Provider = collection.BuildServiceProvider();
         Connection = CreateConnection();
 
-        RespawnerOptions options = GetRespawnOptions();
-
-        var oldState = Connection.State;
-
-        if (oldState is not ConnectionState.Open)
-            await Connection.OpenAsync();
-
         await UseProviderAsync(Provider);
 
-        _respawn = await Respawner.CreateAsync(Connection, options);
-
-        if (oldState is not ConnectionState.Open)
-            await Connection.CloseAsync();
+        if (_createRespawnerOnInitialization)
+            await CreateRespawnerAsync();
     }
 
     public virtual async Task DisposeAsync()
@@ -89,6 +84,21 @@ public abstract class DatabaseFixture : IAsyncLifetime
         await Connection.DisposeAsync();
         await Container.DisposeAsync();
         await Provider.DisposeAsync();
+    }
+
+    public async Task CreateRespawnerAsync()
+    {
+        RespawnerOptions options = GetRespawnOptions();
+
+        var oldState = Connection.State;
+
+        if (oldState is not ConnectionState.Open)
+            await Connection.OpenAsync();
+
+        _respawn = await Respawner.CreateAsync(Connection, options);
+
+        if (oldState is not ConnectionState.Open)
+            await Connection.CloseAsync();
     }
 
     protected virtual void ConfigureServices(IServiceCollection collection) { }

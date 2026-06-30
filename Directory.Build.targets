@@ -10,18 +10,12 @@
         <Title>$(AssemblyName)</Title>
         <PackageId>$(Title)</PackageId>
         <Authors>itmo-is-dev</Authors>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
         <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageIcon>icon.png</PackageIcon>
-    </PropertyGroup>
-
-    <PropertyGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <DebugType>portable</DebugType>
-        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-        <RepositoryType>github</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup Label="NuGet items" Condition="'$(IsPlatformPackage)' == 'true'">
@@ -30,7 +24,16 @@
         <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
-    <ItemGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
+    <PropertyGroup Label="SourceLink" 
+                   Condition="'$(IsPlatformPackage)' == 'true' And '$(IsRoslynComponent)' != 'true'">
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup Label="SourceLink"
+               Condition="'$(IsPlatformPackage)' == 'true' And '$(IsRoslynComponent)' != 'true'">
         <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"/>
     </ItemGroup>
 

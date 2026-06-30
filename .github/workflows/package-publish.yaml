@@ -8,6 +8,7 @@ on:
       - '.github/workflows/package-publish.yaml'
       - 'scripts/*'
       - '*.props'
+      - '*.targets'
       - '!samples'
 
 jobs:

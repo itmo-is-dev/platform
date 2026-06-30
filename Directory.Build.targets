@@ -1,0 +1,37 @@
+<Project>
+
+    <PropertyGroup Label="Build" Condition="'$(IsPlatformPackage)' == 'true'">
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+
+    <PropertyGroup Label="NuGet info" Condition="'$(IsPlatformPackage)' == 'true'">
+        <Title>$(AssemblyName)</Title>
+        <PackageId>$(Title)</PackageId>
+        <Authors>itmo-is-dev</Authors>
+        <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageIcon>icon.png</PackageIcon>
+    </PropertyGroup>
+
+    <PropertyGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <DebugType>embedded</DebugType>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+        <RepositoryType>github</RepositoryType>
+    </PropertyGroup>
+
+    <ItemGroup Label="NuGet items" Condition="'$(IsPlatformPackage)' == 'true'">
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"/>
+    </ItemGroup>
+
+</Project>

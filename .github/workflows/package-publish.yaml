@@ -46,12 +46,12 @@ jobs:
 
           echo changed-packages="$changed_packages" >> "$GITHUB_OUTPUT"
 
-      - name: find Platform.targets changes
+      - name: find Directory.Build.targets changes
         id: find-targets
         run: |
           source ./scripts/common-scripts.sh
           
-          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Platform.targets \
+          changes_count=$(git --no-pager diff ${{ github.event.before }} ${{ github.event.after }} Directory.Build.targets \
             | grep -Ec '^[\+\-] ') || :
           
           echo changes-count="$changes_count" >> "$GITHUB_OUTPUT"

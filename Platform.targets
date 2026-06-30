@@ -20,7 +20,7 @@
             <PackageIcon>icon.png</PackageIcon>
         </PropertyGroup>
 
-        <PropertyGroup Label="SourceLink config">
+        <PropertyGroup Label="SourceLink">
             <PublishRepositoryUrl>true</PublishRepositoryUrl>
             <DebugType>embedded</DebugType>
             <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -36,7 +36,7 @@
 
     </Target>
 
-    <ItemGroup Label="SourceLink packages" Condition="'$(IsPlatformPackage)' == 'true'">
+    <ItemGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
         <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"/>
     </ItemGroup>
 

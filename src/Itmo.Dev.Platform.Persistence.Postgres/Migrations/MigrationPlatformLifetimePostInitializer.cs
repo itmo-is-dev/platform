@@ -27,6 +27,6 @@ internal class MigrationPlatformLifetimePostInitializer : PlatformLifetimePostIn
                 "Trying to apply migration Postgres initializer on non-postgres persistence configuration");
         }
 
-        await postgresConnection.Connection.ReloadTypesAsync();
+        await postgresConnection.Connection.ReloadTypesAsync(cancellationToken);
     }
 }

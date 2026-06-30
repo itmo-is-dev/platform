@@ -14,17 +14,26 @@
             <PackageId>$(Title)</PackageId>
             <Authors>itmo-is-dev</Authors>
             <PackageProjectUrl>https://github.com/itmo-is-dev/platform</PackageProjectUrl>
-            <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
-            <RepositoryType>github</RepositoryType>
             <PackageReadmeFile>README.md</PackageReadmeFile>
             <PackageLicenseFile>LICENSE</PackageLicenseFile>
             <PackageIcon>icon.png</PackageIcon>
+        </PropertyGroup>
+
+        <PropertyGroup Label="SourceLink config">
+            <PublishRepositoryUrl>true</PublishRepositoryUrl>
+            <DebugType>embedded</DebugType>
+            <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
+            <RepositoryType>github</RepositoryType>
         </PropertyGroup>
 
         <ItemGroup Label="NuGet items">
             <None Include="README.md" Pack="true" PackagePath="\"/>
             <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\"/>
             <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+        </ItemGroup>
+        
+        <ItemGroup Label="SourceLink packages">
+            <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"/>
         </ItemGroup>
 
     </Target>

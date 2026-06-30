@@ -75,5 +75,6 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.17.0" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.7" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300"/>
   </ItemGroup>
 </Project>

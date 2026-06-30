@@ -19,6 +19,12 @@
     <PropertyGroup Label="SourceLink" Condition="'$(IsPlatformPackage)' == 'true'">
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <DebugType>portable</DebugType>
+
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
         <RepositoryUrl>https://github.com/itmo-is-dev/platform</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
     </PropertyGroup>

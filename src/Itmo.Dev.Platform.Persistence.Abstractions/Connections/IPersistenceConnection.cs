@@ -5,4 +5,6 @@ namespace Itmo.Dev.Platform.Persistence.Abstractions.Connections;
 public interface IPersistenceConnection : IAsyncDisposable
 {
     IPersistenceCommand CreateCommand(string query);
+
+    internal Task ReloadTypesAsync(CancellationToken cancellationToken);
 }

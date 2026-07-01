@@ -4,6 +4,7 @@
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Deterministic>true</Deterministic>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
     <PropertyGroup Label="NuGet info" Condition="'$(IsPlatformPackage)' == 'true'">
@@ -24,7 +25,7 @@
         <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
-    <PropertyGroup Label="SourceLink" 
+    <PropertyGroup Label="SourceLink"
                    Condition="'$(IsPlatformPackage)' == 'true' And '$(IsRoslynComponent)' != 'true'">
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>

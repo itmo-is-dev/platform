@@ -25,6 +25,11 @@ internal class PostgresPersistenceConnection : IPersistenceConnection
 #pragma warning restore CA2100
     }
 
+    public Task ReloadTypesAsync(CancellationToken cancellationToken)
+    {
+        return Connection.ReloadTypesAsync(cancellationToken);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await Connection.DisposeAsync();

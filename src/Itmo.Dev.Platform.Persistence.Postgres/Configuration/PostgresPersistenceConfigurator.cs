@@ -1,7 +1,6 @@
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using Itmo.Dev.Platform.Persistence.Postgres.Connections;
-using Itmo.Dev.Platform.Persistence.Postgres.Migrations;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Itmo.Dev.Platform.Persistence.Postgres.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,15 +42,12 @@ internal class PostgresPersistenceConfigurator :
 
         _collection
             .AddFluentMigratorCore()
-            .ConfigureRunner(
-                builder => builder
-                    .AddPostgres()
-                    .WithMigrationsIn(assemblies)
-                    .WithGlobalConnectionString(
-                        provider => provider.GetRequiredService<IPostgresConnectionStringProvider>()
-                            .GetConnectionString()));
-
-        _collection.AddHostedService<MigrationRunnerBackgroundService>();
+            .ConfigureRunner(builder => builder
+                .AddPostgres()
+                .WithMigrationsIn(assemblies)
+                .WithGlobalConnectionString(provider => provider
+                    .GetRequiredService<IPostgresConnectionStringProvider>()
+                    .GetConnectionString()));
 
         return this;
     }
@@ -63,19 +59,16 @@ internal class PostgresPersistenceConfigurator :
 
         _collection
             .AddFluentMigratorCore()
-            .ConfigureRunner(
-                builder => builder
-                    .AddPostgres()
-                    .WithGlobalConnectionString(
-                        provider => provider.GetRequiredService<IPostgresConnectionStringProvider>()
-                            .GetConnectionString()));
+            .ConfigureRunner(builder => builder
+                .AddPostgres()
+                .WithGlobalConnectionString(provider => provider
+                    .GetRequiredService<IPostgresConnectionStringProvider>()
+                    .GetConnectionString()));
 
         foreach (IMigrationSourceItem item in items)
         {
             _collection.TryAddEnumerable(ServiceDescriptor.Singleton(item));
         }
-
-        _collection.AddHostedService<MigrationRunnerBackgroundService>();
 
         return this;
     }

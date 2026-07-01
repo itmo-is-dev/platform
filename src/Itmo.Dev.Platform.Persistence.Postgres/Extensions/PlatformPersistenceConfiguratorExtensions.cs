@@ -26,7 +26,7 @@ public static class PlatformPersistenceConfiguratorExtensions
         var postgresConfigurator = new PostgresPersistenceConfigurator(configurator.Services);
         postgresConfiguration.Invoke(postgresConfigurator);
 
-        configurator.Services.AddPlatformLifetimePostInitializer<MigrationPlatformLifetimePostInitializer>();
+        configurator.Services.AddPlatformLifetimeInitializer<MigrationPlatformLifetimeInitializer>();
 
         configurator.Services.AddSingleton<IPostgresConnectionStringProvider, PostgresConnectionStringProvider>();
 

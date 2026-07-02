@@ -211,7 +211,7 @@ jobs:
         run: dotnet restore ${{ steps.csproj.outputs.path }}
 
       - name: build
-        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore
+        run: dotnet build ${{ steps.csproj.outputs.path }} -c Release --no-restore /p:GITHUB_ACTIONS=true
 
       - name: publish
         run: |

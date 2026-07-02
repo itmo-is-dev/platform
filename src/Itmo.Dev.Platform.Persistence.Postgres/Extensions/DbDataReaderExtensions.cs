@@ -22,7 +22,6 @@ public static class DbDataReaderExtensions
         this DbDataReader reader,
         int ordinal,
         IPlatformSerializer serializer)
-        where T : notnull
     {
         var serialized = reader.GetString(ordinal);
         var deserialized = serializer.Deserialize<T>(serialized);
@@ -37,9 +36,24 @@ public static class DbDataReaderExtensions
         this DbDataReader reader,
         string name,
         IPlatformSerializer serializer)
-        where T : notnull
     {
         return reader.GetJsonFieldValue<T>(reader.GetOrdinal(name), serializer);
+    }
+    
+    public static T? GetNullableJsonFieldValue<T>(
+        this DbDataReader reader,
+        int ordinal,
+        IPlatformSerializer serializer)
+    {
+        return reader.IsDBNull(ordinal) ? default : reader.GetJsonFieldValue<T>(ordinal, serializer);
+    }
+
+    public static T? GetNullableJsonFieldValue<T>(
+        this DbDataReader reader,
+        string name,
+        IPlatformSerializer serializer)
+    {
+        return reader.IsDBNull(name) ? default : reader.GetJsonFieldValue<T>(name, serializer);
     }
 
     public static T[] GetJsonArrayFieldValue<T>(

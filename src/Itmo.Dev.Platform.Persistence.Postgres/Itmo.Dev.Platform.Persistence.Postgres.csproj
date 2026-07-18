@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Abstractions\Itmo.Dev.Platform.Persistence.Abstractions.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Persistence.Postgres.Analyzers\Itmo.Dev.Platform.Persistence.Postgres.Analyzers.csproj" />
     </ItemGroup>
 
     <ItemGroup>

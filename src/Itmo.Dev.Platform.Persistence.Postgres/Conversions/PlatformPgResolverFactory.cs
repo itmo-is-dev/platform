@@ -72,7 +72,18 @@ internal sealed class PlatformPgResolverFactory(
                     i.IsConstructedGenericType
                     && i.GetGenericTypeDefinition().IsAssignableTo(typeof(IList<>)));
 
-            return listInterface?.GenericTypeArguments.SingleOrDefault();
+            var elementType = listInterface?.GenericTypeArguments.SingleOrDefault();
+
+            if (elementType is null)
+                return elementType;
+
+            if (elementType.IsConstructedGenericType
+                && elementType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                elementType = elementType.GenericTypeArguments.Single();
+            }
+
+            return elementType;
         }
     }
 }

@@ -119,6 +119,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18C776DA-A
 		docs\persistence.md = docs\persistence.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Persistence.Postgres.Analyzers", "src\Itmo.Dev.Platform.Persistence.Postgres.Analyzers\Itmo.Dev.Platform.Persistence.Postgres.Analyzers.csproj", "{085DF7E0-B102-48A4-99CD-8D3C9EE178AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Platform.Persistence.Postgres.Benchmarks", "benchmarks\Itmo.Dev.Platform.Persistence.Postgres.Benchmarks\Itmo.Dev.Platform.Persistence.Postgres.Benchmarks.csproj", "{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -277,6 +281,14 @@ Global
 		{769371D9-527B-4C23-B45A-04CFC0C653B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{769371D9-527B-4C23-B45A-04CFC0C653B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{769371D9-527B-4C23-B45A-04CFC0C653B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{085DF7E0-B102-48A4-99CD-8D3C9EE178AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{085DF7E0-B102-48A4-99CD-8D3C9EE178AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{085DF7E0-B102-48A4-99CD-8D3C9EE178AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{085DF7E0-B102-48A4-99CD-8D3C9EE178AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9C9FC028-1F10-42B3-8938-A3EAE0D07C1F} = {65E3EDFE-875D-42A1-A224-E06E746B8A5E}
@@ -323,5 +335,7 @@ Global
 		{14CCA0DE-C0CF-4F8A-AED0-96180BFE1750} = {32001A49-AB42-481C-A5CB-E12F377888E9}
 		{5C33DB36-4A17-4799-AA7C-CD2DF84E48A1} = {32001A49-AB42-481C-A5CB-E12F377888E9}
 		{769371D9-527B-4C23-B45A-04CFC0C653B6} = {32001A49-AB42-481C-A5CB-E12F377888E9}
+		{085DF7E0-B102-48A4-99CD-8D3C9EE178AB} = {38EA42C0-A34A-4977-A6FF-6B82E9016439}
+		{95CEB8DB-E7CA-4652-BD4F-46C4F018CDF7} = {EBA4A79B-F695-4E03-AACD-147E981335FD}
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,5 @@
 using FluentMigrator.Runner.Initialization;
+using Itmo.Dev.Platform.Persistence.Postgres.Conversions;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Itmo.Dev.Platform.Persistence.Postgres.Plugins;
 using Microsoft.Extensions.Options;
@@ -14,15 +15,21 @@ public interface IPostgresPersistenceConnectionConfigurator
 
 public interface IPostgresPersistenceMigrationConfigurator
 {
-    IPostgresPersistencePluginConfigurator WithMigrationsFrom(params Assembly[] assemblies);
+    IPostgresPersistenceConfigurator WithMigrationsFrom(params Assembly[] assemblies);
 
-    IPostgresPersistencePluginConfigurator WithMigrationsFromItems(params IMigrationSourceItem[] items);
+    IPostgresPersistenceConfigurator WithMigrationsFromItems(params IMigrationSourceItem[] items);
 }
 
-public interface IPostgresPersistencePluginConfigurator : IPostgresPersistenceConfigurator
+public interface IPostgresPersistenceConfigurator
 {
-    IPostgresPersistencePluginConfigurator WithDataSourcePlugin<T>()
+    IPostgresPersistenceConfigurator WithDataSourcePlugin<T>()
         where T : class, IPostgresDataSourcePlugin;
-}
 
-public interface IPostgresPersistenceConfigurator { }
+    IPostgresPersistenceConfigurator WithStructConverter<TSource, TPrimitive>(
+        IPlatformPostgresConverter<TSource, TPrimitive> converter)
+        where TSource : struct;
+
+    IPostgresPersistenceConfigurator WithConverter<TSource, TPrimitive>(
+        IPlatformPostgresConverter<TSource, TPrimitive> converter)
+        where TSource : class;
+}

@@ -16,6 +16,8 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         _fixture = fixture;
     }
 
+    public Task DisposeAsync() => _fixture.ResetAsync();
+
     [Fact]
     public async Task AddMultiArrayStringParameter_ShouldInsertValuesCorrectly()
     {
@@ -64,10 +66,5 @@ public class NpgsqlParameterArrayExtensionTests : IAsyncDisposeLifetime
         {
             await cleanupCommand.ExecuteNonQueryAsync(default);
         }
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _fixture.ResetAsync();
     }
 }

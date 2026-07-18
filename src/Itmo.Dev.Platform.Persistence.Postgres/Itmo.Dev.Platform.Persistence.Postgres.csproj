@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPlatformPackage>true</IsPlatformPackage>
+        <NoWarn>$(NoWarn);NPG9001;</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>

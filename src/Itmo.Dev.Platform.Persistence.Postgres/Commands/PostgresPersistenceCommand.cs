@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.Common.Serialization;
 using Itmo.Dev.Platform.Persistence.Abstractions.Commands;
 using Itmo.Dev.Platform.Persistence.Postgres.Exceptions;
+using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Npgsql;
 using NpgsqlTypes;
 using System.Data.Common;
@@ -52,12 +53,22 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
     [OverloadResolutionPriority(int.MaxValue)]
     public IPersistenceCommand AddParameter<T>(string parameterName, IEnumerable<T> values)
     {
-        var value = values is List<T> or T[] ? values : values.ToArray();
+        var value = values is IList<T> or T[] ? values : values.ToArray();
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: value);
         AddParameterCore(parameter);
 
         return this;
+    }
+
+    public IPersistenceCommand AddParameter<TSource, TTarget>(
+        string parameterName,
+        IReadOnlyList<TSource> values,
+        Func<TSource, TTarget> selector)
+    {
+        return AddParameter(
+            parameterName,
+            new OneWayProxyList<TSource, TTarget>(values, selector));
     }
 
     public IPersistenceCommand AddMultiArrayStringParameter<T>(string parameterName, IEnumerable<IEnumerable<T>> values)
@@ -77,7 +88,7 @@ internal class PostgresPersistenceCommand : IPersistenceCommand
 
     public IPersistenceCommand AddJsonParameter<T>(string parameterName, T value)
     {
-        var serialized = _serializer.Serialize(value, typeof(T)); 
+        var serialized = _serializer.Serialize(value, typeof(T));
 
         var parameter = new NpgsqlParameter(parameterName: parameterName, value: serialized)
         {

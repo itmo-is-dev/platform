@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System.Data.Common;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -17,6 +16,11 @@ public interface IPersistenceCommand : IAsyncDisposable
 
     [OverloadResolutionPriority(int.MaxValue)]
     IPersistenceCommand AddParameter<T>(string parameterName, IEnumerable<T> values);
+
+    IPersistenceCommand AddParameter<TSource, TTarget>(
+        string parameterName,
+        IReadOnlyList<TSource> values,
+        Func<TSource, TTarget> selector);
 
     IPersistenceCommand AddMultiArrayStringParameter<T>(
         string parameterName,

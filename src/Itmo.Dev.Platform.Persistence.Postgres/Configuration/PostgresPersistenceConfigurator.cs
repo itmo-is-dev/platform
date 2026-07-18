@@ -1,6 +1,8 @@
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using Itmo.Dev.Platform.Persistence.Postgres.Connections;
+using Itmo.Dev.Platform.Persistence.Postgres.Conversions;
+using Itmo.Dev.Platform.Persistence.Postgres.Conversions.Initializers;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Itmo.Dev.Platform.Persistence.Postgres.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +15,7 @@ namespace Itmo.Dev.Platform.Persistence.Postgres.Configuration;
 internal class PostgresPersistenceConfigurator :
     IPostgresPersistenceConnectionConfigurator,
     IPostgresPersistenceMigrationConfigurator,
-    IPostgresPersistencePluginConfigurator
+    IPostgresPersistenceConfigurator
 {
     private readonly IServiceCollection _collection;
 
@@ -35,7 +37,7 @@ internal class PostgresPersistenceConfigurator :
         return this;
     }
 
-    public IPostgresPersistencePluginConfigurator WithMigrationsFrom(params Assembly[] assemblies)
+    public IPostgresPersistenceConfigurator WithMigrationsFrom(params Assembly[] assemblies)
     {
         if (assemblies is [])
             return this;
@@ -52,7 +54,7 @@ internal class PostgresPersistenceConfigurator :
         return this;
     }
 
-    public IPostgresPersistencePluginConfigurator WithMigrationsFromItems(params IMigrationSourceItem[] items)
+    public IPostgresPersistenceConfigurator WithMigrationsFromItems(params IMigrationSourceItem[] items)
     {
         if (items is [])
             return this;
@@ -73,10 +75,30 @@ internal class PostgresPersistenceConfigurator :
         return this;
     }
 
-    public IPostgresPersistencePluginConfigurator WithDataSourcePlugin<T>()
+    public IPostgresPersistenceConfigurator WithDataSourcePlugin<T>()
         where T : class, IPostgresDataSourcePlugin
     {
         _collection.TryAddEnumerable(ServiceDescriptor.Singleton<IPostgresDataSourcePlugin, T>());
+        return this;
+    }
+
+    public IPostgresPersistenceConfigurator WithStructConverter<TSource, TPrimitive>(
+        IPlatformPostgresConverter<TSource, TPrimitive> converter)
+        where TSource : struct
+    {
+        _collection.TryAddEnumerable(ServiceDescriptor.Singleton<IPlatformConverterInitializer>(
+            new StructConversionInitializer<TSource, TPrimitive>(converter)));
+
+        return this;
+    }
+
+    public IPostgresPersistenceConfigurator WithConverter<TSource, TPrimitive>(
+        IPlatformPostgresConverter<TSource, TPrimitive> converter)
+        where TSource : class
+    {
+        _collection.TryAddEnumerable(ServiceDescriptor.Singleton<IPlatformConverterInitializer>(
+            new ClassConversionInitializer<TSource, TPrimitive>(converter)));
+
         return this;
     }
 }

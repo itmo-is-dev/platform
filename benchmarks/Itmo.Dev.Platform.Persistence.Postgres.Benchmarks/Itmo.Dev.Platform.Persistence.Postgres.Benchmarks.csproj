@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\tests\Itmo.Dev.Platform.Persistence.Postgres.Tests\Itmo.Dev.Platform.Persistence.Postgres.Tests.csproj" />
+    </ItemGroup>
+
+</Project>

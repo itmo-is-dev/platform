@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <NoWarn>$(NoWarn);CA1707</NoWarn>
+        <NoWarn>$(NoWarn);CA1707;NPG9001</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Persistence.Postgres.Analyzers\Itmo.Dev.Platform.Persistence.Postgres.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Persistence.Postgres\Itmo.Dev.Platform.Persistence.Postgres.csproj" />
         <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Testing\Itmo.Dev.Platform.Testing.csproj"/>
     </ItemGroup>

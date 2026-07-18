@@ -23,7 +23,7 @@ internal sealed class PlatformPgResolverFactory(
 
         public PgTypeInfo? GetTypeInfo(Type? type, DataTypeName? dataTypeName, PgSerializerOptions options)
         {
-            if (type is null || converterInitializers.TryGetValue(type, out var initializer) is false)
+            if (type is null || converterInitializers.TryGetValue(GetRawType(type), out var initializer) is false)
                 return null;
 
             if (_mappingCollection.Find(type, dataTypeName, options) is not { } typeInfo)
@@ -74,16 +74,18 @@ internal sealed class PlatformPgResolverFactory(
 
             var elementType = listInterface?.GenericTypeArguments.SingleOrDefault();
 
-            if (elementType is null)
-                return elementType;
-
-            if (elementType.IsConstructedGenericType
-                && elementType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                elementType = elementType.GenericTypeArguments.Single();
-            }
-
-            return elementType;
+            return elementType is null ? elementType : GetRawType(elementType);
         }
+    }
+
+    private static Type GetRawType(Type type)
+    {
+        if (type.IsConstructedGenericType
+            && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            type = type.GenericTypeArguments.Single();
+        }
+
+        return type;
     }
 }

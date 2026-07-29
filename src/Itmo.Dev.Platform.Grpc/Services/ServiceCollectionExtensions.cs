@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
             options.Interceptors.Add<ServerTracingInterceptor>();
             options.Interceptors.Add<PlatformHeaderServerInterceptor>();
             options.Interceptors.Add<GrpcErrorLoggingInterceptor>();
+            options.Interceptors.Add<RequestValidationInterceptor>();
         });
 
         collection.AddSingleton<ServerTracingInterceptorOptions>(sp =>

@@ -17,7 +17,7 @@ public sealed class PrimitiveConversionSourceGenerator : IIncrementalGenerator
         isEnabledByDefault: true);
 
     private static readonly IdentifierNameSyntax ExtensionsTypeName = IdentifierName(
-        "Itmo.Dev.Platform.Persistence.Postgres.Conversions.__UnsafePersistencePostgresConverterExtensions");
+        "global::Itmo.Dev.Platform.Persistence.Postgres.Conversions.__UnsafePersistencePostgresConverterExtensions");
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -144,6 +144,18 @@ public sealed class PrimitiveConversionSourceGenerator : IIncrementalGenerator
                                 .Last()
                                 .DescendantNodesAndSelf(node => node is not TypeDeclarationSyntax)
                                 .OfType<UsingDirectiveSyntax>()
+                                .Select(directive =>
+                                {
+                                    var name = directive.NamespaceOrType;
+                                    var stringName = name.ToString();
+
+                                    if (stringName.StartsWith("global::") is false)
+                                    {
+                                        name = IdentifierName(Identifier($"global::{stringName}"));
+                                    }
+
+                                    return directive.WithNamespaceOrType(name);
+                                })
                                 .ToArray());
 
                     context.AddSource(

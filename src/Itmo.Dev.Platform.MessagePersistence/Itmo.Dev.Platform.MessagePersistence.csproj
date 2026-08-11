@@ -6,7 +6,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Refactored persistence configuration
+            Added IPersistedMessageBatchReference
         </PackageReleaseNotes>
     </PropertyGroup>
 

@@ -1,3 +1,5 @@
+using Itmo.Dev.Platform.MessagePersistence.Internal.Models;
+
 namespace Itmo.Dev.Platform.MessagePersistence;
 
 public static class PersistedMessageReferenceExtensions
@@ -26,5 +28,32 @@ public static class PersistedMessageReferenceExtensions
         {
             message.SetFailedResult(exception);
         }
+    }
+
+    public static IEnumerable<IPersistedMessageBatchReference<TMessage>> BatchBy<TMessage, TKey, TOrder>(
+        this IEnumerable<IPersistedMessageBatchReference<TMessage>> messages,
+        Func<IPersistedMessageReference<TMessage>, TKey> keySelector,
+        Func<IPersistedMessageReference<TMessage>, TOrder> orderingSelector)
+        where TKey : IEquatable<TKey>
+        where TOrder : IComparable<TOrder>
+    {
+        return messages.GroupBy(
+            keySelector,
+            (_, group) =>
+            {
+                var messageCollection = group.ToArray();
+
+                return new PersistedMessageBatchReference<TMessage>(
+                    messageCollection.MaxBy(orderingSelector)!,
+                    messageCollection);
+            });
+    }
+
+    public static IEnumerable<IPersistedMessageBatchReference<TMessage>> BatchBy<TMessage, TKey>(
+        this IEnumerable<IPersistedMessageBatchReference<TMessage>> messages,
+        Func<IPersistedMessageReference<TMessage>, TKey> keySelector)
+        where TKey : IEquatable<TKey>
+    {
+        return messages.BatchBy(keySelector, message => message.CreatedAt);
     }
 }

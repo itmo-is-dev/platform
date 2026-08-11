@@ -30,8 +30,16 @@ public static class PersistedMessageReferenceExtensions
         }
     }
 
+    /// <summary>
+    ///     Groups messages by specified key and determines the "latest" message
+    ///     calling MaxBy by specified ordering selector.
+    /// </summary>
+    /// <returns>
+    ///     A message reference batch, which properties will return data from "latest" message,
+    ///     but actions over it (such as result specification) will be performed over all messages in a batch.
+    /// </returns>
     public static IEnumerable<IPersistedMessageBatchReference<TMessage>> BatchBy<TMessage, TKey, TOrder>(
-        this IEnumerable<IPersistedMessageBatchReference<TMessage>> messages,
+        this IEnumerable<IPersistedMessageReference<TMessage>> messages,
         Func<IPersistedMessageReference<TMessage>, TKey> keySelector,
         Func<IPersistedMessageReference<TMessage>, TOrder> orderingSelector)
         where TKey : IEquatable<TKey>
@@ -49,8 +57,16 @@ public static class PersistedMessageReferenceExtensions
             });
     }
 
+    /// <summary>
+    ///     Groups messages by specified key and determines the "latest" message
+    ///     calling MaxBy over CreatedAt property.
+    /// </summary>
+    /// <returns>
+    ///     A message reference batch, which properties will return data from "latest" message,
+    ///     but actions over it (such as result specification) will be performed over all messages in a batch.
+    /// </returns>
     public static IEnumerable<IPersistedMessageBatchReference<TMessage>> BatchBy<TMessage, TKey>(
-        this IEnumerable<IPersistedMessageBatchReference<TMessage>> messages,
+        this IEnumerable<IPersistedMessageReference<TMessage>> messages,
         Func<IPersistedMessageReference<TMessage>, TKey> keySelector)
         where TKey : IEquatable<TKey>
     {

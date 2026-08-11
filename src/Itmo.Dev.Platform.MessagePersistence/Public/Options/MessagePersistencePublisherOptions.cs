@@ -11,6 +11,6 @@ public class MessagePersistencePublisherOptions
     [Range(minimum: 1, maximum: int.MaxValue)]
     public int BatchSize { get; set; }
 
-    [Range(typeof(TimeSpan), minimum: "00:00:00.500", maximum: "23:59:59")]
+    [Range(typeof(TimeSpan), minimum: "00:00:00.50", maximum: "23:59:59")]
     public TimeSpan PollingDelay { get; set; }
 }

@@ -11,6 +11,9 @@ public readonly record struct Optional<T>(
 
     public T GetValueOrDefault(T defaultValue)
         => HasValue ? Value : defaultValue;
+
+    public T? GetValueOrDefault()
+        => HasValue ? Value : default;
 }
 
 public static class Optional

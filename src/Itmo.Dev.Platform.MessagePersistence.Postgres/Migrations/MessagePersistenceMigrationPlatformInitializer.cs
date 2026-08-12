@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Lifetime.Initializers;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 using Itmo.Dev.Platform.MessagePersistence.Postgres.Plugins;
+using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
 using Itmo.Dev.Platform.Persistence.Abstractions.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
@@ -37,17 +38,22 @@ public class MessagePersistenceMigrationPlatformInitializer : PlatformLifetimeIn
 
         collection.AddPlatform(x => x.WithSystemTextJsonConfiguration());
 
-        collection.AddPlatformPersistence(
-            persistence => persistence.UsePostgres(
-                postgres => postgres
-                    .WithConnectionOptions(builder => builder.Configure(o => connectionOptions.Value.ApplyTo(o)))
-                    .WithMigrationsFromItems(new MigrationSourceItem())
-                    .WithDataSourcePlugin<MappingPlugin>()));
+        collection.AddPlatformPersistence(persistence => persistence.UsePostgres(postgres => postgres
+            .WithConnectionOptions(builder => builder.Configure(o => connectionOptions.Value.ApplyTo(o)))
+            .WithMigrationsFromItems(new MigrationSourceItem())
+            .WithDataSourcePlugin<MappingPlugin>()));
 
-        var provider = collection.BuildServiceProvider();
-        await using var innerScope = provider.CreateAsyncScope();
+        await using (var provider = collection.BuildServiceProvider())
+        {
+            await using var innerScope = provider.CreateAsyncScope();
+            var runner = innerScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 
-        var runner = innerScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateUp();
+            runner.MigrateUp();
+        }
+
+        var outerConnectionProvider = outerScope.ServiceProvider.GetRequiredService<IPersistenceConnectionProvider>();
+        await using var outerConnection = await outerConnectionProvider.GetConnectionAsync(cancellationToken);
+
+        await outerConnection.ReloadTypesAsync(cancellationToken);
     }
 }

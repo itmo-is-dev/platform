@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Postgres.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Postgres.Plugins;
 using Itmo.Dev.Platform.Common.Extensions;
 using Itmo.Dev.Platform.Common.Lifetime.Initializers;
+using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
 using Itmo.Dev.Platform.Persistence.Abstractions.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
@@ -42,10 +43,17 @@ public class BackgroundTasksMigrationPlatformInitializer : PlatformLifetimeIniti
                     .WithMigrationsFromItems(new MigrationSourceItem())
                     .WithDataSourcePlugin<BackgroundTaskDataSourcePlugin>()));
 
-        var provider = collection.BuildServiceProvider();
-        await using var innerScope = provider.CreateAsyncScope();
+        await using (var provider = collection.BuildServiceProvider())
+        {
+            await using var innerScope = provider.CreateAsyncScope();
 
-        var runner = innerScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateUp();
+            var runner = innerScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+            runner.MigrateUp();
+        }
+
+        var outerConnectionProvider = scope.ServiceProvider.GetRequiredService<IPersistenceConnectionProvider>();
+        await using var outerConnection = await outerConnectionProvider.GetConnectionAsync(cancellationToken);
+
+        await outerConnection.ReloadTypesAsync(cancellationToken);
     }
 }

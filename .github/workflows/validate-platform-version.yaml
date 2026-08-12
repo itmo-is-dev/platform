@@ -99,18 +99,3 @@ jobs:
             >&2 echo 'package platform version has ivalid PatchVersion annotation' "$line"
             exit 1
           fi
-
-      - name: validate package version
-        run: |
-          source ./scripts/common-scripts.sh
-          
-          csproj_path=$(echo ${{ matrix.package }} | short_name_to_csproj_path)
-          property_group_line_number=$(( ${{ steps.validate-property-group.outputs.line-number }} + 4 ))
-          
-          line=$(sed "${property_group_line_number}q;d" "$csproj_path" | tr -d ' \t')
-          
-          if [[ ! "$line" =~ '<PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>' ]]
-          then
-            >&2 echo 'package platform version has ivalid PackageVersion annotation' "$line"
-            exit 1
-          fi

@@ -14,7 +14,6 @@
         <MajorVersion>3</MajorVersion>
         <MinorVersion>0</MinorVersion>
         <PatchVersion>449</PatchVersion>
-        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

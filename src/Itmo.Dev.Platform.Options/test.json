@@ -1,0 +1,9 @@
+{
+  "$schema": "./bin/Debug/net10.0/schemas/Itmo.Dev.Platform.Options.schema.json",
+  "Application": {
+    "SomeSection": {
+      "Value": 1,
+      "Time": ""
+    }
+  }
+}

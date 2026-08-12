@@ -17,6 +17,8 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageIcon>icon.png</PackageIcon>
+
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(VersionSuffix)</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup Label="NuGet items" Condition="'$(IsPlatformPackage)' == 'true'">

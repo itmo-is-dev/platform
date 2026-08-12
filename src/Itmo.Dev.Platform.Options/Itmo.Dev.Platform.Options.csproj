@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Platform.Options.Analyzers\Itmo.Dev.Platform.Options.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Itmo.Dev.Platform.Options.MSBuild\Itmo.Dev.Platform.Options.MSBuild.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json.Schema"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+    </ItemGroup>
+
+    <UsingTask TaskName="Itmo.Dev.Platform.Options.MSBuild.GenerateJsonSchemaTask"
+               AssemblyFile="../Itmo.Dev.Platform.Options.MSBuild/bin/Debug/net10.0/Itmo.Dev.Platform.Options.MSBuild.dll"/>
+
+    <UsingTask TaskName="Itmo.Dev.Platform.Options.MSBuild.GenerateFinalSchemaTask"
+               AssemblyFile="../Itmo.Dev.Platform.Options.MSBuild/bin/Debug/net10.0/Itmo.Dev.Platform.Options.MSBuild.dll"/>
+
+    <Target Name="GenerateJsonSchema" AfterTargets="Build">
+        <GenerateJsonSchemaTask AssemblyPath="$(TargetPath)" OutputPath="$(OutputPath)schemas"/>
+        <GenerateFinalSchemaTask AssemblyPath="$(TargetPath)" SchemasPath="$(OutputPath)schemas"/>
+    </Target>
+
+    <ItemGroup>
+        <None Include="$(OutputPath)/schemas/*.json"
+              Link="schemas/*"
+              Visible="false"
+              Pack="true"
+              PackagePath="schemas/"/>
+    </ItemGroup>
+
+</Project>

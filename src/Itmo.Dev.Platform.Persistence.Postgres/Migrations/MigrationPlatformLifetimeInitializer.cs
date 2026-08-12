@@ -18,7 +18,11 @@ internal class MigrationPlatformLifetimeInitializer : PlatformLifetimeInitialize
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
 
-        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        var runner = scope.ServiceProvider.GetService<IMigrationRunner>();
+
+        if (runner is null)
+            return;
+
         runner.MigrateUp();
 
         var connectionProvider = scope.ServiceProvider.GetRequiredService<IPersistenceConnectionProvider>();

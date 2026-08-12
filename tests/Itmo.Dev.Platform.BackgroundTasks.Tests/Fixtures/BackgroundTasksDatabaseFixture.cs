@@ -64,7 +64,9 @@ public class BackgroundTasksDatabaseFixture : DatabaseFixture
         create table if not exists placeholder();
         """;
 
-        await using var command = new NpgsqlCommand(sql, Connection);
+        await using var connection = await GetOpenedConnectionAsync();
+
+        await using var command = new NpgsqlCommand(sql, connection.Connection);
         await command.ExecuteNonQueryAsync();
     }
 }

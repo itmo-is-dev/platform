@@ -126,4 +126,35 @@ public abstract class DatabaseFixture : IAsyncLifetime
     {
         return new NpgsqlConnection(Container.GetConnectionString());
     }
+
+    protected ValueTask<ConnectionScope> GetOpenedConnectionAsync()
+    {
+        return ConnectionScope.CreateAsync(Connection);
+    }
+
+    public readonly struct ConnectionScope : IAsyncDisposable
+    {
+        public NpgsqlConnection Connection { get; private init; }
+        public bool WasOpen { get; private init; }
+
+        public static async ValueTask<ConnectionScope> CreateAsync(NpgsqlConnection connection)
+        {
+            var scope = new ConnectionScope
+            {
+                Connection = connection,
+                WasOpen = connection.State is ConnectionState.Open,
+            };
+
+            if (scope.WasOpen is false)
+                await connection.OpenAsync();
+
+            return scope;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (WasOpen is false)
+                await Connection.CloseAsync();
+        }
+    }
 }

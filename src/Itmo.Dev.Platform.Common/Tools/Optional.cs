@@ -8,6 +8,9 @@ public readonly record struct Optional<T>(
     bool HasValue)
 {
     public static implicit operator Optional<T?>(T? value) => Optional.Some(value);
+
+    public T GetValueOrDefault(T defaultValue)
+        => HasValue ? Value : defaultValue;
 }
 
 public static class Optional

@@ -1,0 +1,19 @@
+<Project>
+
+    <PropertyGroup Condition="'$(_UsePlatformOptions)' == 'true'">
+        <_OptionsTasksAssembly>$(MSBuildThisFileDirectory)bin\$(Configuration)\net10.0\Itmo.Dev.Platform.Options.MSBuild.dll</_OptionsTasksAssembly>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(_UsePlatformOptions)' != 'true'">
+        <_OptionsTasksAssembly>$(MSBuildThisFileDirectory)..\tasks\net10.0\Itmo.Dev.Platform.Options.MSBuild.dll</_OptionsTasksAssembly>
+    </PropertyGroup>
+
+    <UsingTask TaskName="Itmo.Dev.Platform.Options.MSBuild.Tasks.ProcessOptionTypesBuildTask"
+               AssemblyFile="$(_OptionsTasksAssembly)"/>
+
+    <UsingTask TaskName="Itmo.Dev.Platform.Options.MSBuild.Tasks.CopyReferencedSchemasTask"
+               AssemblyFile="$(_OptionsTasksAssembly)"/>
+
+    <UsingTask TaskName="Itmo.Dev.Platform.Options.MSBuild.Tasks.GenerateCurrentSchemaBuildTask"
+               AssemblyFile="$(_OptionsTasksAssembly)"/>
+
+</Project>

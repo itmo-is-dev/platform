@@ -1,16 +1,64 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
+        <IsPlatformPackage>true</IsPlatformPackage>
+        <NoWarn>$(NoWarn);NU5100</NoWarn>
+        <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageReleaseNotes>
+            Added options build tasks
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <PropertyGroup Label="PlatformVersion">
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>3</MinorVersion>
+        <PatchVersion>447</PatchVersion>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" GeneratePathProperty="true"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" PrivateAssets="all"/>
-        <PackageReference Include="Newtonsoft.Json.Schema" />
-        <PackageReference Include="System.Reflection.MetadataLoadContext" />
+        <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="Runtime"/>
+        <PackageReference Include="Newtonsoft.Json.Schema" PrivateAssets="all"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Itmo.Dev.Platform.Options.MSBuild.targets" PackagePath="buildTransitive"/>
+    </ItemGroup>
+
+<!--    https://learn.microsoft.com/en-us/visualstudio/msbuild/tutorial-custom-task-code-generation?view=visualstudio#package-the-task-for-distribution-->
+
+    <PropertyGroup>
+        <TargetsForTfmSpecificBuildOutput>
+            $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
+        </TargetsForTfmSpecificBuildOutput>
+        <GenerateDependencyFile>true</GenerateDependencyFile>
+    </PropertyGroup>
+    
+    <Target
+            Name="CopyProjectReferencesToPackage"
+            DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <!-- The TargetPath is the path inside the package that the source file will be placed. This is already precomputed in the ReferenceCopyLocalPaths items' DestinationSubPath, so reuse it here. -->
+            <BuildOutputInPackage
+                    Include="@(ReferenceCopyLocalPaths)"
+                    TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+        </ItemGroup>
+    </Target>
+
+    <Target
+            Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput"
+            BeforeTargets="BuiltProjectOutputGroup"
+            Condition=" '$(GenerateDependencyFile)' == 'true'">
+
+        <ItemGroup>
+            <BuiltProjectOutputGroupOutput
+                    Include="$(ProjectDepsFilePath)"
+                    TargetPath="$(ProjectDepsFileName)"
+                    FinalOutputPath="$(ProjectDepsFilePath)" />
+        </ItemGroup>
+    </Target>
 
 </Project>

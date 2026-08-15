@@ -1,5 +1,8 @@
+using Itmo.Dev.Platform.Options;
+
 namespace Itmo.Dev.Platform.BackgroundTasks.Hangfire.Configuration;
 
+[OptionsType]
 public class BackgroundTaskHangfireOptions
 {
     public TimeSpan CancellationCheckDelay { get; set; } = TimeSpan.FromSeconds(10);

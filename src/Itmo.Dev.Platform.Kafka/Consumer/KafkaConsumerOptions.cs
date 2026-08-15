@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Kafka.Consumer;
 
+[OptionsType]
 public class KafkaConsumerOptions : IValidatableObject
 {
     public bool IsDisabled { get; set; }

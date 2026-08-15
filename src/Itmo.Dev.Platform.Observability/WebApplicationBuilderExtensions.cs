@@ -6,12 +6,14 @@ using Itmo.Dev.Platform.Observability.Metrics;
 using Itmo.Dev.Platform.Observability.Platform;
 using Itmo.Dev.Platform.Observability.Sentry;
 using Itmo.Dev.Platform.Observability.Tracing;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itmo.Dev.Platform.Observability;
 
 public static class WebApplicationBuilderExtensions
 {
+    [ProducesOptionRegistration<PlatformSentryOptions>(SectionName = "Platform:Observability:Sentry")]
     public static void AddPlatformObservability(
         this WebApplicationBuilder builder,
         Action<IPlatformObservabilityExtensionConfigurator>? configuration = null)

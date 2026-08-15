@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -28,6 +29,7 @@ public static partial class MessagePersistenceConfiguration
                     builder.Configure(options);
             });
 
+            [ProducesOptionRegistration<MessagePersistenceHandlerOptions>(SectionParameterName = nameof(sectionPath))]
             IMessageStep WithConfiguration(string sectionPath) => WithConfiguration(builder =>
                 builder.BindConfiguration(sectionPath));
         }

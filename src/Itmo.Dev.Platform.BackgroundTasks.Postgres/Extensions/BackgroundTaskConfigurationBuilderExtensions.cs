@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.BackgroundTasks.Configuration;
 using Itmo.Dev.Platform.BackgroundTasks.Postgres.Configuration;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -15,6 +16,7 @@ public static class BackgroundTaskConfigurationBuilderExtensions
         return selector.UsePersistenceConfigurator(configurator);
     }
 
+    [ProducesOptionRegistration<BackgroundTaskPersistenceOptions>(SectionParameterName = nameof(sectionPath))]
     public static IBackgroundTaskSchedulingOptionsConfigurator UsePostgresPersistence(
         this IBackgroundTaskPersistenceConfigurationSelector selector,
         string sectionPath)

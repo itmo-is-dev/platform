@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -13,6 +14,7 @@ public static partial class MessagePersistenceConfiguration
             IPersistenceStep WithDefaultPublisherOptions(
                 Action<OptionsBuilder<MessagePersistencePublisherOptions>> action);
 
+            [ProducesOptionRegistration<MessagePersistencePublisherOptions>(SectionParameterName = nameof(sectionPath))]
             IPersistenceStep WithDefaultPublisherOptions(string sectionPath) => WithDefaultPublisherOptions(builder =>
             {
                 builder.BindConfiguration(sectionPath);

@@ -1,8 +1,10 @@
 using Confluent.Kafka;
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Kafka.Configuration;
 
+[OptionsType]
 public class PlatformKafkaOptions : IValidatableObject
 {
     public string Host { get; set; } = null!;

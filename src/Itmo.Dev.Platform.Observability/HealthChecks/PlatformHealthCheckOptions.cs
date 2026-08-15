@@ -1,5 +1,8 @@
+using Itmo.Dev.Platform.Options;
+
 namespace Itmo.Dev.Platform.Observability.HealthChecks;
 
+[OptionsType]
 internal class PlatformHealthCheckOptions
 {
     public bool IsEnabled { get; set; }

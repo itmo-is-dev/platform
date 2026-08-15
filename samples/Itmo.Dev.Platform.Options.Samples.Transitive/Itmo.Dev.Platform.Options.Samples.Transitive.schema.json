@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Value": {
+          "type": "integer"
+        },
+        "OtherValue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Value",
+        "OtherValue"
+      ]
+    }
+  },
+  "properties": {
+    "Application": {
+      "properties": {
+        "SomeOptions": {
+          "$ref": "#/$defs/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+        }
+      }
+    }
+  }
+}

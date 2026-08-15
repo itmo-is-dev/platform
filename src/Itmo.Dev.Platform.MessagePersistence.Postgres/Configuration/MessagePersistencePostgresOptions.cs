@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Postgres.Configuration;
 
+[OptionsType]
 public class MessagePersistencePostgresOptions : IValidatableObject
 {
     public string SchemaName { get; set; } = string.Empty;

@@ -1,5 +1,8 @@
+using Itmo.Dev.Platform.Options;
+
 namespace Itmo.Dev.Platform.Locking.Redis;
 
+[OptionsType]
 public class RedisLockingOptions
 {
     public string Endpoint { get; set; } = string.Empty;

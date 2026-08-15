@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPlatformPackage>true</IsPlatformPackage>
+        <_UsePlatformOptions>true</_UsePlatformOptions>
         <OutputType>Library</OutputType>
     </PropertyGroup>
 

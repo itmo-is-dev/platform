@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.BackgroundTasks.Hangfire.Factories;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -9,6 +10,7 @@ public interface IBackgroundTaskHangfireOptionsConfigurator
     IBackgroundTaskHangfireJobStorageConfigurator ConfigureOptions(
         Action<OptionsBuilder<BackgroundTaskHangfireOptions>> action);
 
+    [ProducesOptionRegistration<BackgroundTaskHangfireOptions>(SectionParameterName = nameof(sectionPath))]
     IBackgroundTaskHangfireJobStorageConfigurator ConfigureOptions(string sectionPath)
     {
         return ConfigureOptions(builder => builder.BindConfiguration(sectionPath));

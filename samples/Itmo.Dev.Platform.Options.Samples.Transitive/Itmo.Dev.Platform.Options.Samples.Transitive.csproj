@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <_UsePlatformOptions>true</_UsePlatformOptions>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Itmo.Dev.Platform.Options.Samples\Itmo.Dev.Platform.Options.Samples.csproj" />
+    </ItemGroup>
+
+</Project>

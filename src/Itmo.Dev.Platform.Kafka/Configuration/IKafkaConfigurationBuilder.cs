@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -26,6 +27,7 @@ public interface IKafkaConfigurationOptionsSelector
         return ConfigureOptions(builder => builder.Configure(action));
     }
 
+    [ProducesOptionRegistration<PlatformKafkaOptions>(SectionParameterName = nameof(sectionPath))]
     IKafkaConfigurationBuilder ConfigureOptions(string sectionPath)
     {
         return ConfigureOptions(builder => builder.BindConfiguration(sectionPath));

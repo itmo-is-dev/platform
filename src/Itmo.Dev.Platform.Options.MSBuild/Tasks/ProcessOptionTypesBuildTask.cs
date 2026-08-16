@@ -32,7 +32,11 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
         {
             return ExecuteCore();
         }
-        catch (Exception e) when (e is not ReflectionTypeLoadException)
+        catch (ReflectionTypeLoadException)
+        {
+            Log.LogWarning("Failed to process option type, try rebuilding the project");
+        }
+        catch (Exception e)
         {
             Log.LogWarning("Error while executing task {0} = {1}", nameof(ProcessOptionTypesBuildTask), e);
         }

@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.Options.MSBuild.Models.ProjectAssets;
 using Microsoft.Build.Framework;
+using System.Reflection;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks;
@@ -18,11 +19,16 @@ public sealed class CopyReferencedSchemasTask : BuildTask
         {
             return ExecuteCore();
         }
+        catch (ReflectionTypeLoadException)
+        {
+            Log.LogWarning("Failed to process option type, try rebuilding the project");
+        }
         catch (Exception e)
         {
             Log.LogError("Error while executing '{0}' = {1}", nameof(CopyReferencedSchemasTask), e);
-            return false;
         }
+
+        return true;
     }
 
     private bool ExecuteCore()

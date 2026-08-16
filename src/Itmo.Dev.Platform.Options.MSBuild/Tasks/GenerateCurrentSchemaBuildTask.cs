@@ -70,9 +70,7 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             propertyNode.ConfigureSchema(rootSchema: schema, currentSchema: schema);
         }
 
-        File.WriteAllText(
-            Path.Combine(OutputPath, $"{Path.GetFileNameWithoutExtension(AssemblyPath)}.schema.json"),
-            schema.ToJson());
+        File.WriteAllText(OutputPath, schema.ToJson());
 
         return true;
     }

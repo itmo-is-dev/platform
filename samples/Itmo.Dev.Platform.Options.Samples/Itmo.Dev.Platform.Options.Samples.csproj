@@ -5,4 +5,8 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Observability\Itmo.Dev.Platform.Observability.csproj" />
+    </ItemGroup>
+
 </Project>

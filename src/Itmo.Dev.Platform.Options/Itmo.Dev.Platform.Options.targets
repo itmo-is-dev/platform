@@ -22,7 +22,7 @@
         <CopyReferencedSchemasTask
                 ProjectAssetsFile="$(ProjectAssetsFile)"
                 TargetDir="$(TargetDir)"
-                Condition="'$(OutputType)' == 'Exe'"/>
+                Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
 
         <GenerateCurrentSchemaBuildTask
                 TargetFramework="$(TargetFramework)"
@@ -30,8 +30,8 @@
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
                 ProjectAssetsFilePath="$(ProjectAssetsFile)"
                 SchemasPaths="$(ProjectDir)$(IntermediateOutputPath)schemas;$(ProjectDir)$(OutputPath)schemas"
-                OutputPath="$(ProjectDir)"
-                Condition="'$(OutputType)' == 'Exe'"/>
+                OutputPath="$(ProjectDir)$(AssemblyName).schema.json"
+                Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
 
     </Target>
 

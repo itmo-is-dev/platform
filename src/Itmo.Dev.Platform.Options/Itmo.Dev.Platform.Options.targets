@@ -1,0 +1,56 @@
+<Project>
+
+    <Target Name="GenerateJsonSchema" AfterTargets="Build" Condition="'$(_DisablePlatformOptions)' != 'true'">
+
+        <ItemGroup>
+            <_SharedFrameworkPaths Include="@(FrameworkReference->'$(DOTNET_ROOT)/shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
+        </ItemGroup>
+
+        <ProcessOptionTypesBuildTask
+                AssemblyPath="$(TargetPath)"
+                SharedFrameworkPaths="@(_SharedFrameworkPaths)"
+                ReferencePaths="@(ReferencePath)"
+                OutputPath="$(ProjectDir)$(IntermediateOutputPath)schemas"/>
+
+        <CopyReferencedSchemasTask
+                ProjectAssetsFile="$(ProjectAssetsFile)"
+                TargetDir="$(TargetDir)"
+                Condition="'$(OutputType)' == 'Exe'"/>
+
+        <GenerateCurrentSchemaBuildTask
+                AssemblyPath="$(TargetPath)"
+                SharedFrameworkPaths="@(_SharedFrameworkPaths)"
+                ReferencePaths="@(ReferencePath)"
+                SchemasPaths="$(ProjectDir)$(IntermediateOutputPath)schemas;$(ProjectDir)$(OutputPath)schemas"
+                OutputPath="$(ProjectDir)"
+                Condition="'$(OutputType)' == 'Exe'"/>
+
+    </Target>
+
+    <ItemGroup>
+        <FileWrites Include="$(OutputPath)schemas/**/*"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>
+            $(TargetsForTfmSpecificContentInPackage);IncludeGeneratedSchemas
+        </TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
+    <Target Name="IncludeGeneratedSchemas" DependsOnTargets="GenerateJsonSchema">
+        <ItemGroup>
+            <_SchemaFiles Include="$(ProjectDir)$(IntermediateOutputPath)schemas\*.json"/>
+            <TfmSpecificPackageFile Include="@(_SchemaFiles)">
+                <PackagePath>schemas\%(Filename)%(Extension)</PackagePath>
+            </TfmSpecificPackageFile>
+        </ItemGroup>
+    </Target>
+
+    <ItemGroup>
+        <Content Include="$(IntermediateOutputPath)schemas\*.json"
+                 CopyToOutputDirectory="PreserveNewest"
+                 Link="schemas\%(Filename)%(Extension)"
+                 Visible="false"/>
+    </ItemGroup>
+
+</Project>

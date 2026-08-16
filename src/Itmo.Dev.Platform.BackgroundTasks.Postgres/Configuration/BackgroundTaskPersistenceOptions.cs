@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.BackgroundTasks.Postgres.Configuration;
 
+[OptionsType]
 public class BackgroundTaskPersistenceOptions : IValidatableObject
 {
     public string SchemaName { get; set; } = string.Empty;

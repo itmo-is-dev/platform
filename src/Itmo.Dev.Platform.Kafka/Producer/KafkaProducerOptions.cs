@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Kafka.Producer;
 
+[OptionsType]
 public class KafkaProducerOptions : IValidatableObject
 {
     public string Topic { get; init; } = string.Empty;

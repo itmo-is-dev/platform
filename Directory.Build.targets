@@ -17,6 +17,11 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageIcon>icon.png</PackageIcon>
+        
+        <_VersionSuffix>-alpha</_VersionSuffix>
+
+        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(_VersionSuffix)</PackageVersion>
+        <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup Label="NuGet items" Condition="'$(IsPlatformPackage)' == 'true'">
@@ -36,6 +41,18 @@
     <ItemGroup Label="SourceLink"
                Condition="'$(IsPlatformPackage)' == 'true' And '$(IsRoslynComponent)' != 'true'">
         <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <Import Project="$(MSBuildThisFileDirectory)src/Itmo.Dev.Platform.Options/Itmo.Dev.Platform.Options.targets"
+            Condition="'$(_UsePlatformOptions)' == 'true'"/>
+
+    <Import Project="$(MSBuildThisFileDirectory)src/Itmo.Dev.Platform.Options.MSBuild/Itmo.Dev.Platform.Options.MSBuild.targets"
+            Condition="'$(_UsePlatformOptions)' == 'true'"/>
+
+    <ItemGroup Condition="'$(_UsePlatformOptions)' == 'true'">
+        <ProjectReference Include="$(MSBuildThisFileDirectory)src/Itmo.Dev.Platform.Options/Itmo.Dev.Platform.Options.csproj"/>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)src/Itmo.Dev.Platform.Options.Analyzers/Itmo.Dev.Platform.Options.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all"/>
+        <PackageReference Include="SourceKit.Runtime"/>
     </ItemGroup>
 
 </Project>

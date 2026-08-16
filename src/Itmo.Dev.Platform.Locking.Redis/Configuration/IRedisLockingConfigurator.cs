@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -7,6 +8,7 @@ public interface IOptionsConfigurator
 {
     IDefaultKeyFormatterConfigurator WithOptions(Action<OptionsBuilder<RedisLockingOptions>> action);
 
+    [ProducesOptionRegistration<RedisLockingOptions>(SectionParameterName = nameof(sectionPath))]
     IDefaultKeyFormatterConfigurator WithOptions(string sectionPath)
     {
         return WithOptions(builder => builder.BindConfiguration(sectionPath));

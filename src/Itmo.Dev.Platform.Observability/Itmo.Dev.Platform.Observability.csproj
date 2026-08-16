@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <IsPlatformPackage>true</IsPlatformPackage>
+        <_UsePlatformOptions>true</_UsePlatformOptions>
         <OutputType>Library</OutputType>
     </PropertyGroup>
 
@@ -15,7 +16,6 @@
         <MajorVersion>1</MajorVersion>
         <MinorVersion>4</MinorVersion>
         <PatchVersion>449</PatchVersion>
-        <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

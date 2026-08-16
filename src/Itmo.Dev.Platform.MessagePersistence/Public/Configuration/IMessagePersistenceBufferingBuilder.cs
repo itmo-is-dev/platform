@@ -1,5 +1,6 @@
 using Itmo.Dev.Platform.MessagePersistence.Internal.Options;
 using Itmo.Dev.Platform.MessagePersistence.Options;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,7 @@ public static partial class MessagePersistenceConfiguration
             IBufferingStepStep WithPublisherConfiguration(
                 Action<OptionsBuilder<MessagePersistencePublisherOptions>> action);
 
+            [ProducesOptionRegistration<MessagePersistencePublisherOptions>(SectionParameterName = nameof(sectionName))]
             IBufferingStepStep WithPublisherConfiguration(string sectionName)
             {
                 return WithPublisherConfiguration(builder => builder.BindConfiguration(

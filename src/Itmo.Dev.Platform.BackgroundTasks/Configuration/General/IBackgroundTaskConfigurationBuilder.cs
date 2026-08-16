@@ -3,6 +3,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,7 @@ public interface IBackgroundTaskSchedulingOptionsConfigurator
     IBackgroundTaskSchedulingConfigurationSelector ConfigureScheduling(
         Action<OptionsBuilder<BackgroundTaskSchedulingOptions>> configuration);
 
+    [ProducesOptionRegistration<BackgroundTaskSchedulingOptions>(SectionParameterName = nameof(sectionPath))]
     IBackgroundTaskSchedulingConfigurationSelector ConfigureScheduling(string sectionPath)
     {
         return ConfigureScheduling(builder => builder.BindConfiguration(sectionPath));
@@ -49,6 +51,7 @@ public interface IBackgroundTaskExecutionConfigurator
         });
     }
 
+    [ProducesOptionRegistration<BackgroundTaskExecutionOptions>(SectionParameterName = nameof(sectionPath))]
     IBackgroundTaskStateMachineConfigurator ConfigureExecution(string sectionPath)
     {
         return ConfigureExecution(builder => builder.BindConfiguration(sectionPath));

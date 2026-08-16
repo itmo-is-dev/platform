@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Persistence.Postgres.Models;
 
+[OptionsType]
 public class PostgresConnectionOptions : IValidatableObject
 {
     public string Host { get; set; } = string.Empty;

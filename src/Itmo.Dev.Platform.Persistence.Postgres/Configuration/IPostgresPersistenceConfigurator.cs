@@ -1,7 +1,9 @@
 using FluentMigrator.Runner.Initialization;
+using Itmo.Dev.Platform.Options;
 using Itmo.Dev.Platform.Persistence.Postgres.Conversions;
 using Itmo.Dev.Platform.Persistence.Postgres.Models;
 using Itmo.Dev.Platform.Persistence.Postgres.Plugins;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -11,6 +13,10 @@ public interface IPostgresPersistenceConnectionConfigurator
 {
     IPostgresPersistenceMigrationConfigurator WithConnectionOptions(
         Action<OptionsBuilder<PostgresConnectionOptions>> configuration);
+
+    [ProducesOptionRegistration<PostgresConnectionOptions>(SectionParameterName = nameof(sectionPath))]
+    IPostgresPersistenceMigrationConfigurator WithConnectionOptions(string sectionPath)
+        => WithConnectionOptions(builder => builder.BindConfiguration(sectionPath));
 }
 
 public interface IPostgresPersistenceMigrationConfigurator

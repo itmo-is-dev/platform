@@ -1,7 +1,9 @@
+using Itmo.Dev.Platform.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.MessagePersistence.Options;
 
+[OptionsType]
 public class MessagePersistencePublisherOptions
 {
     internal bool IsInitialized { get; set; }

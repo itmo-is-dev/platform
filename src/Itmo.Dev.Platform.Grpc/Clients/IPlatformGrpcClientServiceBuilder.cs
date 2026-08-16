@@ -1,5 +1,6 @@
 using Grpc.Core.Interceptors;
 using Itmo.Dev.Platform.Grpc.Clients.Options;
+using Itmo.Dev.Platform.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +15,7 @@ public interface IPlatformGrpcClientServiceOptionsConfigurator
 {
     IPlatformGrpcClientConfigurator WithConfiguration(Action<OptionsBuilder<PlatformGrpcClientOptions>> action);
 
+    [ProducesOptionRegistration<PlatformGrpcClientOptions>(SectionParameterName = nameof(sectionPath))]
     IPlatformGrpcClientConfigurator WithConfiguration(string sectionPath)
     {
         return WithConfiguration(builder => builder.BindConfiguration(sectionPath));

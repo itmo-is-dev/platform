@@ -59,7 +59,7 @@ internal class TracingConfigurationPlugin : IObservabilityConfigurationPlugin
                     .AddProcessor<DbStatementActivityFilter>()
                     .AddProcessor<MetricsActivityFilter>();
 
-                foreach (string source in _options.Sources ?? [])
+                foreach (string source in _options.Sources)
                 {
                     tracing.AddSource(source);
                 }

@@ -1,24 +1,16 @@
 using Itmo.Dev.Platform.Options;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Itmo.Dev.Platform.Kafka.Producer;
 
 [OptionsType]
-public class KafkaProducerOptions : IValidatableObject
+public class KafkaProducerOptions
 {
-    public string Topic { get; init; } = string.Empty;
+    [Required]
+    public required string Topic { get; init; }
 
+    [DefaultValue(1_000_000)]
+    [Range(minimum: 1, maximum: int.MaxValue)]
     public int MessageMaxBytes { get; } = 1_000_000;
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (string.IsNullOrEmpty(Topic))
-            yield return new ValidationResult("Topic name must be specified");
-
-        if (MessageMaxBytes < 1)
-        {
-            string message = $"Invalid max message size = {MessageMaxBytes} bytes (must be >= 1) for topic = {Topic}";
-            yield return new ValidationResult(message);
-        }
-    }
 }

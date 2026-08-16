@@ -4,13 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Itmo.Dev.Platform.Grpc.Clients.Options;
 
 [OptionsType]
-public class PlatformGrpcClientOptions : IValidatableObject
+public class PlatformGrpcClientOptions
 {
-    public Uri? Address { get; set; }
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (Address is null)
-            yield return new ValidationResult("Client address must be specified");
-    }
+    [Required]
+    public required Uri Address { get; set; }
 }

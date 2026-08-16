@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "PostgresConfiguration",
+    "Platform",
+    "MessagePersistence"
+  ],
+  "properties": {
+    "PostgresConfiguration": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_Persistence_Postgres_Models_PostgresConnectionOptions"
+        }
+      ]
+    },
+    "Platform": {
+      "allOf": [
+        {
+          "required": [
+            "Observability"
+          ],
+          "properties": {
+            "Observability": {
+              "allOf": [
+                {
+                  "required": [
+                    "HealthChecks",
+                    "Logging",
+                    "Metrics",
+                    "Sentry",
+                    "Tracing"
+                  ],
+                  "properties": {
+                    "HealthChecks": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_HealthChecks_PlatformHealthCheckOptions"
+                        }
+                      ]
+                    },
+                    "Logging": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Logging_PlatformLoggingOptions"
+                        }
+                      ]
+                    },
+                    "Metrics": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Metrics_PlatformMetricsOptions"
+                        }
+                      ]
+                    },
+                    "Sentry": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Sentry_PlatformSentryOptions"
+                        }
+                      ]
+                    },
+                    "Tracing": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Tracing_PlatformTracingOptions"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "MessagePersistence": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_MessagePersistence_Postgres_Configuration_MessagePersistencePostgresOptions"
+        },
+        {
+          "required": [
+            "Publisher",
+            "Handler"
+          ],
+          "properties": {
+            "Publisher": {
+              "allOf": [
+                {
+                  "required": [
+                    "Default"
+                  ],
+                  "properties": {
+                    "Default": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_MessagePersistence_Options_MessagePersistencePublisherOptions"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "Handler": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Itmo_Dev_Platform_MessagePersistence_Options_MessagePersistenceHandlerOptions"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "Itmo_Dev_Platform_Observability_Sentry_PlatformSentryOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PlatformSentryOptions",
+      "type": "object",
+      "required": [
+        "IsEnabled"
+      ],
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "Configuration": {}
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Logging_PlatformLoggingOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PlatformLoggingOptions",
+      "type": "object",
+      "properties": {
+        "Serilog": {}
+      }
+    },
+    "MessageHandleResultKind": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "Success",
+        "Failure",
+        "Ignored"
+      ],
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Itmo_Dev_Platform_MessagePersistence_Options_MessagePersistenceHandlerOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "MessagePersistenceHandlerOptions",
+      "type": "object",
+      "properties": {
+        "DefaultHandleResult": {
+          "description": "Handle result that will be used when handling message, if SetResult was not explicitly called",
+          "default": 0,
+          "oneOf": [
+            {
+              "$ref": "#/definitions/MessageHandleResultKind"
+            }
+          ]
+        },
+        "RetryCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32",
+          "maximum": 2147483647.0,
+          "minimum": 0.0
+        }
+      },
+      "definitions": {
+        "MessageHandleResultKind": {
+          "type": "integer",
+          "description": "",
+          "x-enumNames": [
+            "Success",
+            "Failure",
+            "Ignored"
+          ],
+          "enum": [
+            0,
+            1,
+            2
+          ]
+        }
+      }
+    },
+    "Itmo_Dev_Platform_MessagePersistence_Options_MessagePersistencePublisherOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "MessagePersistencePublisherOptions",
+      "type": "object",
+      "properties": {
+        "BatchSize": {
+          "type": "integer",
+          "format": "int32",
+          "maximum": 2147483647.0,
+          "minimum": 1.0
+        },
+        "PollingDelay": {
+          "type": "string",
+          "pattern": "^-?(\\d+\\.)?([01]?\\d|2[0-3]):([0-5]?\\d):([0-5]?\\d)(\\.\\d{1,7})?$"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Persistence_Postgres_Models_PostgresConnectionOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PostgresConnectionOptions",
+      "type": "object",
+      "required": [
+        "Host",
+        "Port",
+        "Database",
+        "Username",
+        "Password"
+      ],
+      "properties": {
+        "Host": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Port": {
+          "type": "integer",
+          "format": "int32",
+          "maximum": 2147483647.0,
+          "minimum": 1.0
+        },
+        "Database": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Username": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Password": {
+          "type": "string",
+          "minLength": 1
+        },
+        "SslMode": {
+          "type": "string"
+        },
+        "Pooling": {
+          "type": "boolean",
+          "default": true
+        },
+        "MaximumPoolSize": {
+          "type": "integer",
+          "format": "int32",
+          "default": 10,
+          "maximum": 2147483647.0,
+          "minimum": 1.0
+        },
+        "EnableConnectionProviderLogging": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Metrics_PlatformMetricsOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PlatformMetricsOptions",
+      "type": "object",
+      "required": [
+        "IsEnabled"
+      ],
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_MessagePersistence_Postgres_Configuration_MessagePersistencePostgresOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "MessagePersistencePostgresOptions",
+      "type": "object",
+      "required": [
+        "SchemaName"
+      ],
+      "properties": {
+        "SchemaName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Observability_HealthChecks_PlatformHealthCheckOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PlatformHealthCheckOptions",
+      "type": "object",
+      "required": [
+        "IsEnabled"
+      ],
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "StartupCheckUri": {
+          "type": "string",
+          "default": "/health/startup"
+        },
+        "ReadinessCheckUri": {
+          "type": "string",
+          "default": "/health/readyz"
+        },
+        "LivenessCheckUri": {
+          "type": "string",
+          "default": "/health/livez"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Tracing_PlatformTracingOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "PlatformTracingOptions",
+      "type": "object",
+      "required": [
+        "IsEnabled"
+      ],
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "Sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -33,15 +33,13 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             .DistinctBy(x => x.Section)
             .ToArray();
 
-        var registeredOptionTypes = optionRegistrations.Select(x => x.Type).ToHashSet();
-
         Log.LogMessage("Found '{0}' option registrations", optionRegistrations.Length);
 
         if (optionRegistrations is [])
             return true;
 
         var relevantSchemas = EnumerateSchemas()
-            .IntersectBy(registeredOptionTypes, schema => schema.TypeName)
+            .DistinctBy(schema => schema.TypeName)
             .ToArray();
 
         Log.LogMessage("Found '{0}' relevant schemas", relevantSchemas.Length);

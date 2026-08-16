@@ -7,7 +7,8 @@ namespace Itmo.Dev.Platform.Kafka.Configuration;
 [OptionsType]
 public class PlatformKafkaOptions : IValidatableObject
 {
-    public string Host { get; set; } = null!;
+    [Required]
+    public required string Host { get; set; }
 
     public SecurityProtocol SecurityProtocol { get; set; }
 
@@ -21,34 +22,38 @@ public class PlatformKafkaOptions : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (string.IsNullOrEmpty(Host))
-            yield return new ValidationResult("Kafka host should be specified");
-
-        if (SecurityProtocol is SecurityProtocol.Ssl)
+        if (SecurityProtocol is SecurityProtocol.Ssl && string.IsNullOrEmpty(SslCaPem))
         {
-            if (string.IsNullOrEmpty(SslCaPem))
-                yield return new ValidationResult("SslCaPem must be specified for Ssl protocol");
+            yield return new ValidationResult(
+                "SslCaPem must be specified for Ssl protocol",
+                [nameof(SecurityProtocol), nameof(SslCaPem)]);
         }
 
-        if (SecurityProtocol is SecurityProtocol.SaslPlaintext)
+        if (SecurityProtocol is SecurityProtocol.SaslPlaintext or SecurityProtocol.SaslSsl)
         {
             if (string.IsNullOrEmpty(SaslUsername))
-                yield return new ValidationResult("SaslUsername must be specified for SaslPlaintext protocol");
+            {
+                yield return new ValidationResult(
+                    "SaslUsername must be specified for SaslPlaintext protocol",
+                    [nameof(SaslUsername)]);
+            }
 
             if (string.IsNullOrEmpty(SaslPassword))
-                yield return new ValidationResult("SaslPassword must be specified for SaslPlaintext protocol");
+            {
+                yield return new ValidationResult(
+                    "SaslPassword must be specified for SaslPlaintext protocol",
+                    [nameof(SaslPassword)]);
+            }
         }
 
-        if (SecurityProtocol is SecurityProtocol.SaslSsl)
+        if (SecurityProtocol is SecurityProtocol.Ssl or SecurityProtocol.SaslSsl)
         {
             if (string.IsNullOrEmpty(SslCaPem))
-                yield return new ValidationResult("SslCaPem must be specified for SaslSsl protocol");
-
-            if (string.IsNullOrEmpty(SaslUsername))
-                yield return new ValidationResult("SaslUsername must be specified for SaslSsl protocol");
-
-            if (string.IsNullOrEmpty(SaslPassword))
-                yield return new ValidationResult("SaslPassword must be specified for SaslSsl protocol");
+            {
+                yield return new ValidationResult(
+                    "SslCaPem must be specified for SaslSsl protocol",
+                    [nameof(SslCaPem)]);
+            }
         }
     }
 }

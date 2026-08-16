@@ -67,7 +67,7 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
                 continue;
             }
 
-            var schema = JsonSchema.FromType(optionType);
+            var schema = JsonSchema.FromType(optionType, JsonSchemaSettings.CreateDefault());
             schema.AllowAdditionalProperties = true;
 
             File.WriteAllText(Path.Combine(OutputPath, $"{optionType.FullName}.schema.json"), schema.ToJson());

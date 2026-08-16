@@ -3,6 +3,7 @@
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <_UsePlatformOptions>true</_UsePlatformOptions>
     </PropertyGroup>
 
     <PropertyGroup>

@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Options.MSBuild.Models.ProjectAssets;
 using Microsoft.Build.Utilities;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -5,16 +6,14 @@ using System.Runtime.Loader;
 namespace Itmo.Dev.Platform.Options.MSBuild.Tools;
 
 public sealed class CustomAssemblyLoadContext(
+    string targetFramework,
     string assemblyPath,
     string[] sharedFrameworkPaths,
-    string[] referencePaths,
+    string projectAssetsFilePath,
     TaskLoggingHelper log) : AssemblyLoadContext(isCollectible: true)
 {
     private readonly AssemblyDependencyResolver _dependencyResolver = new(assemblyPath);
-
-    private readonly IReadOnlyDictionary<string, string> _referencePaths = referencePaths
-        .GroupBy(Path.GetFileNameWithoutExtension, StringComparer.OrdinalIgnoreCase)
-        .ToDictionary(grouping => grouping.Key ?? string.Empty, grouping => grouping.First());
+    private readonly ProjectAssetsModel _projectAssets = ProjectAssetsModel.FromFile(projectAssetsFilePath);
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
@@ -58,11 +57,34 @@ public sealed class CustomAssemblyLoadContext(
 
     private Assembly? TryLoadFromReferencePaths(AssemblyName assemblyName)
     {
-        if (_referencePaths.TryGetValue(assemblyName.Name ?? string.Empty, out var path) is false)
+        if (_projectAssets.TryGetAssemblyDescriptor(targetFramework, assemblyName, out var descriptor) is false)
+        {
+            log.LogMessage("Failed to find descriptor for {0}", assemblyName.Name);
             return null;
+        }
 
-        log.LogMessage("Loaded from reference paths = '{0}'", path);
-        return LoadFromAssemblyPath(path);
+        if (_projectAssets.Libraries.TryGetValue(descriptor.LibraryName, out var library) is false)
+        {
+            log.LogMessage("Failed to find library {0}", descriptor.LibraryName);
+            return null;
+        }
+
+        if (library.Type is not ProjectAssetsLibraryType.Package)
+        {
+            log.LogMessage("Invalid library type = {0} for {1}", library.Type, assemblyName);
+            return null;
+        }
+
+        if (_projectAssets.TryGetPackageDirectoryPath(library.Path, out var libraryFullPath) is false)
+        {
+            log.LogMessage("Failed to get package directory path for {0}", descriptor.LibraryName);
+            return null;
+        }
+
+        var candidateAssemblyPath = Path.Combine(libraryFullPath, descriptor.PathInPacakge);
+        log.LogMessage("Candidate = {0}", candidateAssemblyPath);
+
+        return File.Exists(candidateAssemblyPath) ? LoadFromAssemblyPath(candidateAssemblyPath) : null;
     }
 
     private Assembly? TryLoadFromResolver(AssemblyName assemblyName)

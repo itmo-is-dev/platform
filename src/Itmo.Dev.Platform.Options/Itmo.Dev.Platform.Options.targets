@@ -1,5 +1,11 @@
 <Project>
 
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>
+            $(TargetsForTfmSpecificContentInPackage);IncludeGeneratedSchemas;GenerateJsonSchema
+        </TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
     <Target Name="GenerateJsonSchema" AfterTargets="Build" Condition="'$(_DisablePlatformOptions)' != 'true'">
 
         <ItemGroup>
@@ -7,9 +13,10 @@
         </ItemGroup>
 
         <ProcessOptionTypesBuildTask
+                TargetFramework="$(TargetFramework)"
                 AssemblyPath="$(TargetPath)"
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
-                ReferencePaths="@(ReferencePath)"
+                ProjectAssetsFilePath="$(ProjectAssetsFile)"
                 OutputPath="$(ProjectDir)$(IntermediateOutputPath)schemas"/>
 
         <CopyReferencedSchemasTask
@@ -18,24 +25,15 @@
                 Condition="'$(OutputType)' == 'Exe'"/>
 
         <GenerateCurrentSchemaBuildTask
+                TargetFramework="$(TargetFramework)"
                 AssemblyPath="$(TargetPath)"
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
-                ReferencePaths="@(ReferencePath)"
+                ProjectAssetsFilePath="$(ProjectAssetsFile)"
                 SchemasPaths="$(ProjectDir)$(IntermediateOutputPath)schemas;$(ProjectDir)$(OutputPath)schemas"
                 OutputPath="$(ProjectDir)"
                 Condition="'$(OutputType)' == 'Exe'"/>
 
     </Target>
-
-    <ItemGroup>
-        <FileWrites Include="$(OutputPath)schemas/**/*"/>
-    </ItemGroup>
-
-    <PropertyGroup>
-        <TargetsForTfmSpecificContentInPackage>
-            $(TargetsForTfmSpecificContentInPackage);IncludeGeneratedSchemas
-        </TargetsForTfmSpecificContentInPackage>
-    </PropertyGroup>
 
     <Target Name="IncludeGeneratedSchemas" DependsOnTargets="GenerateJsonSchema">
         <ItemGroup>
@@ -47,10 +45,14 @@
     </Target>
 
     <ItemGroup>
+
+        <FileWrites Include="$(OutputPath)schemas/**/*"/>
+
         <Content Include="$(IntermediateOutputPath)schemas\*.json"
                  CopyToOutputDirectory="PreserveNewest"
                  Link="schemas\%(Filename)%(Extension)"
-                 Visible="false"/>
+                 Visible="false"
+                 Pack="false"/>
     </ItemGroup>
 
 </Project>

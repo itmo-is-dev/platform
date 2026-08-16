@@ -1,6 +1,6 @@
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
-using Newtonsoft.Json.Schema.Generation;
+using NJsonSchema;
 using System.Reflection;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
@@ -11,13 +11,16 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
     private const string AttributeTypeName = "Itmo.Dev.Platform.Options.OptionsTypeAttribute";
 
     [Required]
+    public required string TargetFramework { get; set; }
+
+    [Required]
     public required string AssemblyPath { get; set; }
 
     [Required]
     public required string[] SharedFrameworkPaths { get; set; }
-    
+
     [Required]
-    public required string[] ReferencePaths { get; set; }
+    public required string ProjectAssetsFilePath { get; set; }
 
     [Required]
     public required string OutputPath { get; set; }
@@ -46,14 +49,13 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
         Log.LogMessage("Assembly base dir = {0}", assemblyDirectory);
 
         var context = new CustomAssemblyLoadContext(
+            TargetFramework,
             AssemblyPath,
             SharedFrameworkPaths,
-            ReferencePaths,
+            ProjectAssetsFilePath,
             Log);
 
         var assembly = context.LoadFromAssemblyPath(AssemblyPath);
-
-        var schemaGenerator = new JSchemaGenerator();
 
         foreach (TypeInfo optionType in assembly.DefinedTypes)
         {
@@ -64,8 +66,8 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
                 continue;
             }
 
-            var schema = schemaGenerator.Generate(optionType);
-            File.WriteAllText(Path.Combine(OutputPath, $"{optionType.FullName}.schema.json"), schema.ToString());
+            var schema = JsonSchema.FromType(optionType);
+            File.WriteAllText(Path.Combine(OutputPath, $"{optionType.FullName}.schema.json"), schema.ToJson());
         }
 
         return true;

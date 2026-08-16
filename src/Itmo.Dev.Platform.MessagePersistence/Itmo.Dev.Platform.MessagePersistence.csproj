@@ -33,7 +33,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
-        <PackageReference Include="SourceKit.Generators.Builder"/>
+        <PackageReference Include="SourceKit.Generators.Builder" PrivateAssets="all"/>
     </ItemGroup>
 
 </Project>

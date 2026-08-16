@@ -1,31 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$defs": {
-    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "Value": {
-          "type": "integer"
-        },
-        "OtherValue": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "Value",
-        "OtherValue"
-      ]
-    }
-  },
+  "type": "object",
+  "required": [
+    "Application"
+  ],
   "properties": {
     "Application": {
+      "required": [
+        "SomeOptions"
+      ],
       "properties": {
         "SomeOptions": {
-          "$ref": "#/$defs/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+          "$ref": "#/definitions/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "SomeOptions",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "OtherValue"
+      ],
+      "properties": {
+        "Value": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OtherValue": {
+          "type": "string"
         }
       }
     }

@@ -209,18 +209,18 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
                 if (sectionNameParameterArgument.Key is not null)
                 {
                     if (sectionNameParameterArgument.Value.Value is not string parameterName)
-                        return IncrementalResult.SkipWithMetadata(Log("invalid parameter name"));
+                        return IncrementalResult.Skip;
 
                     var argument = invocationOperation.Arguments
                         .SingleOrDefault(arg => arg.Parameter?.Name == parameterName);
 
                     if (argument is null)
-                        return IncrementalResult.SkipWithMetadata(Log("parameter not found in invocation"));
+                        return IncrementalResult.Skip;
 
                     if (argument.Value.ConstantValue.HasValue is false
                         || argument.Value.ConstantValue.Value is not string parameterValue)
                     {
-                        return IncrementalResult.SkipWithMetadata(Log($"invalid parameter value = {argument.ConstantValue}"));
+                        return IncrementalResult.Skip;
                     }
 
                     sectionName = parameterValue;
@@ -232,7 +232,7 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
                 if (sectionNameArgument.Key is not null)
                 {
                     if (sectionNameArgument.Value.Value is not string sectionNamePrefix)
-                        return IncrementalResult.SkipWithMetadata(Log("Invalid section name prefix"));
+                        return IncrementalResult.Skip;
 
                     sectionName = string.IsNullOrEmpty(sectionName)
                         ? sectionNamePrefix

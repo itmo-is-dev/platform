@@ -1,5 +1,5 @@
+using Itmo.Dev.Platform.Options.MSBuild.Models.ProjectAssets;
 using Microsoft.Build.Framework;
-using Newtonsoft.Json.Linq;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks;
@@ -27,83 +27,28 @@ public sealed class CopyReferencedSchemasTask : BuildTask
 
     private bool ExecuteCore()
     {
-        if (File.Exists(ProjectAssetsFile) is false)
+        if (ProjectAssetsModel.TryGetFromFile(ProjectAssetsFile, out var projectAssets) is false)
             return true;
 
-        var projectAssetsText = File.ReadAllText(ProjectAssetsFile);
-        var projectAssets = JObject.Parse(projectAssetsText);
-
-        Log.LogMessage("Loading libraries");
-
-        var libraries = projectAssets
-            .Property("libraries", StringComparison.OrdinalIgnoreCase)
-            ?.Value.Value<JObject>();
-
-        if (libraries is null)
-            return true;
-
-        Log.LogMessage("Loading package folders");
-
-        var packageFolders = projectAssets
-            .Property("packageFolders", StringComparison.OrdinalIgnoreCase)
-            ?.Value.Value<JObject>()
-            ?.Properties()
-            .Select(property => property.Name)
-            .ToArray();
-
-        if (packageFolders is null)
-            return true;
-
-        foreach (JProperty libraryProperty in libraries.Properties())
+        foreach (KeyValuePair<ProjectAssetsLibraryName, ProjectAssetsLibraryModel> library in projectAssets.Libraries)
         {
-            Log.LogMessage("Loading package library");
-            var library = libraryProperty.Value.Value<JObject>();
-
-            if (library is null)
+            if (library.Value.Type is not ProjectAssetsLibraryType.Package)
                 continue;
 
-            Log.LogMessage("Loading package package type");
-
-            var packageType = library
-                .Property("type", StringComparison.OrdinalIgnoreCase)
-                ?.Value.Value<string>();
-
-            if (packageType is not "package")
+            if (projectAssets.TryGetPackageDirectoryPath(library.Value.Path, out var packagePath) is false)
                 continue;
 
-            Log.LogMessage("Loading package package path");
-
-            var packagePath = library
-                .Property("path", StringComparison.OrdinalIgnoreCase)
-                ?.Value.Value<string>();
-
-            if (packagePath is null)
-                continue;
-
-            Log.LogMessage("Loading files");
-            var filesProperty = library.Property("files", StringComparison.OrdinalIgnoreCase);
-
-            if (filesProperty is null)
-                continue;
-
-            var files = filesProperty.Value.Values<string>();
-
-            foreach (string? file in files)
+            foreach (string file in library.Value.Files)
             {
-                if (file?.StartsWith("schemas") is not true)
+                if (file.StartsWith("schemas") is false)
                     continue;
 
+                var sourcePath = Path.Combine(packagePath, file);
                 var targetPath = Path.Combine(TargetDir, file);
 
-                foreach (string packageFolder in packageFolders)
+                if (File.Exists(sourcePath))
                 {
-                    var candidatePath = Path.Combine(packageFolder, packagePath, file);
-
-                    if (File.Exists(candidatePath))
-                    {
-                        File.Copy(candidatePath, targetPath, overwrite: true);
-                        break;
-                    }
+                    File.Copy(sourcePath, targetPath, overwrite: true);
                 }
             }
         }

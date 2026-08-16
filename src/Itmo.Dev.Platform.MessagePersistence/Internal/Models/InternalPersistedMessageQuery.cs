@@ -8,4 +8,4 @@ internal partial record InternalPersistedMessageQuery(
     string[] Names,
     MessageState[] States,
     DateTimeOffset? Cursor,
-    [RequiredValue] int PageSize);
+    [BuilderProperty(BuilderPropertyOptions.Required)] int PageSize);

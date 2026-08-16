@@ -1,7 +1,6 @@
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
+using NJsonSchema;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks;
@@ -11,13 +10,16 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
     private const string AttributeTypeName = "Itmo.Dev.Platform.Options.OptionRegistrationAttribute";
 
     [Required]
+    public required string TargetFramework { get; set; }
+
+    [Required]
     public required string AssemblyPath { get; set; }
 
     [Required]
     public required string[] SharedFrameworkPaths { get; set; }
-    
+
     [Required]
-    public required string[] ReferencePaths { get; set; }
+    public required string ProjectAssetsFilePath { get; set; }
 
     [Required]
     public required string[] SchemasPaths { get; set; }
@@ -44,8 +46,24 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
 
         Log.LogMessage("Found '{0}' relevant schemas", relevantSchemas.Length);
 
-        var schema = new JSchema();
-        schema.SchemaVersion = new Uri("https://json-schema.org/draft/2020-12/schema");
+        var schema = new JsonSchema
+        {
+            SchemaVersion = "https://json-schema.org/draft/2020-12/schema",
+            Type = JsonObjectType.Object,
+            ExtensionData = new Dictionary<string, object?>(),
+        };
+
+        foreach (OptionsTypeSchema typeSchema in relevantSchemas)
+        {
+            var sourceTypeSchema = JsonSchema.FromJsonAsync(typeSchema.Schema).GetAwaiter().GetResult();
+
+            foreach (KeyValuePair<string, JsonSchema> definition in sourceTypeSchema.Definitions)
+            {
+                schema.Definitions.TryAdd(definition.Key, definition.Value);
+            }
+
+            schema.Definitions[FormatTypeName(typeSchema.TypeName)] = sourceTypeSchema;
+        }
 
         foreach (OptionRegistration registration in optionRegistrations)
         {
@@ -53,32 +71,31 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
                 ":",
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            JSchema properties = schema;
+            JsonSchema properties = schema;
 
             foreach (string part in parts)
             {
                 if (properties.Properties.TryGetValue(part, out var sectionSchema) is false)
                 {
-                    sectionSchema = properties.Properties[part] = new JSchema();
+                    sectionSchema = properties.Properties[part] = new JsonSchemaProperty();
                 }
 
-                properties.Required.Add(part);
+                if (properties.RequiredProperties.Contains(part) is false)
+                {
+                    properties.RequiredProperties.Add(part);
+                }
+
                 properties = sectionSchema;
             }
 
-            properties.ExtensionData["$ref"] = $"#/$defs/{FormatTypeName(registration.Type)}";
-        }
-
-        var definitions = schema.ExtensionData["$defs"] = new JObject();
-
-        foreach (OptionsTypeSchema typeSchema in relevantSchemas)
-        {
-            definitions[FormatTypeName(typeSchema.TypeName)] = JObject.Parse(typeSchema.Schema);
+            properties.Reference = schema.Definitions.TryGetValue(FormatTypeName(registration.Type), out var definition)
+                ? definition
+                : null;
         }
 
         File.WriteAllText(
             Path.Combine(OutputPath, $"{Path.GetFileNameWithoutExtension(AssemblyPath)}.schema.json"),
-            schema.ToString());
+            schema.ToJson());
 
         return true;
     }
@@ -88,9 +105,10 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         Log.LogMessage("Loading assembly at '{0}'", AssemblyPath);
 
         var context = new CustomAssemblyLoadContext(
+            TargetFramework,
             AssemblyPath,
             SharedFrameworkPaths,
-            ReferencePaths,
+            ProjectAssetsFilePath,
             Log);
 
         var assembly = context.LoadFromAssemblyPath(AssemblyPath);

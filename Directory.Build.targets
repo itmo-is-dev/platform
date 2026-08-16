@@ -18,7 +18,7 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageIcon>icon.png</PackageIcon>
         
-        <_VersionSuffix>-alpha</_VersionSuffix>
+        <_VersionSuffix></_VersionSuffix>
 
         <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(_VersionSuffix)</PackageVersion>
         <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</AssemblyVersion>

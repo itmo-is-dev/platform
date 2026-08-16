@@ -126,8 +126,6 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
                 if (schemaTypeNames.Add(schemaTypeName) is false)
                     continue;
 
-                Log.LogMessage("Found schema for '{0}'", schemaTypeName);
-
                 yield return new OptionsTypeSchema(
                     schemaTypeName,
                     Schema: File.ReadAllText(schemaFile.FullName));

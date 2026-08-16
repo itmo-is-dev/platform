@@ -17,9 +17,9 @@ function _find_project_references_by_short_name {
     
     if [[ ! "$is_options_enabled" -eq 0 ]]
     then
-      echo "Options"
-      echo "Options.MSBuild"
-      echo "Options.Analyzers"
+      echo "src/Itmo.Dev.Platform.Options/Itmo.Dev.Platform.Options.csproj"
+      echo "src/Itmo.Dev.Platform.Options.MSBuild/Itmo.Dev.Platform.Options.MSBuild.csproj"
+      echo "src/Itmo.Dev.Platform.Options.Analyzers/Itmo.Dev.Platform.Options.Analyzers.csproj"
     fi
   done
 }

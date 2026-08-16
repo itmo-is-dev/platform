@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
 using NJsonSchema;
+using NJsonSchema.Generation;
 using System.Reflection;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
@@ -31,7 +32,7 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
         {
             return ExecuteCore();
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not ReflectionTypeLoadException)
         {
             Log.LogWarning("Error while executing task {0} = {1}", nameof(ProcessOptionTypesBuildTask), e);
         }
@@ -67,6 +68,8 @@ public sealed class ProcessOptionTypesBuildTask : BuildTask
             }
 
             var schema = JsonSchema.FromType(optionType);
+            schema.AllowAdditionalProperties = true;
+
             File.WriteAllText(Path.Combine(OutputPath, $"{optionType.FullName}.schema.json"), schema.ToJson());
         }
 

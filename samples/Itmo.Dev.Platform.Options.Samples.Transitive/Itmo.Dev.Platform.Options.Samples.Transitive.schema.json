@@ -6,14 +6,22 @@
   ],
   "properties": {
     "Application": {
-      "required": [
-        "SomeOptions"
-      ],
-      "properties": {
-        "SomeOptions": {
-          "$ref": "#/definitions/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+      "allOf": [
+        {
+          "required": [
+            "SomeOptions"
+          ],
+          "properties": {
+            "SomeOptions": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+                }
+              ]
+            }
+          }
         }
-      }
+      ]
     }
   },
   "definitions": {
@@ -21,7 +29,6 @@
       "$schema": "http://json-schema.org/draft-04/schema#",
       "title": "SomeOptions",
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "OtherValue"
       ],

@@ -65,32 +65,11 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             schema.Definitions[FormatTypeName(typeSchema.TypeName)] = sourceTypeSchema;
         }
 
-        foreach (OptionRegistration registration in optionRegistrations)
+        var propertyNodes = BuildPropertyNodes(optionRegistrations);
+
+        foreach (PropertyNode propertyNode in propertyNodes)
         {
-            var parts = registration.Section.Split(
-                ":",
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            JsonSchema properties = schema;
-
-            foreach (string part in parts)
-            {
-                if (properties.Properties.TryGetValue(part, out var sectionSchema) is false)
-                {
-                    sectionSchema = properties.Properties[part] = new JsonSchemaProperty();
-                }
-
-                if (properties.RequiredProperties.Contains(part) is false)
-                {
-                    properties.RequiredProperties.Add(part);
-                }
-
-                properties = sectionSchema;
-            }
-
-            properties.Reference = schema.Definitions.TryGetValue(FormatTypeName(registration.Type), out var definition)
-                ? definition
-                : null;
+            propertyNode.ConfigureSchema(rootSchema: schema, currentSchema: schema);
         }
 
         File.WriteAllText(
@@ -156,9 +135,84 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         }
     }
 
+    private IEnumerable<PropertyNode> BuildPropertyNodes(IEnumerable<OptionRegistration> registrations)
+    {
+        var properties = new Dictionary<string, PropertyNode>();
+
+        foreach (OptionRegistration registration in registrations)
+        {
+            var pathParts = registration.Section.Split(
+                separator: ":",
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+            PropertyNode? currentProperty = null;
+
+            foreach (string pathPart in pathParts)
+            {
+                if (currentProperty is null)
+                {
+                    if (properties.TryGetValue(pathPart, out currentProperty) is false)
+                        currentProperty = properties[pathPart] = new PropertyNode(pathPart);
+                }
+                else
+                {
+                    currentProperty = currentProperty.GetChildProperty(pathPart);
+                }
+            }
+
+            currentProperty?.SchemaTypeNames.Add(registration.Type);
+        }
+
+        return properties.Values;
+    }
+
     private readonly record struct OptionsTypeSchema(string TypeName, string Schema);
 
     private readonly record struct OptionRegistration(string Section, string Type);
+
+    private class PropertyNode(string name)
+    {
+        public string Name { get; } = name;
+
+        public ICollection<string> SchemaTypeNames { get; } = [];
+
+        public IDictionary<string, PropertyNode> Properties { get; } = new Dictionary<string, PropertyNode>();
+
+        public PropertyNode GetChildProperty(string name)
+        {
+            if (Properties.TryGetValue(name, out var childProperty) is false)
+            {
+                Properties[name] = childProperty = new PropertyNode(name);
+            }
+
+            return childProperty;
+        }
+
+        public void ConfigureSchema(JsonSchema rootSchema, JsonSchema currentSchema)
+        {
+            var property = currentSchema.Properties[Name] = new JsonSchemaProperty();
+            currentSchema.RequiredProperties.Add(Name);
+
+            foreach (string schemaTypeName in SchemaTypeNames)
+            {
+                if (rootSchema.Definitions.TryGetValue(FormatTypeName(schemaTypeName), out var definition))
+                {
+                    property.AllOf.Add(new JsonSchema { Reference = definition });
+                }
+            }
+
+            if (Properties.Count is not 0)
+            {
+                var currentReference = new JsonSchema();
+                property.AllOf.Add(currentReference);
+
+                foreach (KeyValuePair<string, PropertyNode> propertyNode in Properties)
+                {
+                    propertyNode.Value.ConfigureSchema(rootSchema, currentReference);
+                }
+            }
+        }
+    }
 
     private static string FormatTypeName(string typeName) => typeName.Replace('.', '_');
 }

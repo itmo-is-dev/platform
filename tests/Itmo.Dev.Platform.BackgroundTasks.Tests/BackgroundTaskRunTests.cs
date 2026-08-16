@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldSetStateFailed_WhenRetryCountExceeded;
@@ -153,7 +154,7 @@ public class BackgroundTaskRunTests : TestBase
                                 .ConfigureExecution(configuration, options => options.MaxRetryCount = 2)
                                 .AddBackgroundTask(
                                     task => task
-                                        .WithMetadata<EmptyMetadata>()
+                                        .WithMetadata<ValueMetadata>()
                                         .WithExecutionMetadata<EmptyExecutionMetadata>()
                                         .WithResult<EmptyExecutionResult>()
                                         .WithError<EmptyError>()
@@ -177,7 +178,7 @@ public class BackgroundTaskRunTests : TestBase
         // Act
         var backgroundTaskId = await manager
             .StartBackgroundTask
-            .WithMetadata(EmptyMetadata.Value)
+            .WithMetadata(new ValueMetadata("aboba"))
             .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<FailingBackgroundTask>(default);
 
@@ -246,7 +247,7 @@ public class BackgroundTaskRunTests : TestBase
                                 .ConfigureExecution(configuration, options => options.MaxRetryCount = 0)
                                 .AddBackgroundTask(
                                     task => task
-                                        .WithMetadata<EmptyMetadata>()
+                                        .WithMetadata<ValueMetadata>()
                                         .WithExecutionMetadata<EmptyExecutionMetadata>()
                                         .WithResult<EmptyExecutionResult>()
                                         .WithError<EmptyError>()
@@ -270,7 +271,7 @@ public class BackgroundTaskRunTests : TestBase
         // Act
         var backgroundTaskId = await manager
             .StartBackgroundTask
-            .WithMetadata(EmptyMetadata.Value)
+            .WithMetadata(new ValueMetadata("aboba"))
             .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<ThrowingBackgroundTask>(default);
 

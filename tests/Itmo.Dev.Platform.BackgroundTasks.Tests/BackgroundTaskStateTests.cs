@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Postgres.Extensions;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteSimpleStateMachine;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteSimpleStateMachine.States;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteStateMachine_WhenItContainsSuspends;
@@ -75,7 +76,7 @@ public class BackgroundTaskStateTests : TestBase
                                 .AddStateMachine()
                                 .AddBackgroundTask(
                                     task => task
-                                        .WithMetadata<EmptyMetadata>()
+                                        .WithMetadata<ValueMetadata>()
                                         .WithExecutionMetadata<SimpleStateExecutionMetadata>()
                                         .WithResult<EmptyExecutionResult>()
                                         .WithError<EmptyError>()
@@ -98,7 +99,7 @@ public class BackgroundTaskStateTests : TestBase
 
         // Act
         var backgroundTaskId = await runner.StartBackgroundTask
-            .WithMetadata(EmptyMetadata.Value)
+            .WithMetadata(new ValueMetadata("aboba"))
             .WithExecutionMetadata(new SimpleStateExecutionMetadata())
             .RunWithAsync<SimpleStateTask>(default);
 
@@ -158,7 +159,7 @@ public class BackgroundTaskStateTests : TestBase
                                 .AddStateMachine()
                                 .AddBackgroundTask(
                                     task => task
-                                        .WithMetadata<EmptyMetadata>()
+                                        .WithMetadata<ValueMetadata>()
                                         .WithExecutionMetadata<SuspendedTaskExecutionMetadata>()
                                         .WithResult<EmptyExecutionResult>()
                                         .WithError<EmptyError>()
@@ -181,7 +182,7 @@ public class BackgroundTaskStateTests : TestBase
 
         // Act
         var backgroundTaskId = await runner.StartBackgroundTask
-            .WithMetadata(EmptyMetadata.Value)
+            .WithMetadata(new ValueMetadata("aboba"))
             .WithExecutionMetadata(new SuspendedTaskExecutionMetadata())
             .RunWithAsync<SuspendedStateTask>(default);
 

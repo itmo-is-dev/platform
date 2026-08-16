@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.ProceedAsync_ShouldProceedTaskExecution;
 
 public class ProceedableBackgroundTask : IBackgroundTask<
-    EmptyMetadata,
+    ValueMetadata,
     EmptyExecutionMetadata,
     EmptyExecutionResult,
     EmptyError>
@@ -26,9 +26,12 @@ public class ProceedableBackgroundTask : IBackgroundTask<
     public static string Name => nameof(ProceedableBackgroundTask);
 
     public Task<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>> ExecuteAsync(
-        BackgroundTaskExecutionContext<EmptyMetadata, EmptyExecutionMetadata> executionContext,
+        BackgroundTaskExecutionContext<ValueMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(executionContext.Metadata.Value))
+            _completionManager.Fail(new ArgumentException("Invalid metadata, possible serialization issues"));
+
         if (_completionManager.Version is 0)
         {
             _logger.LogInformation("Suspending task");

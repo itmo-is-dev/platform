@@ -1,7 +1,6 @@
 using Itmo.Dev.Platform.BackgroundTasks.StateMachine;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
-using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteStateMachine_WhenItContainsSuspends.
     States;
@@ -13,7 +12,7 @@ public class StartingSuspendedTaskStateHandler : ISuspendedTaskStateHandler<Star
 {
     public ValueTask<StateHandleResult<SuspendedTaskState, EmptyExecutionResult, EmptyError>> HandleAsync(
         StartingSuspendedTaskState state,
-        BackgroundTaskExecutionContext<EmptyMetadata, SuspendedTaskExecutionMetadata> context,
+        BackgroundTaskExecutionContext<ValueMetadata, SuspendedTaskExecutionMetadata> context,
         CancellationToken cancellationToken)
     {
         return ValueTask.FromResult<StateHandleResult<SuspendedTaskState, EmptyExecutionResult, EmptyError>>(

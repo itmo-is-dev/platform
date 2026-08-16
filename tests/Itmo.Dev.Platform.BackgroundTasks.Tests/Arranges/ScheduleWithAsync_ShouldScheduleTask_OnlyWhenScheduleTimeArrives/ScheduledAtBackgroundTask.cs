@@ -26,6 +26,9 @@ public class ScheduledAtBackgroundTask : IBackgroundTask<
         BackgroundTaskExecutionContext<ScheduledAtMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (executionContext.Metadata.ScheduledAt == default)
+            throw new ArgumentException("Invalid metadata, possible serialization issues");
+
         await Task.Yield();
 
         return _dateTimeProvider.Current < executionContext.Metadata.ScheduledAt

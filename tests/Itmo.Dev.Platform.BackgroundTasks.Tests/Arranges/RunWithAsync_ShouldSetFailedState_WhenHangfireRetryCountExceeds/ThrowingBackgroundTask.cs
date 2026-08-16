@@ -8,7 +8,7 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.
     RunWithAsync_ShouldSetFailedState_WhenHangfireRetryCountExceeds;
 
 public class ThrowingBackgroundTask : IBackgroundTask<
-    EmptyMetadata,
+    ValueMetadata,
     EmptyExecutionMetadata,
     EmptyExecutionResult,
     EmptyError>
@@ -16,9 +16,12 @@ public class ThrowingBackgroundTask : IBackgroundTask<
     public static string Name => nameof(ThrowingBackgroundTask);
 
     public Task<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>> ExecuteAsync(
-        BackgroundTaskExecutionContext<EmptyMetadata, EmptyExecutionMetadata> executionContext,
+        BackgroundTaskExecutionContext<ValueMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(executionContext.Metadata.Value))
+            throw new ArgumentException("Invalid metadata, possible serialization issues");
+
         throw new InvalidOperationException("Task cannot be executed");
     }
 }

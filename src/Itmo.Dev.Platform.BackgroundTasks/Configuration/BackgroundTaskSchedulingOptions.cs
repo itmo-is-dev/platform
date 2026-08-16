@@ -11,6 +11,6 @@ public class BackgroundTaskSchedulingOptions
     public int BatchSize { get; set; }
 
     [Required]
-    [Range(typeof(TimeSpan), minimum: "00:00:00:020", maximum: "1.00:00:00")]
+    [Range(typeof(TimeSpan), minimum: "00:00:00.020", maximum: "1.00:00:00")]
     public TimeSpan PollingDelay { get; set; }
 }

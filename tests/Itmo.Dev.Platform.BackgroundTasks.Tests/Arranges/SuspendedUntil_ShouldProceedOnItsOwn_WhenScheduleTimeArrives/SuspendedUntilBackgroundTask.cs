@@ -24,6 +24,10 @@ public class SuspendedUntilBackgroundTask : IBackgroundTask<
         BackgroundTaskExecutionContext<SuspendedUntilMetadata, SuspendedUntilExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (executionContext.Metadata.ContinuationScheduled == default)
+            throw new ArgumentException("Invalid metadata, possible serialization issues");
+
+        
         await Task.Yield();
 
         if (executionContext.ExecutionMetadata.WasSuspended is false)

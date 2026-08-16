@@ -10,6 +10,7 @@ using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.ExecutionMetadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.ProceedAsync_ShouldProceedTaskExecution;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Fixtures;
@@ -67,7 +68,7 @@ public class BackgroundTaskProceedTests : TestBase
                                 .ConfigureExecution(configuration, options => options.MaxRetryCount = 10)
                                 .AddBackgroundTask(
                                     task => task
-                                        .WithMetadata<EmptyMetadata>()
+                                        .WithMetadata<ValueMetadata>()
                                         .WithExecutionMetadata<EmptyExecutionMetadata>()
                                         .WithResult<EmptyExecutionResult>()
                                         .WithError<EmptyError>()
@@ -91,7 +92,7 @@ public class BackgroundTaskProceedTests : TestBase
         // Act
         var backgroundTaskId = await manager
             .StartBackgroundTask
-            .WithMetadata(EmptyMetadata.Value)
+            .WithMetadata(new ValueMetadata("aboba"))
             .WithExecutionMetadata(EmptyExecutionMetadata.Value)
             .RunWithAsync<ProceedableBackgroundTask>(default);
 

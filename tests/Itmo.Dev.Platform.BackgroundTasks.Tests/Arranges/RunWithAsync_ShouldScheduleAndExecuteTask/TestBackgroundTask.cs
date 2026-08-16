@@ -23,6 +23,9 @@ public class TestBackgroundTask : IBackgroundTask<
         BackgroundTaskExecutionContext<TestBackgroundTaskMetadata, EmptyExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(executionContext.Metadata.Value))
+            _completionManager.Fail(new ArgumentException("Invalid metadata, possible serialization issues"));
+
         var metadata = executionContext.Metadata;
         _completionManager.Complete(metadata.Value);
 

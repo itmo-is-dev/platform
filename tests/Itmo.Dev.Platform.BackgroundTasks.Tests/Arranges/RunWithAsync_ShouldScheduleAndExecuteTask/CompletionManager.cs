@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.ExceptionServices;
+
 namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
 
 public class CompletionManager
@@ -11,11 +14,18 @@ public class CompletionManager
     }
 
     public Task<string> WaitTask { get; private set; }
-    
+
     public int Version { get; private set; }
 
     public void Complete(string value)
         => _tcs.SetResult(value);
+
+    [DoesNotReturn]
+    public void Fail(Exception exception)
+    {
+        _tcs.SetException(exception);
+        ExceptionDispatchInfo.Throw(exception);
+    }
 
     public void Reset()
     {

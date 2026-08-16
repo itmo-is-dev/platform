@@ -1,7 +1,6 @@
 using Itmo.Dev.Platform.BackgroundTasks.StateMachine;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Errors;
-using Itmo.Dev.Platform.BackgroundTasks.Tasks.Metadata;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldExecuteSimpleStateMachine.States;
 using Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.RunWithAsync_ShouldScheduleAndExecuteTask;
@@ -19,7 +18,7 @@ public class SecondSimpleStateHandler : ISimpleStateHandler<SecondSimpleState>
 
     public ValueTask<StateHandleResult<SimpleState, EmptyExecutionResult, EmptyError>> HandleAsync(
         SecondSimpleState state,
-        BackgroundTaskExecutionContext<EmptyMetadata, SimpleStateExecutionMetadata> context,
+        BackgroundTaskExecutionContext<ValueMetadata, SimpleStateExecutionMetadata> context,
         CancellationToken cancellationToken)
     {
         _completionManager.Complete(string.Empty);

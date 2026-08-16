@@ -12,7 +12,7 @@ namespace Itmo.Dev.Platform.BackgroundTasks.Tests.Arranges.
     RunWithAsync_ShouldExecuteStateMachine_WhenItContainsSuspends;
 
 public class SuspendedStateTask : IBackgroundTask<
-    EmptyMetadata,
+    ValueMetadata,
     SuspendedTaskExecutionMetadata,
     EmptyExecutionResult,
     EmptyError>
@@ -27,12 +27,16 @@ public class SuspendedStateTask : IBackgroundTask<
     public static string Name => nameof(SuspendedStateTask);
 
     public async Task<BackgroundTaskExecutionResult<EmptyExecutionResult, EmptyError>> ExecuteAsync(
-        BackgroundTaskExecutionContext<EmptyMetadata, SuspendedTaskExecutionMetadata> executionContext,
+        BackgroundTaskExecutionContext<ValueMetadata, SuspendedTaskExecutionMetadata> executionContext,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(executionContext.Metadata.Value))
+            throw new ArgumentException("Invalid metadata, possible serialization issues");
+
+        
         return await _stateMachineFactory
             .CreateForState<SuspendedTaskState>()
-            .ForEmptyMetadata()
+            .ForMetadata<ValueMetadata>()
             .ForExecutionMetadata<SuspendedTaskExecutionMetadata>()
             .ForEmptyResult()
             .ForEmptyError()

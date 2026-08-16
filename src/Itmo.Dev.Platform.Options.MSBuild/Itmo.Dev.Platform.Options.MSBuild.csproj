@@ -16,7 +16,7 @@
     <PropertyGroup Label="PlatformVersion">
         <MajorVersion>1</MajorVersion>
         <MinorVersion>3</MinorVersion>
-        <PatchVersion>464</PatchVersion>
+        <PatchVersion>466</PatchVersion>
     </PropertyGroup>
 
     <ItemGroup>

@@ -12,6 +12,15 @@ function _find_project_references_by_short_name {
       | csproj_path_to_unix_path \
       | csproj_path_to_short_name \
       | _find_project_references_by_short_name  
+      
+    is_options_enabled=$(grep -E '<_UsePlatformOptions>true</_UsePlatformOptions>' "$csproj_path" | wc -l)
+    
+    if [[ ! "$is_options_enabled" -eq 0 ]]
+    then
+      echo "Options"
+      echo "Options.MSBuild"
+      echo "Options.Analyzers"
+    fi
   done
 }
 

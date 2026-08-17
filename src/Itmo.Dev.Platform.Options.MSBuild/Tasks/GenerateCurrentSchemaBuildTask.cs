@@ -1,13 +1,17 @@
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
+using Newtonsoft.Json;
 using NJsonSchema;
+using NJsonSchema.Generation;
+using System.Reflection;
 using BuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks;
 
 public sealed class GenerateCurrentSchemaBuildTask : BuildTask
 {
-    private const string AttributeTypeName = "Itmo.Dev.Platform.Options.OptionRegistrationAttribute";
+    private const string OptionRegistrationAttributeTypeName = "Itmo.Dev.Platform.Options.OptionRegistrationAttribute";
+    private const string OptionsTypeAttributeTypeName = "Itmo.Dev.Platform.Options.OptionsTypeAttribute";
 
     [Required]
     public required string TargetFramework { get; set; }
@@ -22,14 +26,22 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
     public required string ProjectAssetsFilePath { get; set; }
 
     [Required]
-    public required string[] SchemasPaths { get; set; }
-
-    [Required]
     public required string OutputPath { get; set; }
 
     public override bool Execute()
     {
-        var optionRegistrations = EnumerateRegistrations()
+        using var assemblyLoadContext = new CustomAssemblyLoadContext(
+            TargetFramework,
+            AssemblyPath,
+            SharedFrameworkPaths,
+            ProjectAssetsFilePath,
+            Log);
+
+        Log.LogMessage("Loading assembly at '{0}'", AssemblyPath);
+
+        var assembly = assemblyLoadContext.LoadFromAssemblyPath(AssemblyPath);
+
+        var optionRegistrations = EnumerateRegistrations(assembly)
             .DistinctBy(x => x.Section)
             .ToArray();
 
@@ -38,12 +50,6 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         if (optionRegistrations is [])
             return true;
 
-        var relevantSchemas = EnumerateSchemas()
-            .DistinctBy(schema => schema.TypeName)
-            .ToArray();
-
-        Log.LogMessage("Found '{0}' relevant schemas", relevantSchemas.Length);
-
         var schema = new JsonSchema
         {
             SchemaVersion = "https://json-schema.org/draft/2020-12/schema",
@@ -51,19 +57,22 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             ExtensionData = new Dictionary<string, object?>(),
         };
 
-        foreach (OptionsTypeSchema typeSchema in relevantSchemas)
+        var jsonSchemaSettings = JsonSchemaSettings.CreateDefault();
+        var jsonSchemaResolver = new JsonSchemaResolver(schema, jsonSchemaSettings);
+        var jsonSchemaGenerator = new JsonSchemaGenerator(jsonSchemaSettings);
+
+        foreach (Type optionsType in EnumerateOptionsTypes(assembly, assemblyLoadContext).OrderBy(type => type.Name))
         {
-            var sourceTypeSchema = JsonSchema.FromJsonAsync(typeSchema.Schema).GetAwaiter().GetResult();
+            if (string.IsNullOrEmpty(optionsType.FullName))
+                continue;
 
-            foreach (KeyValuePair<string, JsonSchema> definition in sourceTypeSchema.Definitions)
-            {
-                schema.Definitions.TryAdd(definition.Key, definition.Value);
-            }
+            if (jsonSchemaResolver.HasSchema(optionsType, false))
+                continue;
 
-            schema.Definitions[FormatTypeName(typeSchema.TypeName)] = sourceTypeSchema;
+            jsonSchemaGenerator.Generate(optionsType, jsonSchemaResolver);
         }
 
-        var propertyNodes = BuildPropertyNodes(optionRegistrations);
+        var propertyNodes = BuildPropertyNodes(optionRegistrations).OrderBy(node => node.Name);
 
         foreach (PropertyNode propertyNode in propertyNodes)
         {
@@ -75,58 +84,47 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         return true;
     }
 
-    private IEnumerable<OptionRegistration> EnumerateRegistrations()
+    private IEnumerable<OptionRegistration> EnumerateRegistrations(Assembly assembly)
     {
-        Log.LogMessage("Loading assembly at '{0}'", AssemblyPath);
-
-        var context = new CustomAssemblyLoadContext(
-            TargetFramework,
-            AssemblyPath,
-            SharedFrameworkPaths,
-            ProjectAssetsFilePath,
-            Log);
-
-        var assembly = context.LoadFromAssemblyPath(AssemblyPath);
-
         return assembly
             .GetCustomAttributesData()
-            .Where(attr => attr.AttributeType.FullName is AttributeTypeName)
+            .Where(attr => attr.AttributeType.FullName is OptionRegistrationAttributeTypeName)
             .Select(attr => new OptionRegistration(
                 (string)attr.ConstructorArguments[0].Value!,
                 (string)attr.ConstructorArguments[1].Value!));
     }
 
-    private IEnumerable<OptionsTypeSchema> EnumerateSchemas()
+    private IEnumerable<Type> EnumerateOptionsTypes(
+        Assembly assembly,
+        CustomAssemblyLoadContext assemblyLoadContext)
     {
-        var schemaTypeNames = new HashSet<string>();
+        var processedAssemblies = new HashSet<string>();
 
-        foreach (string schemasPath in SchemasPaths)
+        var assemblyQueue = new Queue<Assembly>();
+        assemblyQueue.Enqueue(assembly);
+
+        while (assemblyQueue.TryDequeue(out var currentAssembly))
         {
-            Log.LogMessage("Loading schemas from '{0}'", schemasPath);
-            var schemasDirectory = new DirectoryInfo(schemasPath);
-
-            if (schemasDirectory.Exists is false)
+            foreach (TypeInfo type in currentAssembly.DefinedTypes)
             {
-                yield break;
-            }
+                var attributes = type.GetCustomAttributesData();
 
-            var schemaFiles = schemasDirectory.EnumerateFiles(searchPattern: "*.schema.json");
-
-            foreach (FileInfo schemaFile in schemaFiles)
-            {
-                var schemaTypeName = schemaFile.Name.Replace(
-                    ".schema.json",
-                    string.Empty,
-                    StringComparison.OrdinalIgnoreCase);
-
-                if (schemaTypeNames.Add(schemaTypeName) is false)
+                if (attributes.All(attribute => attribute.AttributeType.FullName is not OptionsTypeAttributeTypeName))
                     continue;
 
-                Log.LogMessage("Found schema for '{0}'", schemaTypeName);
+                yield return type;
+            }
 
-                yield return new OptionsTypeSchema(
-                    schemaTypeName,
-                    Schema: File.ReadAllText(schemaFile.FullName));
+            foreach (AssemblyName referencedAssemblyName in currentAssembly.GetReferencedAssemblies())
+            {
+                if (string.IsNullOrEmpty(referencedAssemblyName.Name))
+                    continue;
+
+                if (processedAssemblies.Add(referencedAssemblyName.Name) is false)
+                    continue;
+
+                var referencedAssembly = assemblyLoadContext.LoadFromAssemblyName(referencedAssemblyName);
+                assemblyQueue.Enqueue(referencedAssembly);
             }
         }
     }
@@ -162,8 +160,6 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         return properties.Values;
     }
 
-    private readonly record struct OptionsTypeSchema(string TypeName, string Schema);
-
     private readonly record struct OptionRegistration(string Section, string Type);
 
     private class PropertyNode(string name)
@@ -189,9 +185,9 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             var property = currentSchema.Properties[Name] = new JsonSchemaProperty();
             currentSchema.RequiredProperties.Add(Name);
 
-            foreach (string schemaTypeName in SchemaTypeNames)
+            foreach (string schemaTypeName in SchemaTypeNames.Order())
             {
-                if (rootSchema.Definitions.TryGetValue(FormatTypeName(schemaTypeName), out var definition))
+                if (rootSchema.Definitions.TryGetValue(schemaTypeName.Replace('.', '_'), out var definition))
                 {
                     property.AllOf.Add(new JsonSchema { Reference = definition });
                 }
@@ -202,13 +198,11 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
                 var currentReference = new JsonSchema();
                 property.AllOf.Add(currentReference);
 
-                foreach (KeyValuePair<string, PropertyNode> propertyNode in Properties)
+                foreach (PropertyNode propertyNode in Properties.Values.OrderBy(node => node.Name))
                 {
-                    propertyNode.Value.ConfigureSchema(rootSchema, currentReference);
+                    propertyNode.ConfigureSchema(rootSchema, currentReference);
                 }
             }
         }
     }
-
-    private static string FormatTypeName(string typeName) => typeName.Replace('.', '_');
 }

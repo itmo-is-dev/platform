@@ -13,7 +13,11 @@ public static class JsonSchemaSettings
 
     public static SystemTextJsonSchemaGeneratorSettings CreateDefault()
     {
-        var settings = new SystemTextJsonSchemaGeneratorSettings();
+        var settings = new SystemTextJsonSchemaGeneratorSettings
+        {
+            AlwaysAllowAdditionalObjectProperties = true,
+            SchemaNameGenerator = new FullNameSchemaNameGenerator(),
+        };
 
         settings.TypeMappers.Add(new PrimitiveTypeMapper(
             typeof(TimeSpan),

@@ -10,7 +10,7 @@ public sealed class CustomAssemblyLoadContext(
     string assemblyPath,
     string[] sharedFrameworkPaths,
     string projectAssetsFilePath,
-    TaskLoggingHelper log) : AssemblyLoadContext(isCollectible: true)
+    TaskLoggingHelper log) : AssemblyLoadContext(isCollectible: true), IDisposable
 {
     private readonly AssemblyDependencyResolver _dependencyResolver = new(assemblyPath);
     private readonly ProjectAssetsModel _projectAssets = ProjectAssetsModel.FromFile(projectAssetsFilePath);
@@ -96,5 +96,10 @@ public sealed class CustomAssemblyLoadContext(
 
         log.LogMessage("From resolver = '{0}'", path);
         return LoadFromAssemblyPath(path);
+    }
+
+    public void Dispose()
+    {
+       Unload(); 
     }
 }

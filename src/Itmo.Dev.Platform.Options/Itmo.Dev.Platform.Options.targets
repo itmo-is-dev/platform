@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetsForTfmSpecificContentInPackage>
-            $(TargetsForTfmSpecificContentInPackage);IncludeGeneratedSchemas;GenerateJsonSchema
+            $(TargetsForTfmSpecificContentInPackage);GenerateJsonSchema
         </TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
@@ -12,47 +12,14 @@
             <_SharedFrameworkPaths Include="@(FrameworkReference->'$(DOTNET_ROOT)/shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
         </ItemGroup>
 
-        <ProcessOptionTypesBuildTask
-                TargetFramework="$(TargetFramework)"
-                AssemblyPath="$(TargetPath)"
-                SharedFrameworkPaths="@(_SharedFrameworkPaths)"
-                ProjectAssetsFilePath="$(ProjectAssetsFile)"
-                OutputPath="$(ProjectDir)$(IntermediateOutputPath)schemas"/>
-
-        <CopyReferencedSchemasTask
-                ProjectAssetsFile="$(ProjectAssetsFile)"
-                TargetDir="$(TargetDir)"
-                Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
-
         <GenerateCurrentSchemaBuildTask
                 TargetFramework="$(TargetFramework)"
                 AssemblyPath="$(TargetPath)"
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
                 ProjectAssetsFilePath="$(ProjectAssetsFile)"
-                SchemasPaths="$(ProjectDir)$(IntermediateOutputPath)schemas;$(ProjectDir)$(OutputPath)schemas"
                 OutputPath="$(ProjectDir)$(AssemblyName).schema.json"
                 Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
 
     </Target>
-
-    <Target Name="IncludeGeneratedSchemas" DependsOnTargets="GenerateJsonSchema">
-        <ItemGroup>
-            <_SchemaFiles Include="$(ProjectDir)$(IntermediateOutputPath)schemas\*.json"/>
-            <TfmSpecificPackageFile Include="@(_SchemaFiles)">
-                <PackagePath>schemas\%(Filename)%(Extension)</PackagePath>
-            </TfmSpecificPackageFile>
-        </ItemGroup>
-    </Target>
-
-    <ItemGroup>
-
-        <FileWrites Include="$(OutputPath)schemas/**/*"/>
-
-        <Content Include="$(IntermediateOutputPath)schemas\*.json"
-                 CopyToOutputDirectory="PreserveNewest"
-                 Link="schemas\%(Filename)%(Extension)"
-                 Visible="false"
-                 Pack="false"/>
-    </ItemGroup>
 
 </Project>

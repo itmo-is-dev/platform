@@ -21,7 +21,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="Runtime"/>
-        <PackageReference Include="NJsonSchema" />
+        <PackageReference Include="NJsonSchema" PrivateAssets="all"/>
     </ItemGroup>
 
     <ItemGroup>

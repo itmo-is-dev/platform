@@ -13,9 +13,9 @@
         </PropertyGroup>
 
         <ItemGroup>
-            <_SharedFrameworkPaths Include="@(FrameworkReference->'$(DOTNET_ROOT)/shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
+            <_SharedFrameworkPaths Include="@(FrameworkReference->'$(NetCoreRoot)shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
         </ItemGroup>
-
+        
         <GenerateCurrentSchemaBuildTask
                 TargetFramework="$(TargetFramework)"
                 AssemblyPath="$(TargetPath)"

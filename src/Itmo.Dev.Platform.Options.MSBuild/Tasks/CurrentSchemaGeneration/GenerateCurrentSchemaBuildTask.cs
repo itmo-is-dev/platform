@@ -1,6 +1,7 @@
 using Itmo.Dev.Platform.Options.MSBuild.Extensions;
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
+using Namotion.Reflection;
 using NJsonSchema;
 using NJsonSchema.Generation;
 using System.Reflection;
@@ -43,10 +44,11 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             Log);
 
         Log.LogDebugMessage("Loading assembly at '{0}'", AssemblyPath);
+        Log.LogDebugMessage("SharedFrameworkPaths = {0}", string.Join(";", SharedFrameworkPaths));
 
         var assembly = assemblyLoadContext.LoadFromAssemblyPath(AssemblyPath);
 
-        var optionRegistrations = EnumerateRegistrations(assembly)
+        var optionRegistrations = EnumerateRegistrations(assembly, assemblyLoadContext)
             .DistinctBy(x => x.Section)
             .ToArray();
 
@@ -82,13 +84,35 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         return true;
     }
 
-    private static IEnumerable<OptionRegistration> EnumerateRegistrations(Assembly assembly)
+    private IEnumerable<OptionRegistration> EnumerateRegistrations(
+        Assembly assembly,
+        CustomAssemblyLoadContext context)
     {
-        return assembly
-            .GetCustomAttributesData()
-            .Where(attr => attr.AttributeType.FullName is OptionRegistrationAttributeTypeName)
-            .Select(attr => new OptionRegistration(
-                (string)attr.ConstructorArguments[0].Value!,
-                (Type)attr.ConstructorArguments[1].Value!));
+        Log.LogDebugMessage("Loading registrations for {0}", assembly.GetName().Name);
+
+        var optionsAssembly = context.LoadFromAssemblyName(new AssemblyName("Itmo.Dev.Platform.Options"));
+        var optionsAttributeType = optionsAssembly.GetType(OptionRegistrationAttributeTypeName);
+
+        Log.LogDebugMessage("Loaded attribute type = {0}", optionsAttributeType);
+
+        if (optionsAttributeType is null)
+            yield break;
+
+        foreach (Attribute attribute in assembly.GetCustomAttributes(optionsAttributeType))
+        {
+            var sectionName = attribute.TryGetPropertyValue<string>("SectionName");
+            var type = attribute.TryGetPropertyValue<Type>("OptionsType");
+
+            if (sectionName is null || type is null)
+            {
+                Log.LogDebugMessage("Invalid attribute, section name = '{0}', options type = {1}",
+                    sectionName,
+                    type);
+            }
+            else
+            {
+                yield return new OptionRegistration(sectionName, type);
+            }
+        }
     }
 }

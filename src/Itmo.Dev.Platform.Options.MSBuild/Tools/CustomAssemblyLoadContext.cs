@@ -65,6 +65,7 @@ public sealed class CustomAssemblyLoadContext(
         foreach (string sharedFrameworkPath in sharedFrameworkPaths)
         {
             var path = Path.Combine(sharedFrameworkPath, $"{assemblyName.Name}.dll");
+            log.LogDebugMessage("Trying to find in shared paths = {0}", path);
 
             if (File.Exists(path))
             {
@@ -72,6 +73,8 @@ public sealed class CustomAssemblyLoadContext(
                 return CustomLoadFromAssemblyPath(path);
             }
         }
+        
+        log.LogDebugMessage("Not found in shared paths");
 
         return null;
     }

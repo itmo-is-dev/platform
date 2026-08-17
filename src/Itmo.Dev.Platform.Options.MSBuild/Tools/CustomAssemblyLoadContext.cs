@@ -17,20 +17,6 @@ public sealed class CustomAssemblyLoadContext(
     private readonly AssemblyDependencyResolver _dependencyResolver = new(assemblyPath);
     private readonly ProjectAssetsModel _projectAssets = ProjectAssetsModel.FromFile(projectAssetsFilePath);
 
-    public bool TryLoadFromAssemblyName(AssemblyName assemblyName, [NotNullWhen(true)] out Assembly? assembly)
-    {
-        try
-        {
-            assembly = LoadFromAssemblyName(assemblyName);
-            return true;
-        }
-        catch
-        {
-            assembly = null;
-            return false;
-        }
-    }
-
     protected override Assembly? Load(AssemblyName assemblyName)
     {
         log.LogMessage("Loading {0}", assemblyName.FullName);
@@ -122,7 +108,7 @@ public sealed class CustomAssemblyLoadContext(
         }
         catch
         {
-            log.LogMessage("Failed to load assembly at '{0}' using method '{1}'", path, callerName);
+            log.LogWarning("Failed to load assembly at '{0}' using method '{1}'", path, callerName);
             throw;
         }
     }

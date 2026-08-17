@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Itmo.Dev.Platform.Observability.Metrics;
 
 [OptionsType]
-internal class PlatformMetricsOptions
+public class PlatformMetricsOptions
 {
     [Required]
     public bool IsEnabled { get; set; }

@@ -87,6 +87,21 @@
     }
   },
   "definitions": {
+    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
+      "type": "object",
+      "required": [
+        "OtherValue"
+      ],
+      "properties": {
+        "Value": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OtherValue": {
+          "type": "string"
+        }
+      }
+    },
     "Itmo_Dev_Platform_Observability_HealthChecks_PlatformHealthCheckOptions": {
       "type": "object",
       "required": [
@@ -153,21 +168,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
-      "type": "object",
-      "required": [
-        "OtherValue"
-      ],
-      "properties": {
-        "Value": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "OtherValue": {
-          "type": "string"
         }
       }
     }

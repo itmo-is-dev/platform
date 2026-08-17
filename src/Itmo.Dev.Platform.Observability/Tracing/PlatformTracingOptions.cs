@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Itmo.Dev.Platform.Observability.Tracing;
 
 [OptionsType]
-internal class PlatformTracingOptions
+public class PlatformTracingOptions
 {
     [Required]
     public bool IsEnabled { get; set; }

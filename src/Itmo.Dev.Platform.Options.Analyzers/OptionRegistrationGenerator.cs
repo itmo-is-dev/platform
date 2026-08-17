@@ -49,19 +49,9 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
                 return;
 
             var attributes = optionRegistrations
-                .Select(registration =>
-                {
-                    var sectionArgument = AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        Literal(registration.Section)));
-
-                    var typeArgument = AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        Literal(registration.TypeName)));
-
-                    return AttributeList()
-                        .AddAttributes(Attribute(IdentifierName(AttributeMetadataName))
-                            .AddArgumentListArguments(sectionArgument, typeArgument))
-                        .WithTarget(AttributeTargetSpecifier(Token(SyntaxKind.AssemblyKeyword)));
-                })
+                .Select(registration => AttributeList()
+                    .AddAttributes(registration.AttributeSyntax)
+                    .WithTarget(AttributeTargetSpecifier(Token(SyntaxKind.AssemblyKeyword))))
                 .ToArray();
 
             var unit = CompilationUnit()
@@ -124,9 +114,8 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
                     var hasAttribute = optionsType.GetAttributes().HasAttribute(optionsTypeAttributeType);
 
                     var registration = new OptionRegistration(
-                        section,
-                        optionsType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(
-                            SymbolDisplayGlobalNamespaceStyle.Omitted)));
+                        Section: Literal(section),
+                        Type: IdentifierName(optionsType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
 
                     return hasAttribute
                         ? IncrementalResult.Success(registration)
@@ -151,10 +140,22 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
             .Where(attribute => attribute.AttributeClass?.Name is AttributeName)
             .Select(attribute =>
             {
-                return new OptionRegistration(
-                    (string)attribute.ConstructorArguments[0].Value!,
-                    (string)attribute.ConstructorArguments[1].Value!);
-            });
+                if (attribute.ConstructorArguments is not [var sectionArgument, var typeArgument])
+                    return IncrementalResult.Skip;
+
+                if (sectionArgument.Value is not string sectionName)
+                    return IncrementalResult.Skip;
+
+                if (typeArgument.Value is not INamedTypeSymbol type)
+                    return IncrementalResult.SkipWithMetadata(Log("Not a type argument"));
+
+                var registration = new OptionRegistration(
+                    Section: Literal(sectionName),
+                    Type: IdentifierName(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+
+                return IncrementalResult.Success(registration);
+            })
+            .Unwrap(context);
     }
 
     private static IncrementalValuesProvider<OptionRegistration> GetRegistrationsFromMethodProducedOptions(
@@ -249,14 +250,14 @@ public sealed class OptionRegistrationGenerator : IIncrementalGenerator
                 var hasAttribute = optionsType.GetAttributes().HasAttribute(optionsTypeAttributeType);
 
                 var registration = new OptionRegistration(
-                    sectionName,
-                    optionsType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(
-                        SymbolDisplayGlobalNamespaceStyle.Omitted)));
+                    Section: Literal(sectionName),
+                    Type: IdentifierName(optionsType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
 
                 return hasAttribute
                     ? IncrementalResult.Success(registration)
                     : IncrementalResult.Success(registration,
-                        Diagnostic.Create(MissingOptionsTypeAttributeDescriptor, invocationOperation.Syntax.GetLocation()));
+                        Diagnostic.Create(MissingOptionsTypeAttributeDescriptor,
+                            invocationOperation.Syntax.GetLocation()));
             })
             .Unwrap(context);
     }

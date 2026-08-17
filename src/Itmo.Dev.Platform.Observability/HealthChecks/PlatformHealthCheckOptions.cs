@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Itmo.Dev.Platform.Observability.HealthChecks;
 
 [OptionsType]
-internal class PlatformHealthCheckOptions
+public class PlatformHealthCheckOptions
 {
     [Required]
     public bool IsEnabled { get; set; }

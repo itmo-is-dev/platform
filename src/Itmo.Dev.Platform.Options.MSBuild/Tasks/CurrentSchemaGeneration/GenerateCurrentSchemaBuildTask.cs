@@ -1,3 +1,4 @@
+using Itmo.Dev.Platform.Options.MSBuild.Extensions;
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
 using NJsonSchema;
@@ -26,8 +27,14 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
     [Required]
     public required string OutputPath { get; set; }
 
+    [Required]
+    public required bool IsDebug { get; set; }
+
     public override bool Execute()
     {
+        using var _ = LoggingExtensions.UseDebugLogging(IsDebug);
+        using var __ = Log.UseDebugScope(nameof(GenerateCurrentSchemaBuildTask));
+
         using var assemblyLoadContext = new CustomAssemblyLoadContext(
             TargetFramework,
             AssemblyPath,
@@ -35,7 +42,7 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             ProjectAssetsFilePath,
             Log);
 
-        Log.LogMessage("Loading assembly at '{0}'", AssemblyPath);
+        Log.LogDebugMessage("Loading assembly at '{0}'", AssemblyPath);
 
         var assembly = assemblyLoadContext.LoadFromAssemblyPath(AssemblyPath);
 
@@ -43,7 +50,7 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             .DistinctBy(x => x.Section)
             .ToArray();
 
-        Log.LogMessage("Found '{0}' option registrations", optionRegistrations.Length);
+        Log.LogDebugMessage("Found '{0}' option registrations", optionRegistrations.Length);
 
         if (optionRegistrations is [])
             return true;
@@ -62,7 +69,7 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         var schemaConfigurationContext = new SchemaConfigurationContext(schemaResolver, schemaGenerator);
 
         var propertyNodes = SchemaPropertyNodeFactory
-            .FromOptionRegistrations(optionRegistrations)
+            .FromOptionRegistrations(optionRegistrations, Log)
             .OrderBy(node => node.Name);
 
         foreach (SchemaPropertyNode propertyNode in propertyNodes)

@@ -5,3 +5,4 @@
  Rule ID | Category | Severity | Notes                                                         
 ---------|----------|----------|---------------------------------------------------------------
  IID1000 | Usage    | Warning  | Options type missing [OptionsType] attribute
+ IID1001 | Usage    | Warning  | Incorrect options type accessibility

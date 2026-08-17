@@ -1,9 +1,12 @@
+using Microsoft.Build.Utilities;
+
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks.CurrentSchemaGeneration;
 
 public static class SchemaPropertyNodeFactory
 {
     public static IEnumerable<SchemaPropertyNode> FromOptionRegistrations(
-        IEnumerable<OptionRegistration> registrations)
+        IEnumerable<OptionRegistration> registrations,
+        TaskLoggingHelper log)
     {
         var properties = new Dictionary<string, SchemaPropertyNode>();
 
@@ -20,7 +23,7 @@ public static class SchemaPropertyNodeFactory
                 if (currentProperty is null)
                 {
                     if (properties.TryGetValue(pathPart, out currentProperty) is false)
-                        currentProperty = properties[pathPart] = new SchemaPropertyNode(pathPart);
+                        currentProperty = properties[pathPart] = new SchemaPropertyNode(pathPart, log);
                 }
                 else
                 {

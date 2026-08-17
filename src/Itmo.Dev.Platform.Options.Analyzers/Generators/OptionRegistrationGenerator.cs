@@ -8,13 +8,12 @@ using SourceKit.Models;
 using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Itmo.Dev.Platform.Options.Analyzers;
+namespace Itmo.Dev.Platform.Options.Analyzers.Generators;
 
 [Generator]
 public sealed class OptionRegistrationGenerator : IIncrementalGenerator
 {
     private const string AttributeName = "OptionRegistrationAttribute";
-    private const string AttributeMetadataName = $"global::Itmo.Dev.Platform.Options.{AttributeName}";
 
     private static readonly DiagnosticDescriptor MissingOptionsTypeAttributeDescriptor = new(
         id: "IID1000",

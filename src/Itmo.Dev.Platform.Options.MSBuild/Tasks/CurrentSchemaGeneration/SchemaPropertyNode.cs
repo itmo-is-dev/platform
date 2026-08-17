@@ -1,8 +1,10 @@
+using Itmo.Dev.Platform.Options.MSBuild.Extensions;
+using Microsoft.Build.Utilities;
 using NJsonSchema;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks.CurrentSchemaGeneration;
 
-public sealed class SchemaPropertyNode(string name)
+public sealed class SchemaPropertyNode(string name, TaskLoggingHelper log)
 {
     public string Name { get; } = name;
 
@@ -14,7 +16,7 @@ public sealed class SchemaPropertyNode(string name)
     {
         if (Properties.TryGetValue(name, out var childProperty) is false)
         {
-            Properties[name] = childProperty = new SchemaPropertyNode(name);
+            Properties[name] = childProperty = new SchemaPropertyNode(name, log);
         }
 
         return childProperty;
@@ -22,6 +24,8 @@ public sealed class SchemaPropertyNode(string name)
 
     public void ConfigureSchema(JsonSchema currentSchema, SchemaConfigurationContext context)
     {
+        log.LogDebugMessage("Configuring property = {0}", Name);
+
         var property = currentSchema.Properties[Name] = new JsonSchemaProperty();
         currentSchema.RequiredProperties.Add(Name);
 
@@ -32,6 +36,7 @@ public sealed class SchemaPropertyNode(string name)
                 : context.SchemaGenerator.Generate(type, context.SchemaResolver);
 
             property.AllOf.Add(new JsonSchema { Reference = typeSchema });
+            log.LogDebugMessage("Added property type = {0}", type.FullName);
         }
 
         if (Properties.Count is not 0)

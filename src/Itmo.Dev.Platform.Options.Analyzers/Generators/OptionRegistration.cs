@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Itmo.Dev.Platform.Options.Analyzers;
+namespace Itmo.Dev.Platform.Options.Analyzers.Generators;
 
 public readonly record struct OptionRegistration(
     SyntaxToken Section,

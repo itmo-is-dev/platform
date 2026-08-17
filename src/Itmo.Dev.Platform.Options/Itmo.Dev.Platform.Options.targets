@@ -8,6 +8,10 @@
 
     <Target Name="GenerateJsonSchema" AfterTargets="Build" Condition="'$(_DisablePlatformOptions)' != 'true'">
 
+        <PropertyGroup Condition="'$(_PlatformOptionsDebug)' != 'true'">
+            <_PlatformOptionsDebug>false</_PlatformOptionsDebug>
+        </PropertyGroup>
+
         <ItemGroup>
             <_SharedFrameworkPaths Include="@(FrameworkReference->'$(DOTNET_ROOT)/shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
         </ItemGroup>
@@ -18,6 +22,7 @@
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
                 ProjectAssetsFilePath="$(ProjectAssetsFile)"
                 OutputPath="$(ProjectDir)$(AssemblyName).schema.json"
+                IsDebug="$(_PlatformOptionsDebug)"
                 Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
 
     </Target>

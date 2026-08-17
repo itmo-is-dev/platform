@@ -3,9 +3,14 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <_UsePlatformOptions>true</_UsePlatformOptions>
+        <_PlatformOptionsDebug>true</_PlatformOptionsDebug>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres\Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres.csproj" />
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks.Postgres\Itmo.Dev.Platform.BackgroundTasks.Postgres.csproj" />
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.BackgroundTasks\Itmo.Dev.Platform.BackgroundTasks.csproj" />
+      <ProjectReference Include="..\..\src\Itmo.Dev.Platform.Kafka\Itmo.Dev.Platform.Kafka.csproj" />
       <ProjectReference Include="..\Itmo.Dev.Platform.Options.Samples\Itmo.Dev.Platform.Options.Samples.csproj" />
     </ItemGroup>
 

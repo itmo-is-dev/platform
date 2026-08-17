@@ -1,6 +1,8 @@
 using Itmo.Dev.Platform.Options.MSBuild.Models.ProjectAssets;
 using Microsoft.Build.Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tools;
@@ -14,6 +16,20 @@ public sealed class CustomAssemblyLoadContext(
 {
     private readonly AssemblyDependencyResolver _dependencyResolver = new(assemblyPath);
     private readonly ProjectAssetsModel _projectAssets = ProjectAssetsModel.FromFile(projectAssetsFilePath);
+
+    public bool TryLoadFromAssemblyName(AssemblyName assemblyName, [NotNullWhen(true)] out Assembly? assembly)
+    {
+        try
+        {
+            assembly = LoadFromAssemblyName(assemblyName);
+            return true;
+        }
+        catch
+        {
+            assembly = null;
+            return false;
+        }
+    }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
@@ -48,7 +64,7 @@ public sealed class CustomAssemblyLoadContext(
             if (File.Exists(path))
             {
                 log.LogMessage("Loaded from shared framework = '{0}'", sharedFrameworkPath);
-                return LoadFromAssemblyPath(path);
+                return CustomLoadFromAssemblyPath(path);
             }
         }
 
@@ -84,7 +100,7 @@ public sealed class CustomAssemblyLoadContext(
         var candidateAssemblyPath = Path.Combine(libraryFullPath, descriptor.PathInPacakge);
         log.LogMessage("Candidate = {0}", candidateAssemblyPath);
 
-        return File.Exists(candidateAssemblyPath) ? LoadFromAssemblyPath(candidateAssemblyPath) : null;
+        return File.Exists(candidateAssemblyPath) ? CustomLoadFromAssemblyPath(candidateAssemblyPath) : null;
     }
 
     private Assembly? TryLoadFromResolver(AssemblyName assemblyName)
@@ -95,11 +111,24 @@ public sealed class CustomAssemblyLoadContext(
             return null;
 
         log.LogMessage("From resolver = '{0}'", path);
-        return LoadFromAssemblyPath(path);
+        return CustomLoadFromAssemblyPath(path);
+    }
+
+    private Assembly CustomLoadFromAssemblyPath(string path, [CallerMemberName] string callerName = "")
+    {
+        try
+        {
+            return LoadFromAssemblyPath(path);
+        }
+        catch
+        {
+            log.LogMessage("Failed to load assembly at '{0}' using method '{1}'", path, callerName);
+            throw;
+        }
     }
 
     public void Dispose()
     {
-       Unload(); 
+        Unload();
     }
 }

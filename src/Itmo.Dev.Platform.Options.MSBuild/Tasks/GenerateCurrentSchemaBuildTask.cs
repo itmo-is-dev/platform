@@ -123,8 +123,8 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
                 if (processedAssemblies.Add(referencedAssemblyName.Name) is false)
                     continue;
 
-                var referencedAssembly = assemblyLoadContext.LoadFromAssemblyName(referencedAssemblyName);
-                assemblyQueue.Enqueue(referencedAssembly);
+                if (assemblyLoadContext.TryLoadFromAssemblyName(referencedAssemblyName, out var referencedAssembly))
+                    assemblyQueue.Enqueue(referencedAssembly);
             }
         }
     }

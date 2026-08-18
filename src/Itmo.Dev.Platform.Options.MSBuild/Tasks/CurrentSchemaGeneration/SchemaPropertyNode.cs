@@ -4,7 +4,7 @@ using NJsonSchema;
 
 namespace Itmo.Dev.Platform.Options.MSBuild.Tasks.CurrentSchemaGeneration;
 
-public sealed class SchemaPropertyNode(string name, TaskLoggingHelper log)
+public sealed class SchemaPropertyNode(string name, TaskLoggingHelper log, bool isWeak)
 {
     public string Name { get; } = name;
 
@@ -16,7 +16,7 @@ public sealed class SchemaPropertyNode(string name, TaskLoggingHelper log)
     {
         if (Properties.TryGetValue(name, out var childProperty) is false)
         {
-            Properties[name] = childProperty = new SchemaPropertyNode(name, log);
+            Properties[name] = childProperty = new SchemaPropertyNode(name, log, isWeak);
         }
 
         return childProperty;
@@ -27,7 +27,9 @@ public sealed class SchemaPropertyNode(string name, TaskLoggingHelper log)
         log.LogDebugMessage("Configuring property = {0}", Name);
 
         var property = currentSchema.Properties[Name] = new JsonSchemaProperty();
-        currentSchema.RequiredProperties.Add(Name);
+
+        if (isWeak is false)
+            currentSchema.RequiredProperties.Add(Name);
 
         foreach (Type type in SchemaTypes.OrderBy(type => type.FullName))
         {

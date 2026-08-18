@@ -1,4 +1,5 @@
 using Itmo.Dev.Platform.Options.MSBuild.Extensions;
+using Itmo.Dev.Platform.Options.MSBuild.JsonSchemaProcessors;
 using Itmo.Dev.Platform.Options.MSBuild.Tools;
 using Microsoft.Build.Framework;
 using Namotion.Reflection;
@@ -29,6 +30,9 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
     public required string OutputPath { get; set; }
 
     [Required]
+    public required string WeakOutputPath { get; set; }
+
+    [Required]
     public required bool IsDebug { get; set; }
 
     public override bool Execute()
@@ -57,6 +61,27 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
         if (optionRegistrations is [])
             return true;
 
+        GenerateSchema(
+            OutputPath,
+            JsonSchemaSettings.CreateDefault(),
+            optionRegistrations,
+            isWeak: false);
+
+        GenerateSchema(
+            WeakOutputPath,
+            JsonSchemaSettings.CreateDefault().AddProcessor(new WeakSchemaProcessor()),
+            optionRegistrations,
+            isWeak: true);
+
+        return true;
+    }
+
+    private void GenerateSchema(
+        string outputPath,
+        JsonSchemaGeneratorSettings schemaSettings,
+        IEnumerable<OptionRegistration> optionRegistrations,
+        bool isWeak)
+    {
         var schema = new JsonSchema
         {
             SchemaVersion = "https://json-schema.org/draft/2020-12/schema",
@@ -64,14 +89,13 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             ExtensionData = new Dictionary<string, object?>(),
         };
 
-        var schemaSettings = JsonSchemaSettings.CreateDefault();
         var schemaResolver = new JsonSchemaResolver(schema, schemaSettings);
         var schemaGenerator = new JsonSchemaGenerator(schemaSettings);
 
         var schemaConfigurationContext = new SchemaConfigurationContext(schemaResolver, schemaGenerator);
 
         var propertyNodes = SchemaPropertyNodeFactory
-            .FromOptionRegistrations(optionRegistrations, Log)
+            .FromOptionRegistrations(optionRegistrations, Log, isWeak)
             .OrderBy(node => node.Name);
 
         foreach (SchemaPropertyNode propertyNode in propertyNodes)
@@ -79,9 +103,7 @@ public sealed class GenerateCurrentSchemaBuildTask : BuildTask
             propertyNode.ConfigureSchema(schema, schemaConfigurationContext);
         }
 
-        File.WriteAllText(OutputPath, schema.ToJson());
-
-        return true;
+        File.WriteAllText(outputPath, schema.ToJson());
     }
 
     private IEnumerable<OptionRegistration> EnumerateRegistrations(

@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "Application": {
+      "allOf": [
+        {
+          "properties": {
+            "SomeOptions": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Itmo_Dev_Platform_Options_Samples_SomeOptions"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Execution": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_BackgroundTasks_Configuration_BackgroundTaskExecutionOptions"
+        }
+      ]
+    },
+    "Hangfire": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_BackgroundTasks_Hangfire_Configuration_BackgroundTaskHangfireOptions"
+        }
+      ]
+    },
+    "Kafka": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_Kafka_Configuration_PlatformKafkaOptions"
+        }
+      ]
+    },
+    "Platform": {
+      "allOf": [
+        {
+          "properties": {
+            "Observability": {
+              "allOf": [
+                {
+                  "properties": {
+                    "HealthChecks": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_HealthChecks_PlatformHealthCheckOptions"
+                        }
+                      ]
+                    },
+                    "Logging": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Logging_PlatformLoggingOptions"
+                        }
+                      ]
+                    },
+                    "Metrics": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Metrics_PlatformMetricsOptions"
+                        }
+                      ]
+                    },
+                    "Sentry": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Sentry_PlatformSentryOptions"
+                        }
+                      ]
+                    },
+                    "Tracing": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/Itmo_Dev_Platform_Observability_Tracing_PlatformTracingOptions"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Postgres": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_BackgroundTasks_Postgres_Configuration_BackgroundTaskPersistenceOptions"
+        }
+      ]
+    },
+    "Scheduling": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Itmo_Dev_Platform_BackgroundTasks_Configuration_BackgroundTaskSchedulingOptions"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "Itmo_Dev_Platform_Options_Samples_SomeOptions": {
+      "type": "object",
+      "properties": {
+        "Value": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OtherValue": {
+          "type": "string"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_BackgroundTasks_Configuration_BackgroundTaskExecutionOptions": {
+      "type": "object",
+      "properties": {
+        "MaxRetryCount": {
+          "type": "integer",
+          "format": "int32",
+          "default": 0,
+          "maximum": 2147483647.0,
+          "minimum": 0.0
+        }
+      }
+    },
+    "Itmo_Dev_Platform_BackgroundTasks_Hangfire_Configuration_BackgroundTaskHangfireOptions": {
+      "type": "object",
+      "properties": {
+        "CancellationCheckDelay": {
+          "type": "string",
+          "default": "00:00:10",
+          "pattern": "^-?(\\d+\\.)?([01]?\\d|2[0-3]):([0-5]?\\d):([0-5]?\\d)(\\.\\d{1,7})?$"
+        },
+        "SchedulerRetryCount": {
+          "type": "integer",
+          "format": "int32",
+          "default": 5
+        },
+        "SchedulerRetryDelays": {
+          "type": "array",
+          "default": [
+            60,
+            120,
+            300,
+            600
+          ],
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "SchedulerWorkerCount": {
+          "type": "integer",
+          "format": "int32",
+          "default": 1
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Kafka_Configuration_PlatformKafkaOptions": {
+      "type": "object",
+      "properties": {
+        "Host": {
+          "type": "string",
+          "minLength": 1
+        },
+        "SecurityProtocol": {
+          "$ref": "#/definitions/Confluent_Kafka_SecurityProtocol"
+        },
+        "SslCaPem": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "SaslMechanism": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/Confluent_Kafka_SaslMechanism"
+            }
+          ]
+        },
+        "SaslUsername": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "SaslPassword": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "Confluent_Kafka_SecurityProtocol": {
+      "type": "integer",
+      "description": "SecurityProtocol enum values\n            ",
+      "x-enumNames": [
+        "Plaintext",
+        "Ssl",
+        "SaslPlaintext",
+        "SaslSsl"
+      ],
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Confluent_Kafka_SaslMechanism": {
+      "type": "integer",
+      "description": "SaslMechanism enum values\n            ",
+      "x-enumNames": [
+        "Gssapi",
+        "Plain",
+        "ScramSha256",
+        "ScramSha512",
+        "OAuthBearer"
+      ],
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Itmo_Dev_Platform_Observability_HealthChecks_PlatformHealthCheckOptions": {
+      "type": "object",
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "StartupCheckUri": {
+          "type": "string",
+          "default": "/health/startup"
+        },
+        "ReadinessCheckUri": {
+          "type": "string",
+          "default": "/health/readyz"
+        },
+        "LivenessCheckUri": {
+          "type": "string",
+          "default": "/health/livez"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Logging_PlatformLoggingOptions": {
+      "type": "object",
+      "properties": {
+        "Serilog": {}
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Metrics_PlatformMetricsOptions": {
+      "type": "object",
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Sentry_PlatformSentryOptions": {
+      "type": "object",
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "Configuration": {}
+      }
+    },
+    "Itmo_Dev_Platform_Observability_Tracing_PlatformTracingOptions": {
+      "type": "object",
+      "properties": {
+        "IsEnabled": {
+          "type": "boolean"
+        },
+        "Sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Itmo_Dev_Platform_BackgroundTasks_Postgres_Configuration_BackgroundTaskPersistenceOptions": {
+      "type": "object",
+      "properties": {
+        "SchemaName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Itmo_Dev_Platform_BackgroundTasks_Configuration_BackgroundTaskSchedulingOptions": {
+      "type": "object",
+      "properties": {
+        "BatchSize": {
+          "type": "integer",
+          "format": "int32",
+          "maximum": 2147483647.0,
+          "minimum": 1.0
+        },
+        "PollingDelay": {
+          "type": "string",
+          "pattern": "^-?(\\d+\\.)?([01]?\\d|2[0-3]):([0-5]?\\d):([0-5]?\\d)(\\.\\d{1,7})?$"
+        }
+      }
+    }
+  }
+}

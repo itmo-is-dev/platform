@@ -1,9 +1,10 @@
 <Project>
 
     <PropertyGroup>
-        <TargetsForTfmSpecificContentInPackage>
-            $(TargetsForTfmSpecificContentInPackage);GenerateJsonSchema
-        </TargetsForTfmSpecificContentInPackage>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);GenerateJsonSchema</TargetsForTfmSpecificContentInPackage>
+
+        <_SchemaPath>$(AssemblyName).schema.json</_SchemaPath>
+        <_WeakSchemaPath>$(AssemblyName).schema.weak.json</_WeakSchemaPath>
     </PropertyGroup>
 
     <Target Name="GenerateJsonSchema" AfterTargets="Build" Condition="'$(_DisablePlatformOptions)' != 'true'">
@@ -15,16 +16,23 @@
         <ItemGroup>
             <_SharedFrameworkPaths Include="@(FrameworkReference->'$(NetCoreRoot)shared/%(Identity)/$(BundledNETCoreAppPackageVersion)')"/>
         </ItemGroup>
-        
+
         <GenerateCurrentSchemaBuildTask
                 TargetFramework="$(TargetFramework)"
                 AssemblyPath="$(TargetPath)"
                 SharedFrameworkPaths="@(_SharedFrameworkPaths)"
                 ProjectAssetsFilePath="$(ProjectAssetsFile)"
-                OutputPath="$(ProjectDir)$(AssemblyName).schema.json"
+                OutputPath="$(ProjectDir)$(_SchemaPath)"
+                WeakOutputPath="$(ProjectDir)$(_WeakSchemaPath)"
                 IsDebug="$(_PlatformOptionsDebug)"
                 Condition="'$(OutputType)' == 'Exe' and '$(IsTestProject)' != 'true'"/>
 
     </Target>
+    
+    <ItemGroup>
+        <Content Update="$(_WeakSchemaPath)" 
+                 DependentUpon="$(_SchemaPath)" 
+                 Condition="Exists('$(_WeakSchemaPath)') and Exists('$(_SchemaPath)')"/>
+    </ItemGroup>
 
 </Project>

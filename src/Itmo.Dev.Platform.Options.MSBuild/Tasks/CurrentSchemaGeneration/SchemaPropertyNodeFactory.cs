@@ -6,7 +6,8 @@ public static class SchemaPropertyNodeFactory
 {
     public static IEnumerable<SchemaPropertyNode> FromOptionRegistrations(
         IEnumerable<OptionRegistration> registrations,
-        TaskLoggingHelper log)
+        TaskLoggingHelper log,
+        bool isWeak)
     {
         var properties = new Dictionary<string, SchemaPropertyNode>();
 
@@ -23,7 +24,7 @@ public static class SchemaPropertyNodeFactory
                 if (currentProperty is null)
                 {
                     if (properties.TryGetValue(pathPart, out currentProperty) is false)
-                        currentProperty = properties[pathPart] = new SchemaPropertyNode(pathPart, log);
+                        currentProperty = properties[pathPart] = new SchemaPropertyNode(pathPart, log, isWeak);
                 }
                 else
                 {

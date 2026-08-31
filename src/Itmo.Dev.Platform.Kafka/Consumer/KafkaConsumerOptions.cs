@@ -29,6 +29,18 @@ public class KafkaConsumerOptions : IValidatableObject
     public TimeSpan BufferWaitLimit { get; set; } = TimeSpan.Zero;
 
     public bool ReadLatest { get; set; }
+    
+    public KafkaConsumerOptions WithGroup(string group)
+    {
+        Group = group;
+        return this;
+    }
+
+    public KafkaConsumerOptions WithInstanceId(string instanceId)
+    {
+        InstanceId = instanceId;
+        return this;
+    }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

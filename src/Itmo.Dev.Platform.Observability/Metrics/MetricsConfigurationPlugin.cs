@@ -36,7 +36,8 @@ internal class MetricsConfigurationPlugin : IObservabilityConfigurationPlugin
                 .AddAspNetCoreInstrumentation()
                 .AddRuntimeInstrumentation()
                 .AddPrometheusExporter()
-                .AddMeter("Npgsql"));
+                .AddMeter("Npgsql")
+                .AddMeter(_metricsOptions.MeterNames));
 
         builder.Services.AddMetrics();
 

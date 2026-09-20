@@ -61,6 +61,13 @@ public sealed class GeneratedTestConstructorSyntax
         .AddParameterListParameters(_contextParameter, _outputParameter)
         .AddParameterListParameters(_testConstructorParameters)
         .AddBodyStatements(
+            ExpressionStatement(InvocationExpression(
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName(_contextParameter.Identifier),
+                    IdentifierName("UseOutput")),
+                ArgumentList(SingletonSeparatedList(Argument(IdentifierName(_outputParameter.Identifier)))))
+            ),
             ExpressionStatement(AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 IdentifierName(_sourceTestField.Name),

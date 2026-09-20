@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Itmo.Dev.Platform.Testing.Behavioural;
 
@@ -19,6 +20,8 @@ public interface ITestContext : IAsyncLifetime
 
     Task OnScenarioFinishedAsync();
 
+    void UseOutput(ITestOutputHelper output);
+    
     T GetRequiredService<T>()
         where T : class;
 

@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <PackageReleaseNotes>
-            Added migration runner service
+            Fix persistence transaction
         </PackageReleaseNotes>
     </PropertyGroup>
 
